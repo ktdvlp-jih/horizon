@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-horizon}
+      POSTGRES_USER: ${POSTGRES_USER:-horizon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-horizon}
+      TZ: Asia/Seoul
+    ports:
+      - "${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - horizon_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-horizon} -d ${POSTGRES_DB:-horizon}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ai:
+    build: ./ai
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      HORIZON_AI_LOG_LEVEL: ${HORIZON_AI_LOG_LEVEL:-info}
+      TZ: Asia/Seoul
+    ports:
+      - "${AI_PORT:-9800}:8000"
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      ai:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-horizon}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-horizon}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-horizon}
+      HORIZON_AI_SERVICE_URL: http://ai:8000
+      HORIZON_SERVE_FRONTEND: "true"
+      HORIZON_CORS_ORIGINS: ${HORIZON_CORS_ORIGINS:-http://localhost:5173}
+      HORIZON_KMA_API_KEY: ${HORIZON_KMA_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-horizon-docker-jwt-secret-change-me}
+      HORIZON_AUTH_SEED_ADMIN: ${HORIZON_AUTH_SEED_ADMIN:-true}
+      TZ: Asia/Seoul
+    ports:
+      - "${APP_PORT:-9080}:8080"
+
+volumes:
+  horizon_db:

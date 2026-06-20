@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, "Pretendard", "Apple SD Gothic Neo",
+    "Malgun Gothic", sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Climate ambient cell effects (urban heat-island animation) */
+.fx-heat {
+  background: radial-gradient(
+    circle at 50% 65%,
+    rgba(255, 90, 40, 0.5),
+    rgba(255, 160, 40, 0) 70%
+  );
+  animation: heat-pulse 1.6s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.fx-cool {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(80, 200, 255, 0.45),
+    rgba(80, 200, 255, 0) 70%
+  );
+  animation: cool-ripple 2.6s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes heat-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translateY(-6%) scale(1.06);
+  }
+}
+
+@keyframes cool-ripple {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-heat,
+  .fx-cool {
+    animation: none;
+  }
+}

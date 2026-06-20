@@ -1,0 +1,49 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: horizon
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/horizon}
+    username: ${SPRING_DATASOURCE_USERNAME:horizon}
+    password: ${SPRING_DATASOURCE_PASSWORD:horizon}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Seoul
+  jackson:
+    time-zone: Asia/Seoul
+    serialization:
+      write-dates-as-timestamps: false
+
+jwt:
+  secret: ${JWT_SECRET:horizon-dev-jwt-secret-change-me-in-production}
+  access-token-expiration: 1800
+  refresh-token-expiration: 1209600
+
+horizon:
+  cors:
+    origins: ${HORIZON_CORS_ORIGINS:http://localhost:5173}
+  serve-frontend: ${HORIZON_SERVE_FRONTEND:false}
+  auth:
+    seed-admin: ${HORIZON_AUTH_SEED_ADMIN:true}
+  ai:
+    base-url: ${HORIZON_AI_SERVICE_URL:http://localhost:8000}
+    connect-timeout: 5s
+    read-timeout: 120s
+  weather:
+    kma:
+      base-url: ${HORIZON_KMA_BASE_URL:https://apihub.kma.go.kr}
+      api-key: ${HORIZON_KMA_API_KEY:}
+      temp-path: ${HORIZON_KMA_TEMP_PATH:/api/typ01/url/kma_sfctm2.php}
+      solar-path: ${HORIZON_KMA_SOLAR_PATH:/api/typ01/cgi-bin/url/nph-sun_sfc_sts_pkg}
+
+logging:
+  level:
+    com.horizon: INFO

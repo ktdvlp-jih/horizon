@@ -1,0 +1,9 @@
+# pip fallback (uv 미설치 환경). pyproject.toml과 동일한 핵심 의존성.
+fastapi>=0.115
+uvicorn[standard]>=0.34
+pydantic>=2.0
+pydantic-settings>=2.0
+httpx>=0.28
+pandas>=2.2
+numpy>=2.0
+openai>=1.0

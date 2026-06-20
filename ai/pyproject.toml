@@ -1,0 +1,26 @@
+[project]
+name = "horizon-ai"
+version = "0.1.0"
+description = "Horizon AI service - urban climate design coach"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "httpx>=0.28",
+    "pandas>=2.2",
+    "numpy>=2.0",
+    "openai>=1.0",
+]
+
+[project.optional-dependencies]
+llm = ["langchain>=0.3", "langchain-openai>=0.3"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24", "ruff>=0.9"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

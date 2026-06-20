@@ -1,0 +1,61 @@
+# Java / Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Node
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+ai/.venv/
+
+# ---------------------------------------------------------------------------
+# Environment & secrets — NEVER commit (API keys, DB passwords, JWT, LLM keys, etc.)
+# Copy from *.env.example and fill in locally.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+ai/.env
+ai/.env.local
+ai/.env.*.local
+
+# Spring Boot local overrides (often contain real DB/JWT values)
+**/application-local.yml
+**/application-local.yaml
+**/application-local.properties
+
+# Docker Compose local overrides (ports, secrets)
+compose.override.yaml
+compose.override.yml
+
+# Cloudflare Tunnel credentials
+.cloudflared/
+*.pem
+
+# Ad-hoc secret files
+secrets/
+*.secret
+*credentials*.json
+*.key
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Local logs / runtime
+*.log
+logs/
