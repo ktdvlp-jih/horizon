@@ -95,6 +95,9 @@
 ### 예상 기술 스택
 [TECH_STACK.md](TECH_STACK.md) 그대로: React 19/Vite → Spring Boot 3.5 → Python FastAPI, PostgreSQL, Docker Compose.
 
+### 운영·관리 (MVP 이후)
+관리자 콘솔(사용자·AI 코치·설계·지역·시스템) 구현 명세: [admin_PROMPT.md](admin_PROMPT.md).
+
 ### 기존 서비스 대비 차별성
 조회형 기상 서비스(Windy/Ventusky/기상청)와 달리 사용자가 환경을 설계하고 결과를 즉시 받는 실험 도구. AI 코치가 학습을 완성.
 

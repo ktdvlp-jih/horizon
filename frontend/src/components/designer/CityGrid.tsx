@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useRef } from 'react'
 import type { Grid, SimulationResult, TileType } from '@/types'
-import { TILE_BY_TYPE, tempToColor } from '@/lib/tiles'
+import { cellFromPointer } from '@/lib/grid'
+import { TILE_BY_TYPE, tempToColor, riskToColor } from '@/lib/tiles'
 import ClimateParticles from './ClimateParticles'
 
 interface Props {
@@ -8,67 +9,124 @@ interface Props {
   result: SimulationResult | null
   showHeatmap: boolean
   onPaint: (r: number, c: number) => void
+  onStrokeStart?: () => void
+  onStrokeEnd?: () => void
   animatedTemps?: number[][] | null
   colorMin?: number
   colorMax?: number
   ambient?: boolean
   particles?: boolean
   solarIntensity?: number
+  /** When set, renders risk heatmap instead of temperature. */
+  riskValues?: number[][] | null
+  animatedRisk?: number[][] | null
+  heatmapKind?: 'temp' | 'risk'
+}
+
+function isCoolingTile(tile: TileType): boolean {
+  return tile === 'WATER' || tile === 'TREE' || tile === 'PARK' || tile === 'WETLAND'
 }
 
 function ambientClass(tile: TileType, norm: number): string | null {
+  if (isCoolingTile(tile)) return 'fx-cool'
   if (norm >= 0.62) return 'fx-heat'
-  if (norm <= 0.4 || tile === 'WATER' || tile === 'TREE' || tile === 'PARK') return 'fx-cool'
+  if (norm <= 0.4) return 'fx-cool'
   return null
 }
 
-export default function CityGrid({
+export default memo(CityGrid)
+
+function CityGrid({
   grid,
   result,
   showHeatmap,
   onPaint,
+  onStrokeStart,
+  onStrokeEnd,
   animatedTemps = null,
   colorMin,
   colorMax,
   ambient = false,
   particles = false,
   solarIntensity = 1,
+  riskValues = null,
+  animatedRisk = null,
+  heatmapKind = 'temp',
 }: Props) {
-  const [painting, setPainting] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+  const strokeActiveRef = useRef(false)
+  const lastCellRef = useRef<[number, number] | null>(null)
+  const onPaintRef = useRef(onPaint)
+  const onStrokeStartRef = useRef(onStrokeStart)
+  const onStrokeEndRef = useRef(onStrokeEnd)
 
-  useEffect(() => {
-    const stop = () => setPainting(false)
-    window.addEventListener('pointerup', stop)
-    return () => window.removeEventListener('pointerup', stop)
-  }, [])
+  onPaintRef.current = onPaint
+  onStrokeStartRef.current = onStrokeStart
+  onStrokeEndRef.current = onStrokeEnd
 
   const size = grid.length
-  const animating = !!animatedTemps
-  const temps = animating ? animatedTemps : result?.surfaceTemps ?? null
+  const cellTextClass = size >= 12 ? 'text-[8px]' : 'text-[10px]'
+  const animating = !!animatedTemps || !!animatedRisk
+  const isRisk = heatmapKind === 'risk'
+  const temps = !isRisk && animating ? animatedTemps : !isRisk ? result?.surfaceTemps ?? null : null
+  const risks = isRisk ? (animating ? animatedRisk : riskValues) : null
   const heat = animating || showHeatmap
-  const min = animating ? colorMin ?? 0 : result?.metrics.minSurfaceTemp ?? 0
-  const max = animating ? colorMax ?? 1 : result?.metrics.maxSurfaceTemp ?? 1
+  const min = isRisk
+    ? (animating ? colorMin ?? 0 : 0)
+    : animating
+      ? colorMin ?? 0
+      : result?.metrics.minSurfaceTemp ?? 0
+  const max = isRisk
+    ? (animating ? colorMax ?? 1 : 1)
+    : animating
+      ? colorMax ?? 1
+      : result?.metrics.maxSurfaceTemp ?? 1
 
-  const normAt = useCallback(
-    (r: number, c: number) => {
-      if (!temps || max - min < 0.001) return 0.5
-      return Math.min(1, Math.max(0, (temps[r][c] - min) / (max - min)))
+  const paintAt = useCallback(
+    (clientX: number, clientY: number) => {
+      const el = gridRef.current
+      if (!el) return
+      const cell = cellFromPointer(el, clientX, clientY, size)
+      if (!cell) return
+      const [r, c] = cell
+      if (lastCellRef.current?.[0] === r && lastCellRef.current?.[1] === c) return
+      lastCellRef.current = [r, c]
+      onPaintRef.current(r, c)
     },
-    [temps, min, max],
+    [size],
   )
 
-  const cellColor = useCallback(
-    (r: number, c: number) => {
-      if (heat && temps) {
-        return tempToColor(temps[r][c], min, max)
-      }
-      return TILE_BY_TYPE[grid[r][c]].swatch
+  const finishStroke = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!strokeActiveRef.current) return
+    strokeActiveRef.current = false
+    lastCellRef.current = null
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    onStrokeEndRef.current?.()
+  }, [])
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.button !== 0) return
+      e.preventDefault()
+      strokeActiveRef.current = true
+      lastCellRef.current = null
+      e.currentTarget.setPointerCapture(e.pointerId)
+      onStrokeStartRef.current?.()
+      paintAt(e.clientX, e.clientY)
     },
-    [heat, temps, grid, min, max],
+    [paintAt],
   )
 
-  // Subtle sky tint that brightens toward midday during playback.
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!strokeActiveRef.current) return
+      paintAt(e.clientX, e.clientY)
+    },
+    [paintAt],
+  )
+
   const s = Math.min(1, Math.max(0, solarIntensity))
   const skyStyle = {
     background: `radial-gradient(120% 80% at 50% -10%,
@@ -76,48 +134,76 @@ export default function CityGrid({
       transparent 70%)`,
   }
 
+  const showAmbientFx = ambient && temps && (showHeatmap || animating)
+  const span = max - min
+
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative">
       {animating && (
         <div className="pointer-events-none absolute -inset-3 rounded-2xl" style={skyStyle} aria-hidden />
       )}
 
       <div
+        ref={gridRef}
         className="relative grid touch-none select-none gap-[2px] rounded-xl bg-slate-200 p-[2px]"
-        style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`, touchAction: 'none' }}
         role="grid"
         aria-label="도시 설계 격자"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={finishStroke}
+        onPointerCancel={finishStroke}
+        onLostPointerCapture={(e) => {
+          if (strokeActiveRef.current) finishStroke(e)
+        }}
       >
         {grid.map((row, r) =>
           row.map((tile, c) => {
-            const fx = ambient && temps ? ambientClass(tile, normAt(r, c)) : null
+            const temp = !isRisk && heat && temps ? temps[r][c] : null
+            const risk = isRisk && heat && risks ? risks[r][c] : null
+            const norm =
+              temp != null && span >= 0.001
+                ? Math.min(1, Math.max(0, (temp - min) / span))
+                : risk != null && span >= 0.001
+                  ? Math.min(1, Math.max(0, (risk - min) / span))
+                  : 0.5
+            const bg =
+              heat && temp != null
+                ? tempToColor(temp, min, max)
+                : heat && risk != null
+                  ? riskToColor(risk, min, max)
+                  : TILE_BY_TYPE[tile]?.swatch ?? '#ccc'
+
             return (
-              <button
+              <div
                 key={`${r}-${c}`}
                 role="gridcell"
-                aria-label={`${r + 1}행 ${c + 1}열 ${TILE_BY_TYPE[tile].label}`}
-                onPointerDown={() => {
-                  setPainting(true)
-                  onPaint(r, c)
-                }}
-                onPointerEnter={() => {
-                  if (painting) onPaint(r, c)
-                }}
-                className="relative aspect-square overflow-hidden rounded-[3px] text-[10px] leading-none transition-colors duration-150"
-                style={{ backgroundColor: cellColor(r, c) }}
+                aria-label={`${r + 1}행 ${c + 1}열 ${TILE_BY_TYPE[tile]?.label ?? tile}`}
+                className={`relative aspect-square overflow-hidden rounded-[3px] ${cellTextClass} leading-none`}
+                style={{ backgroundColor: bg }}
               >
-                {fx && <span className={`pointer-events-none absolute inset-0 ${fx}`} aria-hidden />}
-                {!heat && (
+                {showAmbientFx && (
+                  <span
+                    className={`pointer-events-none absolute inset-0 ${ambientClass(tile, norm) ?? ''}`}
+                    aria-hidden
+                  />
+                )}
+                {!heat && TILE_BY_TYPE[tile] && (
                   <span className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-80">
                     {TILE_BY_TYPE[tile].emoji}
                   </span>
                 )}
-                {heat && temps && (
+                {heat && temp != null && (
                   <span className="pointer-events-none absolute inset-0 flex items-center justify-center font-semibold text-white/90">
-                    {Math.round(temps[r][c])}
+                    {Math.round(temp)}
                   </span>
                 )}
-              </button>
+                {heat && risk != null && (
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[9px] font-semibold text-white/90">
+                    {Math.round(risk * 100)}
+                  </span>
+                )}
+              </div>
             )
           }),
         )}

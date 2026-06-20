@@ -2,6 +2,8 @@ import { apiClient, unwrap } from './client'
 import type {
   ApiResponse,
   CoachResponse,
+  DesignDetail,
+  DesignListItem,
   DesignSummary,
   Grid,
   SimulationResult,
@@ -50,14 +52,43 @@ export async function saveDesign(
   return unwrap(res)
 }
 
-export async function fetchLeaderboard(regionCode?: string): Promise<DesignSummary[]> {
-  const res = await apiClient.get<ApiResponse<DesignSummary[]>>('/designs/leaderboard', {
-    params: { regionCode, limit: 10 },
+export async function updateDesign(
+  id: number,
+  name: string,
+  regionCode: string,
+  grid: Grid,
+): Promise<DesignSummary> {
+  const res = await apiClient.put<ApiResponse<DesignSummary>>(`/designs/${id}`, {
+    name,
+    regionCode,
+    grid,
   })
   return unwrap(res)
 }
 
-export async function fetchMyDesigns(): Promise<DesignSummary[]> {
-  const res = await apiClient.get<ApiResponse<DesignSummary[]>>('/designs/mine')
+export async function fetchLeaderboard(regionCode?: string, limit = 10): Promise<DesignSummary[]> {
+  const res = await apiClient.get<ApiResponse<DesignSummary[]>>('/designs/leaderboard', {
+    params: { regionCode, limit },
+  })
   return unwrap(res)
+}
+
+export async function fetchLeaderboardDesign(id: number): Promise<DesignDetail> {
+  const res = await apiClient.get<ApiResponse<DesignDetail>>(`/designs/leaderboard/${id}`)
+  return unwrap(res)
+}
+
+export async function fetchMyDesigns(): Promise<DesignListItem[]> {
+  const res = await apiClient.get<ApiResponse<DesignListItem[]>>('/designs/mine')
+  return unwrap(res)
+}
+
+export async function fetchDesign(id: number): Promise<DesignDetail> {
+  const res = await apiClient.get<ApiResponse<DesignDetail>>(`/designs/${id}`)
+  return unwrap(res)
+}
+
+export async function deleteDesign(id: number): Promise<void> {
+  const res = await apiClient.delete<ApiResponse<null>>(`/designs/${id}`)
+  unwrap(res)
 }

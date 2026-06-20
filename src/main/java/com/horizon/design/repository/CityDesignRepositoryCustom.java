@@ -12,4 +12,9 @@ public interface CityDesignRepositoryCustom {
     List<CityDesign> findLeaderboard(String regionCode, int limit);
 
     List<CityDesign> findByOwnerId(Long ownerId);
+
+    List<CityDesign> searchAdmin(String regionCode, String ownerLoginId, Boolean visibleOnLeaderboard,
+                                 int offset, int limit);
+
+    long countAdmin(String regionCode, String ownerLoginId, Boolean visibleOnLeaderboard);
 }

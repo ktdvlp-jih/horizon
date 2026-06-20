@@ -5,7 +5,26 @@ export interface ApiResponse<T> {
   timestamp: string
 }
 
-export type TileType = 'BUILDING' | 'ROAD' | 'BARE' | 'PARK' | 'TREE' | 'WATER'
+export type TileType =
+  | 'BUILDING'
+  | 'ROAD'
+  | 'BARE'
+  | 'PARK'
+  | 'TREE'
+  | 'WATER'
+  | 'SIDEWALK'
+  | 'WETLAND'
+  | 'PLAZA'
+  | 'SEAWALL'
+  | 'DRAIN'
+  | 'GREEN_BUFFER'
+  | 'SHELTER'
+  | 'RETAINING'
+  | 'HIGH_GROUND'
+
+export type DisasterTileType = TileType
+
+export type DisasterMode = 'typhoon' | 'earthquake' | 'tsunami'
 
 export type Grid = TileType[][]
 
@@ -78,6 +97,97 @@ export interface DesignSummary {
   avgSurfaceTemp: number
   deltaT: number
   greenRatio: number
+  createdAt: string
+}
+
+export interface DesignListItem extends DesignSummary {
+  grid: Grid
+}
+
+export interface DesignDetail extends DesignSummary {
+  grid: Grid
+  experienceId?: string
+  scenarioId?: string | null
+}
+
+export interface ChallengeConfig {
+  id: string
+  experienceId: string
+  title: string
+  description: string
+  ruleType: string
+  threshold: number | null
+  ruleParamsJson: string | null
+  enabled: boolean
+  sortOrder: number
+}
+
+export interface ScenarioSummary {
+  id: string
+  mode: DisasterMode
+  title: string
+  description: string
+  sourceEventId: string | null
+  regionCode: string | null
+}
+
+export interface DisasterMetrics {
+  mode: string
+  gridSize: number
+  totalCells: number
+  tileCounts: Record<string, number>
+  affectedRatio: number
+  maxRisk: number
+  avgRisk: number
+  protectedRatio: number
+  floodCells?: number | null
+  windHighCells?: number | null
+  collapseRiskCells?: number | null
+  evacWithin3MinRatio?: number | null
+  inundatedCells?: number | null
+  highGroundCoverage?: number | null
+}
+
+export interface DisasterSimulationResult {
+  mode: DisasterMode
+  region: RegionWeather
+  scenario: ScenarioSummary
+  gridSize: number
+  cellValues: number[][]
+  metrics: DisasterMetrics
+  globalMin: number
+  globalMax: number
+}
+
+export interface DisasterTimelineFrame {
+  stepIndex: number
+  label: string
+  progress: number
+  cellValues: number[][]
+  avgRisk: number
+  maxRisk: number
+  affectedRatio: number
+}
+
+export interface DisasterTimeline {
+  mode: DisasterMode
+  region: RegionWeather
+  scenario: ScenarioSummary
+  gridSize: number
+  globalMin: number
+  globalMax: number
+  source: string
+  frames: DisasterTimelineFrame[]
+}
+
+export interface DisasterSummary {
+  id: number
+  name: string
+  mode: DisasterMode
+  regionCode: string
+  scenarioId: string
+  avgRisk: number
+  maxRisk: number
   createdAt: string
 }
 

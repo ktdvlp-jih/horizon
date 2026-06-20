@@ -50,11 +50,12 @@ export default function HeatmapGuideButton() {
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h2 id="heatmap-guide-title" className="text-lg font-bold text-slate-900">
-                  히트맵 색상은 어떻게 정해지나요?
+                  격자 보기 &amp; 히트맵 색상
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  절대 온도가 아니라, <strong className="font-semibold text-slate-700">현재 화면 기준 상대값</strong>
-                  으로 표시됩니다.
+                  <strong className="font-semibold text-slate-700">타일</strong> 모드는 건물·도로 아이콘을,
+                  <strong className="font-semibold text-slate-700"> 히트맵</strong> 모드는 온도 색·숫자를 보여
+                  줍니다. 둘 중 하나만 표시됩니다.
                 </p>
               </div>
               <button
@@ -81,12 +82,30 @@ export default function HeatmapGuideButton() {
             </div>
 
             <ul className="space-y-3 text-sm text-slate-600">
-              <li className="rounded-lg bg-sky-50 px-3 py-2">
-                <span className="font-semibold text-sky-800">실시간 설계</span>
+              <li className="rounded-lg bg-emerald-50 px-3 py-2">
+                <span className="font-semibold text-emerald-800">타일 모드 (기본)</span>
                 <br />
-                지금 격자의 <strong>가장 낮은 셀 = 파랑</strong>,{' '}
-                <strong>가장 높은 셀 = 빨강</strong>입니다. 타일을 바꾸면 min/max도
-                함께 바뀝니다.
+                설계한 건물·도로·공원 등 <strong>타일 아이콘</strong>을 확인합니다. 처음에는 이
+                모드로 시작합니다.
+              </li>
+              <li className="rounded-lg bg-rose-50 px-3 py-2">
+                <span className="font-semibold text-rose-800">히트맵 모드</span>
+                <br />
+                온도에 따라 <strong>파랑(시원) → 빨강(더움)</strong> 색과 숫자(°C)로 표시합니다.
+                타일 아이콘은 숨겨집니다.
+              </li>
+              <li className="rounded-lg bg-violet-50 px-3 py-2">
+                <span className="font-semibold text-violet-800">「효과」 연출</span>
+                <br />
+                히트맵·하루 재생에서만 표시됩니다. <strong>도로·건물</strong> 등 뜨거운 타일은
+                붉은 펄스, <strong>공원·수변·습지</strong>는 푸른 연출입니다. 타일 모드에서는
+                격자 아이콘만 보입니다.
+              </li>
+              <li className="rounded-lg bg-sky-50 px-3 py-2">
+                <span className="font-semibold text-sky-800">히트맵 색 기준</span>
+                <br />
+                절대 온도가 아니라 <strong>현재 격자의 최저~최고</strong> 상대값입니다. 타일
+                구성을 바꾸면 색 범위도 함께 바뀝니다.
               </li>
               <li className="rounded-lg bg-amber-50 px-3 py-2">
                 <span className="font-semibold text-amber-900">하루 재생</span>

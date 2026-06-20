@@ -17,6 +17,7 @@ public record CoachRequest(
         double avgSurfaceTemp,
         double maxSurfaceTemp,
         double deltaT,
-        Map<String, Integer> tileCounts
+        Map<String, Integer> tileCounts,
+        CoachSettingsDto coachSettings
 ) {
 }

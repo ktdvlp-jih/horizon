@@ -132,9 +132,9 @@ public record ApiResponse<T>(
 
 ### 3.9 인증 / CORS
 
-- **API Key (선택):** `HORIZON_API_KEY` 환경변수 설정 시 `/api/**`에 `X-API-Key` 또는 `Authorization: Bearer` 필요
-- **CORS:** `HORIZON_CORS_ORIGINS` (쉼표 구분) + `https://*.trycloudflare.com` 패턴 허용
-- 미설정 시 인증 없음 (로컬 개발 편의)
+- **JWT (현재):** Spring Security 6 + Access/Refresh Token — [login_PROMPT.md](login_PROMPT.md) 기준 구현됨
+- **역할:** `USER`, `ADMIN` (`app_user.role`). 관리 API는 `/api/admin/**` + `hasRole('ADMIN')` — [admin_PROMPT.md](admin_PROMPT.md)
+- **CORS:** `HORIZON_CORS_ORIGINS` (쉼표 구분, 예: `http://localhost:5173,http://localhost:5174`) + `https://*.trycloudflare.com` 패턴 허용
 
 ### 3.10 스케줄러
 
@@ -176,17 +176,30 @@ public record ApiResponse<T>(
 
 ### 4.3 디렉터리 구조
 
+**사용자 앱** (`frontend/`, dev 포트 **5173**)
+
 ```
 frontend/src/
-├── api/           # Axios 호출 함수 (도메인별: productApi.ts, scheduler.ts …)
-├── components/    # 재사용 UI 컴포넌트
-│   └── ui/        # shadcn 스타일 primitive
-├── hooks/         # React Query 커스텀 훅 (useProducts, useCategories …)
-├── lib/           # utils, apiBase, format
-├── pages/         # 라우트 단위 페이지
-├── types/         # TypeScript 타입 (API 응답 DTO)
-├── App.tsx        # Router + Provider 조립
-└── main.tsx       # 엔트리
+├── api/           # designApi.ts, authApi.ts, client.ts …
+├── components/    # Layout, designer/*, ui/*
+├── context/       # AuthContext
+├── hooks/
+├── lib/           # grid, tiles, apiBase, authStorage
+├── pages/         # Home, Designer, Login, Signup, MyDesigns
+├── types/
+├── App.tsx
+└── main.tsx
+```
+
+**관리자 앱** (`frontend-admin/`, dev 포트 **5174** — [admin_PROMPT.md](admin_PROMPT.md)로 구현)
+
+```
+frontend-admin/src/
+├── api/           # adminApi.ts, authApi.ts, client.ts
+├── components/    # AdminLayout, AdminRoute, ui/*
+├── context/       # AuthContext (ADMIN role 가드)
+├── pages/         # Dashboard, Users, AiCoach, Designs, Regions, System
+└── …
 ```
 
 ### 4.4 API 클라이언트
@@ -434,12 +447,12 @@ Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 | 환경 | API (Spring) | AI (FastAPI) | PostgreSQL (호스트) | Vite dev |
 |------|--------------|--------------|---------------------|----------|
-| 로컬 개발 | `8080` | `8000` | `5432` (PC PG) / `55432` (Docker DB) | `5173` |
+| 로컬 개발 | `8080` | `8000` | `5432` (PC PG) / `55432` (Docker DB) | 사용자 `5173`, 관리자 `5174` |
 | Docker | `9080` | `9800` | `55432` | — (dist 빌드 후 Spring 서빙) |
 
 ### 6.4 실행 방식 4가지
 
-1. **로컬 개발 (전체):** `gradlew bootRun` + `uvicorn` (ai) + `npm run dev` (Vite)
+1. **로컬 개발 (전체):** `gradlew bootRun` + `uvicorn` (ai) + `npm run dev` (frontend `:5173`, frontend-admin `:5174`)
 2. **로컬 개발 (AI 제외):** Spring + Vite만 — AI 미기동 시 해당 API graceful degrade
 3. **Docker 전체:** `docker compose up` (DB + Spring + AI, 프론트 prod 빌드)
 4. **외부 데모:** Cloudflare Tunnel + `HORIZON_SERVE_FRONTEND=true`
@@ -509,7 +522,7 @@ com.{company}.{project}/
 | Tailwind 4 + shadcn 스타일 | 빠른 UI 구축, 디자인 시스템 유연성 |
 | AG Grid | 대량 데이터 테이블 (정렬·필터·가상 스크롤) |
 | Docker Compose | 로컬·운영 환경 일치, DB 격리 |
-| API Key (Security 대신) | 소규모·내부 도구에 적합한 단순 인증 |
+| JWT + Spring Security 6 | Access/Refresh, `USER`/`ADMIN` 역할, 관리자 `/api/admin/**` |
 | Python + FastAPI (별도 서비스) | AI·데이터 과학 생태계, Spring과 역할 분리 |
 | LangChain + OpenAI SDK | LLM 체인·프롬프트 관리와 직접 호출 모두 지원 |
 | pandas + xarray | 표·격자 기상 데이터 가공에 적합 |

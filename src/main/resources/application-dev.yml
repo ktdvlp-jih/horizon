@@ -1,0 +1,6 @@
+# spring.profiles.active=dev (local bootRun)
+# Connection values: .env.dev (same variable names as production .env)
+
+logging:
+  level:
+    com.horizon: DEBUG

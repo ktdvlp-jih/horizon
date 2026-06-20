@@ -21,7 +21,7 @@ ai/.venv/
 .env
 .env.*
 !.env.example
-!**/.env.example
+!.env.dev.example
 
 frontend/.env
 frontend/.env.local

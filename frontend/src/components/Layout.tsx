@@ -19,6 +19,7 @@ export default function Layout() {
           <nav className="flex items-center gap-1 text-sm">
             <NavItem to="/" label="소개" end />
             <NavItem to="/designer" label="설계 시작" />
+            <NavItem to="/leaderboard" label="리더보드" />
             {isAuthenticated && <NavItem to="/my-designs" label="내 설계" />}
             {isAuthenticated ? (
               <div className="ml-2 flex items-center gap-2 border-l border-slate-200 pl-3">

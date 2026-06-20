@@ -60,3 +60,26 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+/** Load project-root `.env` into bootRun (same vars as Docker Compose). */
+fun loadDotEnv(file: java.io.File): Map<String, String> {
+    if (!file.isFile) return emptyMap()
+    return file.readLines()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && !it.startsWith("#") && it.contains("=") }
+        .mapNotNull { line ->
+            val idx = line.indexOf('=')
+            if (idx <= 0) return@mapNotNull null
+            line.substring(0, idx).trim() to line.substring(idx + 1).trim()
+        }
+        .toMap()
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    jvmArgs("-Dfile.encoding=UTF-8", "-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8")
+    environment("SPRING_PROFILES_ACTIVE", "dev")
+    val envFile = listOf(".env.dev", ".env")
+        .map { rootProject.file(it) }
+        .firstOrNull { it.isFile }
+    envFile?.let { loadDotEnv(it) }?.forEach { (key, value) -> environment(key, value) }
+}

@@ -5,7 +5,7 @@ spring:
   application:
     name: horizon
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/horizon}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:55432/horizon}
     username: ${SPRING_DATASOURCE_USERNAME:horizon}
     password: ${SPRING_DATASOURCE_PASSWORD:horizon}
   jpa:
@@ -29,12 +29,14 @@ jwt:
 
 horizon:
   cors:
-    origins: ${HORIZON_CORS_ORIGINS:http://localhost:5173}
+    origins: ${HORIZON_CORS_ORIGINS:http://localhost:5173,http://localhost:5174}
   serve-frontend: ${HORIZON_SERVE_FRONTEND:false}
   auth:
     seed-admin: ${HORIZON_AUTH_SEED_ADMIN:true}
+  settings:
+    encryption-key: ${HORIZON_SETTINGS_ENCRYPTION_KEY:horizon-dev-settings-key-32b!}
   ai:
-    base-url: ${HORIZON_AI_SERVICE_URL:http://localhost:8000}
+    base-url: ${HORIZON_AI_SERVICE_URL:http://localhost:9800}
     connect-timeout: 5s
     read-timeout: 120s
   weather:

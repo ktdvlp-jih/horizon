@@ -133,6 +133,7 @@ export default function AnimationControls({
               ambient ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
             }`}
             aria-pressed={ambient}
+            title="히트맵·하루 재생 중 더움/시원함 연출 (타일 모드에서는 표시 안 됨)"
           >
             <Sparkles className="h-3.5 w-3.5" /> 효과
           </button>

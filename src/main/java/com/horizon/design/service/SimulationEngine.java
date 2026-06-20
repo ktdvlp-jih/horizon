@@ -201,10 +201,10 @@ public class SimulationEngine {
         for (int[] off : offsets) {
             int nr = r + off[0];
             int nc = c + off[1];
-            if (nr < 0 || nc < 0 || nr >= grid.length || nc >= grid[0].length) {
-                continue;
-            }
-            TileType n = grid[nr][nc];
+            // Out-of-bounds: assume same tile continues (avoids artificial hot/cold corners).
+            TileType n = (nr < 0 || nc < 0 || nr >= grid.length || nc >= grid[0].length)
+                    ? tile
+                    : grid[nr][nc];
             neighborHeat += n.emittedHeat() * NEIGHBOR_HEAT_FACTOR;
             neighborCooling += n.selfCooling() * NEIGHBOR_COOLING_FACTOR;
         }

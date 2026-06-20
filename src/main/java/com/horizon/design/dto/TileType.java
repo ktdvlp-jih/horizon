@@ -16,7 +16,17 @@ public enum TileType {
     BARE(0.20, 0.0, 0.8, false, true, false),
     PARK(0.30, 4.0, 0.0, true, false, false),
     TREE(0.25, 7.0, 0.0, true, false, false),
-    WATER(0.08, 8.0, 0.0, false, false, true);
+    WATER(0.08, 8.0, 0.0, false, false, true),
+    SIDEWALK(0.22, 0.5, 1.0, false, true, false),
+    WETLAND(0.12, 6.0, 0.0, true, false, true),
+    PLAZA(0.40, 1.0, 0.5, false, true, false),
+    /** Disaster-response tiles (also usable in heat-island mode with mild properties). */
+    SEAWALL(0.35, 0.5, 0.2, false, true, false),
+    DRAIN(0.18, 1.0, 0.5, false, true, false),
+    GREEN_BUFFER(0.28, 5.0, 0.0, true, false, false),
+    SHELTER(0.30, 2.0, 0.0, false, false, false),
+    RETAINING(0.22, 0.0, 0.3, false, true, false),
+    HIGH_GROUND(0.25, 1.0, 0.0, false, false, false);
 
     private final double albedo;
     private final double selfCooling;

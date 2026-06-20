@@ -4,6 +4,8 @@
 
 아래 기술 스택을 기반으로 JWT 인증/인가 로그인 기능을 설계하고 구현해주세요.
 
+> **관련:** 관리자 콘솔(`ROLE_ADMIN`, `/api/admin/**`, 별도 Vite `:5174`)은 [admin_PROMPT.md](admin_PROMPT.md) 참고.
+
 ---
 
 # 기술 스택

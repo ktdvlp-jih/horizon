@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -38,7 +40,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/health", "/api/health/**").permitAll()
                         .requestMatchers("/api/regions", "/api/weather/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/designs/leaderboard").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/challenges", "/api/challenges/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/designs/leaderboard", "/api/designs/leaderboard/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/designs/simulate", "/api/designs/simulate/timeline").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/designs/**").authenticated()
                         .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico", "/*.js", "/*.css", "/*.svg", "/*.png", "/*.ico").permitAll()
                         .anyRequest().permitAll())

@@ -69,7 +69,12 @@ function snapshotAt(timeline: SimulationTimeline, position: number): AnimatedSna
  * Loads a day-cycle timeline for the given region/grid and drives a smooth
  * requestAnimationFrame playback loop with interpolation between frames.
  */
-export function useClimateAnimation(regionCode: string, grid: Grid, date: string): ClimateAnimation {
+export function useClimateAnimation(
+  regionCode: string,
+  grid: Grid,
+  date: string,
+  onTimelineLoaded?: () => void,
+): ClimateAnimation {
   const [timeline, setTimeline] = useState<SimulationTimeline | null>(null)
   const [snapshot, setSnapshot] = useState<AnimatedSnapshot | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -85,6 +90,8 @@ export function useClimateAnimation(regionCode: string, grid: Grid, date: string
   const rafRef = useRef<number | null>(null)
   const lastTsRef = useRef<number | null>(null)
   const loadTokenRef = useRef(0)
+  const onTimelineLoadedRef = useRef(onTimelineLoaded)
+  onTimelineLoadedRef.current = onTimelineLoaded
 
   timelineRef.current = timeline
   speedRef.current = speed
@@ -173,6 +180,7 @@ export function useClimateAnimation(regionCode: string, grid: Grid, date: string
         playingRef.current = true
         setIsPlaying(true)
         startLoop()
+        onTimelineLoadedRef.current?.()
       })
       .catch(() => {
         if (token !== loadTokenRef.current) return

@@ -35,7 +35,7 @@ export default function LoginPage() {
       <div className="text-center">
         <h1 className="text-2xl font-bold text-slate-900">로그인</h1>
         <p className="mt-2 text-sm text-slate-500">
-          로그인 후 도시 기후 설계를 시작할 수 있습니다.
+          로그인하면 설계 저장·AI 코치·내 설계 목록을 이용할 수 있습니다.
         </p>
       </div>
 

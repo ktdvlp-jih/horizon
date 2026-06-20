@@ -100,4 +100,17 @@ public class AppUser extends BaseEntity {
         this.loginFailCount = 0;
         this.lockedUntil = null;
     }
+
+    public void updateRole(UserRole role) {
+        this.role = role;
+    }
+
+    public void updateUseYn(String useYn) {
+        this.useYn = useYn;
+    }
+
+    public void resetPassword(String encodedPassword, LocalDateTime now) {
+        this.password = encodedPassword;
+        this.passwordChangedAt = now;
+    }
 }
