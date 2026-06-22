@@ -38,6 +38,9 @@ public class FrontendSpaConfig implements WebMvcConfigurer {
                         if (resourcePath.startsWith("api") || resourcePath.startsWith("files")) {
                             return null;
                         }
+                        if (resourcePath.startsWith("admin") || resourcePath.startsWith("admin/")) {
+                            return null;
+                        }
                         Resource index = location.createRelative("index.html");
                         return index.exists() && index.isReadable() ? index : null;
                     }

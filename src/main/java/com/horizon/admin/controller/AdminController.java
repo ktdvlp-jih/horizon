@@ -9,8 +9,10 @@ import com.horizon.admin.dto.AdminUserDetail;
 import com.horizon.admin.dto.AdminUserPatchRequest;
 import com.horizon.admin.dto.AdminUserSummary;
 import com.horizon.admin.dto.RegionConfigDto;
+import com.horizon.admin.dto.DisasterScenarioDto;
 import com.horizon.admin.service.AdminChallengeService;
 import com.horizon.admin.service.AdminDesignService;
+import com.horizon.admin.service.AdminDisasterScenarioService;
 import com.horizon.admin.service.AdminRegionService;
 import com.horizon.admin.service.AdminSystemService;
 import com.horizon.admin.service.AdminUserService;
@@ -48,6 +50,7 @@ public class AdminController {
     private final AdminDesignService adminDesignService;
     private final AdminRegionService adminRegionService;
     private final AdminChallengeService adminChallengeService;
+    private final AdminDisasterScenarioService adminDisasterScenarioService;
     private final AdminSystemService adminSystemService;
     private final AiCoachSettingsService aiCoachSettingsService;
     private final AdminAuditLogService auditLogService;
@@ -175,6 +178,28 @@ public class AdminController {
     @DeleteMapping("/challenges/{id}")
     public ApiResponse<Void> deleteChallenge(@PathVariable String id) {
         adminChallengeService.delete(id);
+        return ApiResponse.ok(null);
+    }
+
+    @GetMapping("/disaster-scenarios")
+    public ApiResponse<List<DisasterScenarioDto>> disasterScenarios() {
+        return ApiResponse.ok(adminDisasterScenarioService.listAll());
+    }
+
+    @PostMapping("/disaster-scenarios")
+    public ApiResponse<DisasterScenarioDto> createDisasterScenario(@RequestBody DisasterScenarioDto dto) {
+        return ApiResponse.ok(adminDisasterScenarioService.create(dto));
+    }
+
+    @PutMapping("/disaster-scenarios/{id}")
+    public ApiResponse<DisasterScenarioDto> updateDisasterScenario(@PathVariable String id,
+                                                                   @RequestBody DisasterScenarioDto dto) {
+        return ApiResponse.ok(adminDisasterScenarioService.update(id, dto));
+    }
+
+    @DeleteMapping("/disaster-scenarios/{id}")
+    public ApiResponse<Void> deleteDisasterScenario(@PathVariable String id) {
+        adminDisasterScenarioService.delete(id);
         return ApiResponse.ok(null);
     }
 

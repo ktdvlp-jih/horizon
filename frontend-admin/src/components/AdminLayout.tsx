@@ -9,6 +9,7 @@ const nav = [
   { to: '/designs', label: '설계' },
   { to: '/regions', label: '지역' },
   { to: '/challenges', label: '도전과제' },
+  { to: '/disaster-scenarios', label: '재난 시나리오' },
   { to: '/system', label: '시스템' },
 ]
 

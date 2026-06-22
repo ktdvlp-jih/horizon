@@ -25,8 +25,8 @@ export const EXPERIENCES: Experience[] = [
     slug: 'disaster-response',
     title: '3대 재난 대응 설계자',
     description: '태풍·지진·해일 시나리오로 도시 방어선을 설계하고 위험을 확인하세요.',
-    route: '#',
-    status: 'coming-soon',
+    route: '/disaster',
+    status: 'active',
     emoji: '🛡️',
   },
   {

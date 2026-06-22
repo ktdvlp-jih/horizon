@@ -17,9 +17,11 @@ public class ChallengeSeed {
 
     public void seedIfEmpty() {
         if (challengeConfigRepository.count() > 0) {
+            seedDisasterIfMissing();
             return;
         }
         challengeConfigRepository.saveAll(defaultUrbanClimateChallenges());
+        challengeConfigRepository.saveAll(defaultDisasterChallenges());
         log.info("Seeded challenge_config rows");
     }
 

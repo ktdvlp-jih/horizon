@@ -100,6 +100,21 @@ export async function deleteChallenge(id: string) {
   await apiClient.delete(`/admin/challenges/${id}`)
 }
 
+export async function fetchDisasterScenarios() {
+  const res = await apiClient.get<ApiResponse<import('@/types').DisasterScenarioDto[]>>(
+    '/admin/disaster-scenarios',
+  )
+  return unwrap(res)
+}
+
+export async function updateDisasterScenario(id: string, body: import('@/types').DisasterScenarioDto) {
+  const res = await apiClient.put<ApiResponse<import('@/types').DisasterScenarioDto>>(
+    `/admin/disaster-scenarios/${id}`,
+    body,
+  )
+  return unwrap(res)
+}
+
 export async function fetchSystemHealth() {
   const res = await apiClient.get<ApiResponse<Record<string, unknown>>>('/admin/system/health')
   return unwrap(res)

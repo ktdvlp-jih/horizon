@@ -6,6 +6,7 @@ import { fileURLToPath, URL } from 'node:url'
 const apiTarget = process.env.VITE_DEV_API_TARGET ?? 'http://localhost:8080'
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH ?? '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

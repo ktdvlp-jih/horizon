@@ -11,17 +11,24 @@ import { AiCoachPage } from '@/pages/AiCoachPage'
 import { DesignsPage } from '@/pages/DesignsPage'
 import { RegionsPage } from '@/pages/RegionsPage'
 import { ChallengesPage } from '@/pages/ChallengesPage'
+import { DisasterScenariosPage } from '@/pages/DisasterScenariosPage'
 import { SystemPage } from '@/pages/SystemPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
 })
 
+function routerBasename(): string | undefined {
+  const base = import.meta.env.BASE_URL
+  if (!base || base === '/') return undefined
+  return base.replace(/\/$/, '')
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter basename={routerBasename()}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/access-denied" element={<AccessDeniedPage />} />
@@ -33,6 +40,7 @@ export default function App() {
                 <Route path="designs" element={<DesignsPage />} />
                 <Route path="regions" element={<RegionsPage />} />
                 <Route path="challenges" element={<ChallengesPage />} />
+                <Route path="disaster-scenarios" element={<DisasterScenariosPage />} />
                 <Route path="system" element={<SystemPage />} />
               </Route>
             </Route>

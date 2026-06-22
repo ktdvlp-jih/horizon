@@ -69,6 +69,18 @@ export interface RegionConfigDto {
   elevationProfileJson: string | null
 }
 
+export interface DisasterScenarioDto {
+  id: string
+  mode: string
+  title: string
+  description: string
+  sourceEventId: string | null
+  paramsJson: string
+  regionCode: string | null
+  enabled: boolean
+  sortOrder: number
+}
+
 export interface ChallengeConfigDto {
   id: string
   experienceId: string

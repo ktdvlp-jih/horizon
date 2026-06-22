@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/challenges", "/api/challenges/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/designs/leaderboard", "/api/designs/leaderboard/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/designs/simulate", "/api/designs/simulate/timeline").permitAll()
+                        .requestMatchers("/api/disaster/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/designs/**").authenticated()
                         .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico", "/*.js", "/*.css", "/*.svg", "/*.png", "/*.ico").permitAll()

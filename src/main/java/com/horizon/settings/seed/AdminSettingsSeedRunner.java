@@ -2,6 +2,7 @@ package com.horizon.settings.seed;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.horizon.disaster.seed.DisasterScenarioSeed;
 import com.horizon.settings.entity.AiCoachSettings;
 import com.horizon.settings.entity.RegionConfig;
 import com.horizon.settings.repository.AiCoachSettingsRepository;
@@ -51,6 +52,7 @@ public class AdminSettingsSeedRunner implements ApplicationRunner {
     private final AiCoachSettingsRepository aiCoachSettingsRepository;
     private final RegionConfigRepository regionConfigRepository;
     private final ChallengeSeed challengeSeed;
+    private final DisasterScenarioSeed disasterScenarioSeed;
     private final SettingsEncryptionService encryptionService;
     private final ObjectMapper objectMapper;
 
@@ -68,6 +70,8 @@ public class AdminSettingsSeedRunner implements ApplicationRunner {
         seedAiCoachSettings();
         seedRegions();
         challengeSeed.seedIfEmpty();
+        challengeSeed.seedDisasterIfMissing();
+        disasterScenarioSeed.seedIfEmpty();
         challengeSeed.syncDefaultCopy();
     }
 
