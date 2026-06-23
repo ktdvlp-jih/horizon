@@ -2,6 +2,7 @@ package com.horizon.resilience.service;
 
 import com.horizon.design.dto.DesignMetrics;
 import com.horizon.disaster.dto.DisasterMetrics;
+import com.horizon.resilience.dto.AgricultureMetrics;
 import com.horizon.resilience.dto.AirQualityMetrics;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,11 @@ public class ResilienceScoring {
     public double airScore(AirQualityMetrics m) {
         double score = 100.0 - (m.avgPm() - 15.0) * 1.35;
         return clamp(score);
+    }
+
+    /** Agriculture axis: the evaluator already yields a blended 0..100 index. */
+    public double agricultureScore(AgricultureMetrics m) {
+        return clamp(m.overallIndex());
     }
 
     /**

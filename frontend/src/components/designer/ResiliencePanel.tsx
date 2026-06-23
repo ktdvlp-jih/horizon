@@ -29,6 +29,30 @@ const LENS_META: Record<LensKind, { label: string; emoji: string; needsScenario?
 const LENS_ORDER: LensKind[] = ['heat', 'air', 'disaster', 'agriculture']
 const MODES: DisasterMode[] = ['typhoon', 'earthquake', 'tsunami']
 
+interface AgricultureZonesState {
+  farmland: number
+  fishery: number
+  forest: number
+  solar: number
+}
+
+const DEFAULT_ZONES: AgricultureZonesState = { farmland: 0.4, fishery: 0.2, forest: 0.25, solar: 0.15 }
+
+const ZONE_META: { key: keyof AgricultureZonesState; label: string; emoji: string }[] = [
+  { key: 'farmland', label: '농지', emoji: '🌾' },
+  { key: 'fishery', label: '어장', emoji: '🐟' },
+  { key: 'forest', label: '보존림', emoji: '🌲' },
+  { key: 'solar', label: '영농형 태양광', emoji: '🔆' },
+]
+
+interface AgricultureMetricsShape {
+  cropYieldIndex: number
+  fisheryIndex: number
+  waterSecurityIndex: number
+  carbonBalanceIndex: number
+  warmingDeltaC: number
+}
+
 function scoreColor(score: number): string {
   if (score >= 75) return 'text-emerald-600'
   if (score >= 50) return 'text-amber-600'
@@ -44,6 +68,7 @@ function barColor(score: number): string {
 export default function ResiliencePanel({ regionCode, grid, onOverlayChange }: Props) {
   const [activeLens, setActiveLens] = useState<LensKind>('heat')
   const [scenarioId, setScenarioId] = useState<string>('')
+  const [zones, setZones] = useState<AgricultureZonesState>(DEFAULT_ZONES)
   const [debouncedGrid, setDebouncedGrid] = useState<Grid>(grid)
 
   useEffect(() => {
@@ -62,12 +87,16 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange }: P
 
   const gridKey = useMemo(() => JSON.stringify(debouncedGrid), [debouncedGrid])
 
+  const zonesKey = `${zones.farmland}-${zones.fishery}-${zones.forest}-${zones.solar}`
+
   const { data: evalResult } = useQuery<EvaluateResponse>({
-    queryKey: ['evaluate', regionCode, gridKey, scenarioId],
-    queryFn: () => evaluate(regionCode, debouncedGrid, { scenarioId: scenarioId || null }),
+    queryKey: ['evaluate', regionCode, gridKey, scenarioId, zonesKey],
+    queryFn: () => evaluate(regionCode, debouncedGrid, { scenarioId: scenarioId || null, zones }),
     enabled: !!regionCode,
     staleTime: 10_000,
   })
+
+  const agriMetrics = evalResult?.lenses.agriculture?.metrics as AgricultureMetricsShape | undefined
 
   useEffect(() => {
     if (!evalResult) {
@@ -137,6 +166,44 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange }: P
             ))}
           </select>
         </div>
+
+        {activeLens === 'agriculture' && (
+          <div className="space-y-2 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
+            <p className="text-xs font-medium text-emerald-700">외곽 광역 구역 배분</p>
+            {ZONE_META.map(({ key, label, emoji }) => (
+              <div key={key} className="space-y-0.5">
+                <div className="flex justify-between text-[11px] text-slate-600">
+                  <span>
+                    {emoji} {label}
+                  </span>
+                  <span>{Math.round(zones[key] * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={zones[key]}
+                  onChange={(e) =>
+                    setZones((prev) => ({ ...prev, [key]: Number(e.target.value) }))
+                  }
+                  className="w-full accent-emerald-500"
+                />
+              </div>
+            ))}
+            {agriMetrics && (
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
+                <div className="rounded bg-white px-2 py-1">🌾 작황 {agriMetrics.cropYieldIndex.toFixed(0)}</div>
+                <div className="rounded bg-white px-2 py-1">🐟 어획 {agriMetrics.fisheryIndex.toFixed(0)}</div>
+                <div className="rounded bg-white px-2 py-1">💧 수자원 {agriMetrics.waterSecurityIndex.toFixed(0)}</div>
+                <div className="rounded bg-white px-2 py-1">🌳 탄소 {agriMetrics.carbonBalanceIndex.toFixed(0)}</div>
+                <div className="col-span-2 text-center text-[10px] text-slate-400">
+                  장기 기후 가정 +{agriMetrics.warmingDeltaC.toFixed(1)}°C
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {evalResult && (
           <div className="space-y-2">
