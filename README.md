@@ -6,15 +6,15 @@
 
 기획 배경과 아이디어 선정 근거는 [docs/MVP.md](docs/MVP.md), 기술 스택은 [docs/TECH_STACK.md](docs/TECH_STACK.md) 참고.
 
-**온보딩 (집 PC · 개발 PC · 배포 파이프라인):** **[docs/SETUP.md](docs/SETUP.md)** ← **여기서 시작**
+**온보딩 (집 PC · 개발 PC · 배포 파이프라인):** **[docs/onboarding/SETUP.md](docs/onboarding/SETUP.md)** ← **여기서 시작**
 
 | 문서 | 용도 |
 |------|------|
-| [docs/SETUP.md](docs/SETUP.md) | 전체 1회 설정 + 매일 워크플로 |
-| [docs/DEV_SETUP.md](docs/DEV_SETUP.md) | 개발 PC 로컬 실행 |
-| [docs/DEPLOY.md](docs/DEPLOY.md) | GitHub Actions 자동 배포 |
-| [docs/CLOUDFLARE_TUNNEL.md](docs/CLOUDFLARE_TUNNEL.md) | 외부 데모 URL |
-| [docs/SESSION_HANDOFF.md](docs/SESSION_HANDOFF.md) | 다른 PC에서 이어하기 |
+| [docs/onboarding/SETUP.md](docs/onboarding/SETUP.md) | 전체 1회 설정 + 매일 워크플로 |
+| [docs/onboarding/DEV_SETUP.md](docs/onboarding/DEV_SETUP.md) | 개발 PC 로컬 실행 |
+| [docs/onboarding/DEPLOY.md](docs/onboarding/DEPLOY.md) | GitHub Actions 자동 배포 |
+| [docs/onboarding/CLOUDFLARE_TUNNEL.md](docs/onboarding/CLOUDFLARE_TUNNEL.md) | 외부 데모 URL |
+| [docs/onboarding/SESSION_HANDOFF.md](docs/onboarding/SESSION_HANDOFF.md) | 다른 PC에서 이어하기 |
 
 ---
 
@@ -42,7 +42,7 @@ frontend-admin/ (Vite :5174, 관리자) ──/api──┼──▶  Spring Boo
 
 ## 빠른 시작
 
-> **처음이면 [docs/SETUP.md](docs/SETUP.md) 를 순서대로 진행하세요.**
+> **처음이면 [docs/onboarding/SETUP.md](docs/onboarding/SETUP.md) 를 순서대로 진행하세요.**
 
 ### 사전 요구사항
 
@@ -51,7 +51,7 @@ frontend-admin/ (Vite :5174, 관리자) ──/api──┼──▶  Spring Boo
 
 ### 1) 로컬 개발 — Docker 없이, 집 PC DB (Tailscale)
 
-코드는 이 PC, DB는 집 PC Docker Postgres. 상세: **[docs/DEV_SETUP.md](docs/DEV_SETUP.md)**
+코드는 이 PC, DB는 집 PC Docker Postgres. 상세: **[docs/onboarding/DEV_SETUP.md](docs/onboarding/DEV_SETUP.md)**
 
 ```powershell
 # 최초 1회
@@ -96,7 +96,7 @@ docker compose up -d --build
 # 앱: http://localhost:9080
 ```
 
-자동 재빌드: **[docs/DEPLOY.md](docs/DEPLOY.md)** (`master` merge → GitHub Actions + Tailscale SSH)
+자동 재빌드: **[docs/onboarding/DEPLOY.md](docs/onboarding/DEPLOY.md)** (`master` merge → GitHub Actions + Tailscale SSH)
 
 ### 4) 외부 데모 (Cloudflare Tunnel)
 
@@ -105,7 +105,7 @@ docker compose up -d
 cloudflared tunnel --url http://localhost:9080
 ```
 
-[docs/CLOUDFLARE_TUNNEL.md](docs/CLOUDFLARE_TUNNEL.md) 참고.
+[docs/onboarding/CLOUDFLARE_TUNNEL.md](docs/onboarding/CLOUDFLARE_TUNNEL.md) 참고.
 
 ---
 

@@ -1,52 +1,38 @@
 # Horizon 문서
 
-> **처음 시작:** [SETUP.md](SETUP.md) — 집 PC · GitHub · 개발 PC · 배포 파이프라인 **순서대로**  
-> **다른 PC에서 이어하기:** [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
+> **처음 시작:** [onboarding/SETUP.md](onboarding/SETUP.md) — 집 PC · GitHub · 개발 PC · 배포 **순서대로**
 
 ---
 
-## 문서 맵
+## 온보딩 (환경 설정 · 배포)
 
-| 문서 | 대상 | 내용 |
-|------|------|------|
-| **[SETUP.md](SETUP.md)** | 전원 | **전체 온보딩** (1회 설정 + 매일 워크플로) |
-| [DEV_SETUP.md](DEV_SETUP.md) | 개발 PC | 로컬 실행 (Spring/Vite/AI + Tailscale DB 터널) |
-| [DEPLOY.md](DEPLOY.md) | 집 PC · GitHub | Actions 자동 배포 · Secrets · 트러블슈팅 |
-| [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md) | 집 PC | 외부 데모 URL (trycloudflare) |
-| [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | PC 전환 | IP·체크리스트·대화 동기화 |
-| [MVP.md](MVP.md) | 기획 | 아이디어·데모 시나리오 |
-| [TECH_STACK.md](TECH_STACK.md) | 개발 | 기술 스택 상세 |
-| [DISASTER_SIM.md](DISASTER_SIM.md) | 기능 | 3대 재난 시뮬레이션 |
+| 문서 | 용도 |
+|------|------|
+| **[onboarding/SETUP.md](onboarding/SETUP.md)** | 전체 1회 설정 + 매일 워크플로 |
+| [onboarding/DEV_SETUP.md](onboarding/DEV_SETUP.md) | 개발 PC 로컬 실행 |
+| [onboarding/DEPLOY.md](onboarding/DEPLOY.md) | GitHub Actions 자동 배포 |
+| [onboarding/CLOUDFLARE_TUNNEL.md](onboarding/CLOUDFLARE_TUNNEL.md) | 외부 데모 URL |
+| [onboarding/SESSION_HANDOFF.md](onboarding/SESSION_HANDOFF.md) | 다른 PC에서 이어하기 |
 
----
-
-## 아키텍처 (한 줄)
-
-```
-개발 PC: 코드 + Spring/Vite/AI (로컬) ──Tailscale SSH 터널──▶ 집 PC Postgres
-git push master ──▶ GitHub Actions ──▶ 집 PC Docker 재빌드 (9080)
-외부 데모: trycloudflare ──▶ 집 PC 9080
-```
-
-**DB:** 집 PC Docker Postgres만 (클라oud DB 없음) · **비용:** 0원 (Tailscale 무료 tier)
+온보딩 문서 전체 목록: [onboarding/README.md](onboarding/README.md)
 
 ---
 
-## 스크립트 빠른 참조
+## 프로젝트 · 기능
 
-| 스크립트 | PC | 용도 |
-|----------|-----|------|
-| `setup_openssh_tunnel.ps1` | 집 | OpenSSH 서버 (관리자, 1회) |
-| `setup-deploy-ssh.ps1` | 집 | Actions 배포 SSH 키 (관리자, 1회) |
-| `setup-deploy-task.ps1` | 집 | Docker 예약 작업 (관리자, 1회) |
-| `setup-github-ssh.ps1` | 각 PC | Git push SSH 키 (1회/PC) |
-| `setup-local-dev.ps1` | 개발 | Node/Python/npm (1회) |
-| `ssh-db-tunnel-tailscale.bat` | 개발 | DB 터널 (매일, 창 유지) |
-| `deploy-docker.ps1` | 집 | 수동 Docker 재배포 |
-| `start_trycloudflare.bat` | 집 | 외부 데모 URL |
+| 문서 | 용도 |
+|------|------|
+| [MVP.md](MVP.md) | 기획 · 데모 시나리오 |
+| [TECH_STACK.md](TECH_STACK.md) | 기술 스택 상세 |
+| [DISASTER_SIM.md](DISASTER_SIM.md) | 3대 재난 시뮬레이션 |
 
 ---
 
-## chat-exports
+## 프롬프트 · 대화 기록
 
-[chat-exports/README.md](chat-exports/README.md) — Cursor 대화 export 동기화
+| 문서 | 용도 |
+|------|------|
+| [horizon_PROMPT.md](horizon_PROMPT.md) | 메인 앱 개발 프롬프트 |
+| [admin_PROMPT.md](admin_PROMPT.md) | 관리자 UI 프롬프트 |
+| [login_PROMPT.md](login_PROMPT.md) | 로그인 프롬프트 |
+| [chat-exports/README.md](chat-exports/README.md) | Cursor 대화 export 동기화 |

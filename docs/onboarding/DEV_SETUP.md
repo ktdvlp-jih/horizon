@@ -58,7 +58,7 @@ SPRING_DATASOURCE_PASSWORD=<집 PC POSTGRES_PASSWORD>
 HORIZON_AI_SERVICE_URL=http://localhost:8000
 ```
 
-템플릿: [`.env.dev.remote.example`](../.env.dev.remote.example)
+템플릿: [`.env.dev.remote.example`](../../.env.dev.remote.example)
 
 ---
 

@@ -369,7 +369,8 @@ docker compose up -d
 
 ## 11. 관련 문서
 
-- [docs/README.md](README.md) — 문서 목록
+- [../README.md](../README.md) — 전체 문서 목록
+- [README.md](README.md) — 온보딩 문서 목록
 - [DEV_SETUP.md](DEV_SETUP.md) — 개발 PC 상세
 - [DEPLOY.md](DEPLOY.md) — 배포·Actions 상세
 - [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md) — 데모 URL

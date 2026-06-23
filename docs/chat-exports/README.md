@@ -9,6 +9,6 @@ Cursor Agent 대화 export를 Git으로 동기화하는 폴더입니다.
 3. `git commit` → `push`
 4. 다른 PC: `git pull` → `@docs/chat-exports/파일.md` + 「이 대화 이어서 작업해줘」
 
-짧은 맥락만 필요하면 [SESSION_HANDOFF.md](../SESSION_HANDOFF.md) 만 갱신해도 됩니다.
+짧은 맥락만 필요하면 [SESSION_HANDOFF.md](../onboarding/SESSION_HANDOFF.md) 만 갱신해도 됩니다.
 
-전체 환경 설정: [SETUP.md](../SETUP.md)
+전체 환경 설정: [SETUP.md](../onboarding/SETUP.md)
