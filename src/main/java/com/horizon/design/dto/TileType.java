@@ -26,7 +26,9 @@ public enum TileType {
     GREEN_BUFFER(0.28, 5.0, 0.0, true, false, false),
     SHELTER(0.30, 2.0, 0.0, false, false, false),
     RETAINING(0.22, 0.0, 0.3, false, true, false),
-    HIGH_GROUND(0.25, 1.0, 0.0, false, false, false);
+    HIGH_GROUND(0.25, 1.0, 0.0, false, false, false),
+    /** Industrial/factory tile: strong heat + particulate (PM) emission source. */
+    INDUSTRY(0.18, 0.0, 4.2, false, true, false);
 
     private final double albedo;
     private final double selfCooling;

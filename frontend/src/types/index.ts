@@ -21,6 +21,7 @@ export type TileType =
   | 'SHELTER'
   | 'RETAINING'
   | 'HIGH_GROUND'
+  | 'INDUSTRY'
 
 export type DisasterTileType = TileType
 

@@ -24,6 +24,7 @@ export const TILES: TileMeta[] = [
   { type: 'SHELTER', label: '대피소', emoji: '🏕️', swatch: '#f59e0b', hint: '대피 공간' },
   { type: 'RETAINING', label: '옹벽', emoji: '🪨', swatch: '#78716c', hint: '지진 붕괴 완화' },
   { type: 'HIGH_GROUND', label: '고지', emoji: '⛰️', swatch: '#a3e635', hint: '해일·지진 대피 고지' },
+  { type: 'INDUSTRY', label: '공장', emoji: '🏭', swatch: '#71717a', hint: '미세먼지·열 강한 배출원' },
 ]
 
 export const TILE_BY_TYPE: Record<TileType, TileMeta> = TILES.reduce(

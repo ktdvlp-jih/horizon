@@ -1,12 +1,15 @@
 package com.horizon.resilience.service;
 
 import com.horizon.design.dto.SimulationResult;
+import com.horizon.design.dto.TileType;
 import com.horizon.design.service.SimulationEngine;
 import com.horizon.disaster.dto.DisasterSimulateRequest;
 import com.horizon.disaster.dto.DisasterSimulationResult;
 import com.horizon.disaster.entity.DisasterScenario;
+import com.horizon.disaster.service.DisasterGridHelper;
 import com.horizon.disaster.service.DisasterScenarioService;
 import com.horizon.disaster.service.DisasterSimulationService;
+import com.horizon.resilience.air.AirQualityEvaluator;
 import com.horizon.resilience.dto.EvaluateRequest;
 import com.horizon.resilience.dto.EvaluateResponse;
 import com.horizon.resilience.dto.LensResult;
@@ -31,16 +34,19 @@ public class ResilienceOrchestrator {
     private final SimulationEngine simulationEngine;
     private final DisasterScenarioService scenarioService;
     private final DisasterSimulationService disasterSimulationService;
+    private final AirQualityEvaluator airQualityEvaluator;
     private final ResilienceScoring scoring;
     private final ScenarioWeightsResolver weightsResolver;
 
     public EvaluateResponse evaluate(EvaluateRequest request) {
         RegionWeather region = weatherDataService.getRegion(request.regionCode());
+        TileType[][] grid = DisasterGridHelper.parseGrid(request.grid());
 
         Map<String, LensResult> lenses = new LinkedHashMap<>();
         Map<String, Double> axisScores = new LinkedHashMap<>();
 
         int gridSize = addHeatLens(region, request, lenses, axisScores);
+        addAirLens(request, grid, lenses, axisScores);
         addDisasterLens(request, lenses, axisScores);
 
         ScenarioWeights weights = weightsResolver.resolve(request.scenarioId());
@@ -67,6 +73,15 @@ public class ResilienceOrchestrator {
                 "heat", "열섬", heat.surfaceTemps(), min, max, score, heat.metrics()));
         axisScores.put("heat", score);
         return heat.gridSize();
+    }
+
+    private void addAirLens(EvaluateRequest request, TileType[][] grid,
+                            Map<String, LensResult> lenses, Map<String, Double> axisScores) {
+        AirQualityEvaluator.Result air = airQualityEvaluator.evaluate(request.regionCode(), grid);
+        double score = scoring.airScore(air.metrics());
+        lenses.put("air", new LensResult(
+                "air", "미세먼지", air.heatmap(), air.min(), air.max(), score, air.metrics()));
+        axisScores.put("air", score);
     }
 
     private void addDisasterLens(EvaluateRequest request,

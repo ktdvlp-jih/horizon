@@ -2,6 +2,7 @@ package com.horizon.resilience.service;
 
 import com.horizon.design.dto.DesignMetrics;
 import com.horizon.disaster.dto.DisasterMetrics;
+import com.horizon.resilience.dto.AirQualityMetrics;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -27,6 +28,12 @@ public class ResilienceScoring {
     /** Disaster axis: lower average risk is better. */
     public double disasterScore(DisasterMetrics m) {
         return clamp((1.0 - m.avgRisk()) * 100.0);
+    }
+
+    /** Air axis: lower average PM is better. ~15µg/m³ ≈ excellent, 75µg/m³ ≈ poor. */
+    public double airScore(AirQualityMetrics m) {
+        double score = 100.0 - (m.avgPm() - 15.0) * 1.35;
+        return clamp(score);
     }
 
     /**
