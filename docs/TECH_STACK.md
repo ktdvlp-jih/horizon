@@ -453,9 +453,9 @@ Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ### 6.4 실행 방식
 
-1. **로컬 개발 + 원격 DB (권장):** Tailscale + `ssh-db-tunnel-tailscale.bat` → `bootRun` + 로컬 `uvicorn` + `npm run dev` — [DEV_SETUP.md](DEV_SETUP.md)
+1. **로컬 개발 + 원격 DB (권장):** Tailscale + `ssh-db-tunnel-tailscale.bat` → `bootRun` + 로컬 `uvicorn` + `npm run dev` — [SETUP.md](SETUP.md) · [DEV_SETUP.md](DEV_SETUP.md)
 2. **로컬 개발 (이 PC DB):** `docker compose up db -d` 또는 로컬 PG + `.env.dev.example`
-3. **Docker 전체 (집 PC):** `docker compose up -d --build` — [DEPLOY.md](DEPLOY.md)
+3. **Docker 전체 (집 PC):** `docker compose up -d --build` — [SETUP.md](SETUP.md) · [DEPLOY.md](DEPLOY.md)
 4. **외부 데모:** Cloudflare Quick Tunnel + `HORIZON_SERVE_FRONTEND=true`
 
 ### 6.4.1 Tailscale DB 터널
@@ -657,7 +657,7 @@ cd ai && python -m pytest
 cd frontend && npm run lint
 ```
 
-상세: [DEV_SETUP.md](DEV_SETUP.md) · [DEPLOY.md](DEPLOY.md) · [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
+상세: [SETUP.md](SETUP.md) · [DEV_SETUP.md](DEV_SETUP.md) · [DEPLOY.md](DEPLOY.md) · [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
 
 ---
 

@@ -1,119 +1,116 @@
-# 세션 핸드오프 (대화·맥락 동기화)
+# PC 전환 · 맥락 동기화
 
-다른 PC에서 Horizon 작업을 이어갈 때 사용합니다. **코드는 Git**, **대화 맥락은 이 문서 + export**로 맞춥니다.
+> **처음 설정:** [SETUP.md](SETUP.md) · **문서 목록:** [README.md](README.md)
 
 ---
 
-## 아키텍처 (2026-06-23 확정)
+## 아키텍처 (확정)
 
 | 역할 | 방식 |
 |------|------|
 | **DB** | 집 PC Docker Postgres (`55432`) — 클라oud DB 없음 |
-| **밖에서 개발** | Tailscale + `ssh-db-tunnel-tailscale.bat` → `localhost:55432` |
-| **배포** | `master` merge → **GitHub Actions + Tailscale SSH** → `deploy-docker.ps1` |
-| **데모 URL** | `start_trycloudflare.bat` / Cloudflare Tunnel (`9080`) |
-
-GitHub Secrets 4개 필요 → [DEPLOY.md](DEPLOY.md). 집 PC Runner 설치 **불필요**.
+| **밖에서 개발** | Tailscale + `ssh-db-tunnel-tailscale.bat` |
+| **배포** | `master` push → GitHub Actions + Tailscale SSH |
+| **데모** | `start_trycloudflare.bat` → `:9080` |
+| **Git push** | SSH (`setup-github-ssh.ps1`) — PC마다 1회 |
 
 ---
 
-## 빠른 시작 (새 PC)
+## 새 PC 빠른 시작
+
+### 개발 PC로 전환
+
+```text
+1. git clone / git pull
+2. SETUP.md §4 — JDK/Node/Python/Tailscale
+3. copy .env.dev.remote.example → .env.dev  (.env는 git 제외 → 수동 복사)
+4. scripts\ssh-db-tunnel-tailscale.bat — IP/USER 수정
+5. setup-github-ssh.ps1 — GitHub SSH key 등록
+6. 매일: 터널 → bootRun → npm run dev
+```
+
+### 집 PC로 전환
 
 ```text
 1. git pull
-2. copy .env.dev.remote.example .env.dev  (API 키는 USB/비밀관리자로 복사)
-3. Tailscale 설치 · 같은 계정 로그인
-4. scripts\ssh-db-tunnel-tailscale.bat  (집 PC IP 확인)
-5. bootRun + npm run dev  (docs/DEV_SETUP.md)
-6. Cursor 새 Agent 채팅:
-   @docs/SESSION_HANDOFF.md
-   @docs/chat-exports/최신-export.md  (있으면)
-   「이 대화 이어서 작업해줘」
+2. copy .env.example → .env (최초)
+3. docker compose up -d
+4. SETUP.md §2 — sshd, deploy-ssh, deploy-task (1회)
+5. SETUP.md §3 — GitHub Secrets (1회)
 ```
 
 ---
 
-## 현재 프로젝트 상태 (2026-06-23)
+## 환경 값 기록 (팀/본인용 — 아래 수정 후 commit)
 
-### 완료
-
-| 영역 | 커밋/문서 |
-|------|-----------|
-| 도시 기후 설계자 MVP | `b550483` |
-| 3대 재난 시뮬 + 태풍 시의회 UX | `457a55b`, `docs/DISASTER_SIM.md` |
-| Cloudflare trycloudflare 데모 | `docs/CLOUDFLARE_TUNNEL.md` |
-| 로컬 개발 (Docker 없이) + Tailscale DB | `docs/DEV_SETUP.md` |
-
-### 개발 PC ↔ 집 PC DB
+> **민감 정보(비밀번호·키)는 적지 마세요.** IP·사용자명만.
 
 | 항목 | 값 |
 |------|-----|
-| Tailscale (집 PC) | `100.117.145.80` (변경될 수 있음 → `tailscale ip -4`) |
-| SSH 사용자 | `전일훈` |
-| DB 터널 | `localhost:55432` ← SSH ← 집 Docker Postgres |
-| LAN IP (같은 Wi‑Fi) | `192.168.219.107` |
-| 공인 IP | `49.165.27.19` (포트포워딩 대신 Tailscale 사용 중) |
+| GitHub repo | `ktdvlp-jih/horizon` |
+| 집 PC Tailscale IP | `100.x.x.x` (`tailscale ip -4`) |
+| 집 PC Windows 사용자 | `<HOME_USER>` |
+| 집 PC LAN IP (참고) | `192.168.x.x` |
+| SSH 터널 DB | `localhost:55432` → 집 Docker Postgres |
 
-### 로컬 포트 (개발 PC)
+### 포트
 
-| 서비스 | 포트 |
-|--------|------|
-| Spring `bootRun` | 8080 |
-| Vite (사용자) | 5173 |
-| Vite (관리자) | 5174 |
-| AI (로컬 Python) | 8000 |
-| DB (터널 입구) | 55432 |
-
-### 집 PC Docker (배포)
-
-| 서비스 | 포트 |
-|--------|------|
-| app | 9080 |
-| ai | 9800 |
-| db | 55432 |
-
-### 미완 / 다음 작업
-
-- [x] `master` merge 시 집 PC Docker 자동 재빌드 — **GitHub Actions + Tailscale SSH** ([DEPLOY.md](DEPLOY.md))
-- [ ] GitHub Secrets 4개 + Actions 첫 실행 확인
-- [ ] 지진 30초 대피 UX, 해일 단면 UX
-- [ ] Gemini LLM 실연동 (`.env` `OPENAI_*`)
-- [ ] 기상청 API 실연동 (`HORIZON_KMA_API_KEY`)
-
-### 서류 전략
-
-- **깊게:** 도시 기후 설계자
-- **증거 1개:** 태풍 시의회 (`/disaster?mode=typhoon`)
-- **나머지 4체험:** 로드맵만
+| | 개발 PC | 집 PC Docker |
+|--|---------|--------------|
+| App | 5173 | **9080** |
+| Spring | 8080 | (내부 8080) |
+| AI | 8000 | **9800** |
+| DB | 55432 (터널) | **55432** |
+| Admin | 5174 | `/admin` on 9080 |
 
 ---
 
-## 대화 동기화 방법
+## Cursor 대화 동기화
 
-### 1) Export Transcript (확정)
+### Export Transcript
 
 1. Cursor → Export Transcript
-2. `docs/chat-exports/2026-06-23-xxx.md` 저장
+2. `docs/chat-exports/YYYY-MM-DD-주제.md`
 3. `git commit` + `push`
-4. 다른 PC → `pull` → `@docs/chat-exports/...` + 「이어서 작업해줘」
+4. 다른 PC: `@docs/chat-exports/...` + 「이어서 작업해줘」
 
-### 2) SESSION_HANDOFF.md
+### 이 문서 (SESSION_HANDOFF)
 
-IP·포트·다음 할 일만 짧게 유지. 변경 시 커밋.
+IP·체크리스트만 짧게 유지. 변경 시 commit.
 
-### 3) SpecStory (선택)
+### SpecStory (선택)
 
-[SpecStory](https://specstory.com) 확장 → `.specstory/` 자동 저장 → Git sync.
+`.specstory/` 자동 저장 → Git sync
 
-### 4) Cursor workspaceStorage (비추천)
+---
 
-`%APPDATA%\Cursor\User\workspaceStorage` — PC마다 workspace ID가 달라 불안정.
+## 체크리스트 (파이프라인 전체)
+
+**집 PC**
+
+- [ ] Docker + `.env` + health 9080
+- [ ] Tailscale + IP 기록
+- [ ] `setup-deploy-ssh.ps1` (관리자)
+- [ ] `setup-deploy-task.ps1` (관리자)
+- [ ] GitHub Secrets ×4
+- [ ] Actions 성공 1회
+
+**개발 PC**
+
+- [ ] `.env.dev` + npm/pip
+- [ ] `ssh-db-tunnel-tailscale.bat` 설정
+- [ ] `setup-github-ssh.ps1`
+- [ ] 터널 + bootRun + dev 동작
+
+**배포**
+
+- [ ] `master` push → Actions green
 
 ---
 
 ## 관련 문서
 
-- [DEV_SETUP.md](DEV_SETUP.md) — 로컬 실행
-- [DEPLOY.md](DEPLOY.md) — Docker 배포·자동 재빌드
-- [TECH_STACK.md](TECH_STACK.md) — 기술 스택
-- [cursor_project_tech_stack_integration.md](cursor_project_tech_stack_integration.md) — 전체 대화 export
+- [SETUP.md](SETUP.md)
+- [DEV_SETUP.md](DEV_SETUP.md)
+- [DEPLOY.md](DEPLOY.md)
+- [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md)

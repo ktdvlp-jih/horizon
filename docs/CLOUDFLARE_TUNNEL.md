@@ -1,23 +1,35 @@
-# Cloudflare Tunnel 가이드
+# Cloudflare Tunnel — 외부 데모 URL
+
+> **전체 설정:** [SETUP.md §8](SETUP.md#8-외부-데모-url-집-pc) · **집 PC 앱:** Docker `:9080`
 
 Horizon은 외부 데모 노출에 **Cloudflare Tunnel**을 사용합니다.  
-현재는 계정/도메인 없이도 동작하는 **Quick Tunnel**을 사용 중이며, 고정 도메인이 필요할 때 **Named Tunnel**로 전환할 수 있습니다.
+현재는 **Quick Tunnel** (`trycloudflare.com`, 임시 URL). 고정 도메인은 **Named Tunnel**로 전환 가능.
 
-## 현재: Quick Tunnel (임시 URL)
+---
 
-별도 Cloudflare 계정·도메인 없이 즉시 공개 URL을 발급합니다.
+## Quick Tunnel (지금 사용 중)
+
+**집 PC** — Docker 기동 후:
 
 ```powershell
-# Docker Compose 앱이 9080에서 실행 중일 때
+cd e:\workspace\horizon
+docker compose up -d
+.\scripts\start_trycloudflare.bat
+```
+
+또는:
+
+```powershell
 cloudflared tunnel --url http://localhost:9080
 ```
 
-- 매 실행마다 `*.trycloudflare.com` URL이 바뀝니다.
-- 프로덕션/장기 운영에는 부적합합니다.
-- Horizon `WebConfig`는 `https://*.trycloudflare.com` CORS를 허용합니다.
+- 매 실행마다 `*.trycloudflare.com` URL 변경
+- 공유기 포트포워딩 **불필요**
+- Horizon CORS: `https://*.trycloudflare.com` 허용
 
-## Named Tunnel (고정 도메인) 전환 절차
+---
 
+## Named Tunnel (고정 도메인, 선택)
 ### 사전 준비
 
 1. [Cloudflare](https://dash.cloudflare.com/) 계정 생성

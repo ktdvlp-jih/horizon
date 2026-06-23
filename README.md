@@ -4,8 +4,17 @@
 > 사용자가 격자에 건물·도로·공원·나무·물을 칠하면 표면 온도 히트맵이 실시간으로 바뀌고,
 > AI 도시 코치가 설계를 평가·코칭한다.
 
-기획 배경과 아이디어 선정 근거는 [docs/MVP.md](docs/MVP.md), 기술 스택은 [docs/TECH_STACK.md](docs/TECH_STACK.md) 참고.  
-**로컬 실행·Tailscale DB:** [docs/DEV_SETUP.md](docs/DEV_SETUP.md) · **배포:** [docs/DEPLOY.md](docs/DEPLOY.md) · **PC 간 맥락 동기화:** [docs/SESSION_HANDOFF.md](docs/SESSION_HANDOFF.md)
+기획 배경과 아이디어 선정 근거는 [docs/MVP.md](docs/MVP.md), 기술 스택은 [docs/TECH_STACK.md](docs/TECH_STACK.md) 참고.
+
+**온보딩 (집 PC · 개발 PC · 배포 파이프라인):** **[docs/SETUP.md](docs/SETUP.md)** ← **여기서 시작**
+
+| 문서 | 용도 |
+|------|------|
+| [docs/SETUP.md](docs/SETUP.md) | 전체 1회 설정 + 매일 워크플로 |
+| [docs/DEV_SETUP.md](docs/DEV_SETUP.md) | 개발 PC 로컬 실행 |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | GitHub Actions 자동 배포 |
+| [docs/CLOUDFLARE_TUNNEL.md](docs/CLOUDFLARE_TUNNEL.md) | 외부 데모 URL |
+| [docs/SESSION_HANDOFF.md](docs/SESSION_HANDOFF.md) | 다른 PC에서 이어하기 |
 
 ---
 
@@ -32,6 +41,8 @@ frontend-admin/ (Vite :5174, 관리자) ──/api──┼──▶  Spring Boo
 ---
 
 ## 빠른 시작
+
+> **처음이면 [docs/SETUP.md](docs/SETUP.md) 를 순서대로 진행하세요.**
 
 ### 사전 요구사항
 
