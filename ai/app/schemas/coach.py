@@ -66,3 +66,16 @@ class DisasterCoachRequest(BaseModel):
     scenarioTitle: str
     metrics: DisasterMetricsPayload
     coachSettings: CoachSettings | None = None
+
+
+class ResilienceCoachRequest(BaseModel):
+    """Unified multi-axis coaching over a single city design."""
+
+    region: str
+    scenarioTitle: str | None = None
+    axisScores: dict[str, float] = Field(default_factory=dict)
+    resilienceScore: float
+    balancePenalty: float = 0.0
+    # Raw per-lens metrics (heat/air/disaster/agriculture) for richer prompts.
+    lensMetrics: dict[str, Any] | None = None
+    coachSettings: CoachSettings | None = None

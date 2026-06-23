@@ -33,6 +33,22 @@ export async function evaluate(
   return unwrap(res)
 }
 
+/** Unified multi-axis AI coach over a single shared city grid. */
+export async function coachResilience(
+  regionCode: string,
+  grid: Grid,
+  options: EvaluateOptions = {},
+): Promise<CoachResponse> {
+  const res = await apiClient.post<ApiResponse<CoachResponse>>('/designs/coach/resilience', {
+    regionCode,
+    grid,
+    scenarioId: options.scenarioId ?? null,
+    date: options.date,
+    zones: options.zones,
+  })
+  return unwrap(res)
+}
+
 export async function simulate(regionCode: string, grid: Grid): Promise<SimulationResult> {
   const res = await apiClient.post<ApiResponse<SimulationResult>>('/designs/simulate', {
     regionCode,

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { evaluate } from '@/api/designApi'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { coachResilience, evaluate } from '@/api/designApi'
 import { fetchScenarios } from '@/api/disasterApi'
-import type { DisasterMode, EvaluateResponse, Grid, LensKind } from '@/types'
+import type { CoachResponse, DisasterMode, EvaluateResponse, Grid, LensKind } from '@/types'
 import type { HeatmapKind } from '@/lib/tiles'
 import {
   TRACKS,
@@ -127,6 +127,12 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
   })
 
   const agriMetrics = evalResult?.lenses.agriculture?.metrics as AgricultureMetricsShape | undefined
+
+  const [coach, setCoach] = useState<CoachResponse | null>(null)
+  const coachMutation = useMutation({
+    mutationFn: () => coachResilience(regionCode, debouncedGrid, { scenarioId: scenarioId || null, zones }),
+    onSuccess: setCoach,
+  })
 
   const activeLevel = activeLevelId ? LEVEL_BY_ID[activeLevelId] : null
 
@@ -421,6 +427,34 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
                 )
               })}
             </div>
+
+            <button
+              type="button"
+              onClick={() => coachMutation.mutate()}
+              disabled={coachMutation.isPending}
+              className="w-full rounded-md bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-violet-700 disabled:opacity-60"
+            >
+              {coachMutation.isPending ? '코치 분석 중…' : '🤖 통합 AI 코치 받기'}
+            </button>
+
+            {coach && (
+              <div className="space-y-1.5 rounded-lg border border-violet-100 bg-violet-50/50 p-3 text-[11px]">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-violet-700">{coach.grade}</span>
+                  <span className="text-slate-400">{coach.source === 'llm' ? 'AI' : '규칙'}</span>
+                </div>
+                {coach.strengths.length > 0 && (
+                  <p className="text-emerald-700">👍 {coach.strengths[0]}</p>
+                )}
+                {coach.weaknesses.length > 0 && (
+                  <p className="text-rose-700">⚠️ {coach.weaknesses[0]}</p>
+                )}
+                {coach.suggestions.length > 0 && (
+                  <p className="text-slate-600">💡 {coach.suggestions[0]}</p>
+                )}
+                <p className="text-slate-400">{coach.learningPoint}</p>
+              </div>
+            )}
           </div>
         )}
         <p className="text-[11px] leading-relaxed text-slate-400">

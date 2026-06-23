@@ -11,6 +11,7 @@ from app.core.exceptions import AiServiceError, ai_service_error_handler
 from app.routers import analyze, coach, health
 from app.services.coach_service import CoachService
 from app.services.llm_service import LlmService
+from app.services.resilience_coach_service import ResilienceCoachService
 
 logger = logging.getLogger("horizon.ai")
 
@@ -34,6 +35,7 @@ async def lifespan(app: FastAPI):
     llm = LlmService(settings)
     app.state.llm = llm
     app.state.coach_service = CoachService(llm)
+    app.state.resilience_coach_service = ResilienceCoachService(llm)
     logging.getLogger("horizon.ai").info(
         "Horizon AI started (llm_enabled=%s, model=%s)", llm.enabled, llm.model
     )

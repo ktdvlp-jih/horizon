@@ -3,6 +3,7 @@ package com.horizon.ai.client;
 import com.horizon.ai.dto.AiHealth;
 import com.horizon.ai.dto.CoachRequest;
 import com.horizon.ai.dto.CoachResponse;
+import com.horizon.ai.dto.ResilienceCoachRequest;
 import com.horizon.disaster.dto.DisasterCoachRequest;
 import com.horizon.common.exception.BusinessException;
 import com.horizon.common.exception.ErrorCode;
@@ -56,6 +57,25 @@ public class AiServiceClient {
             return response;
         } catch (RestClientException ex) {
             log.error("AI disaster coach call failed: {}", ex.getMessage());
+            throw new BusinessException(ErrorCode.AI_SERVICE_ERROR, "AI 코치 서비스에 연결할 수 없습니다.");
+        }
+    }
+
+    public CoachResponse resilienceCoach(ResilienceCoachRequest request) {
+        log.debug("AI resilience coach call -> POST /internal/v1/coach/resilience region={}", request.region());
+        try {
+            CoachResponse response = aiRestClient.post()
+                    .uri("/internal/v1/coach/resilience")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .body(CoachResponse.class);
+            if (response != null) {
+                log.debug("AI resilience coach response source={} score={}", response.source(), response.score());
+            }
+            return response;
+        } catch (RestClientException ex) {
+            log.error("AI resilience coach call failed: {}", ex.getMessage());
             throw new BusinessException(ErrorCode.AI_SERVICE_ERROR, "AI 코치 서비스에 연결할 수 없습니다.");
         }
     }

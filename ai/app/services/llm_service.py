@@ -6,7 +6,12 @@ import logging
 import re
 
 from app.config import Settings
-from app.schemas.coach import CoachRequest, CoachResponse, CoachSettings
+from app.schemas.coach import (
+    CoachRequest,
+    CoachResponse,
+    CoachSettings,
+    ResilienceCoachRequest,
+)
 
 logger = logging.getLogger("horizon.ai.llm")
 
@@ -35,6 +40,26 @@ SYSTEM_PROMPT = (
 )
 
 
+RESILIENCE_SYSTEM_PROMPT = (
+    "당신은 도시 회복탄력성을 코칭하는 AI 도시 코치입니다. "
+    "하나의 도시 설계를 열섬(heat), 미세먼지(air), 재난(disaster), 농어업(agriculture) "
+    "여러 축으로 동시에 평가한 점수를 받습니다. "
+    "특정 축만 잘하고 다른 축이 약하면 종합 점수가 낮아지는 '균형(systemic) 사고'를 강조하세요. "
+    "가장 약한 축을 끌어올리는 구체적이고 짧은 행동을 제안합니다. "
+    "타일 이름은 한국어로 씁니다. "
+    "반드시 한국어로, 아래 JSON 스키마로만 응답하세요.\n"
+    '{"score": int(0-100), "grade": str, "strengths": [str], '
+    '"weaknesses": [str], "suggestions": [str], "learningPoint": str}'
+)
+
+AXIS_LABELS_KO = {
+    "heat": "열섬",
+    "air": "미세먼지",
+    "disaster": "재난 대응",
+    "agriculture": "농어업",
+}
+
+
 class LlmService:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -54,6 +79,78 @@ class LlmService:
         if self._client is None:
             return None
         return run_llm_coach(req, fallback, None, self._client, self._settings.openai_model, 0.6)
+
+    def resilience(
+        self, req: ResilienceCoachRequest, fallback: CoachResponse
+    ) -> CoachResponse | None:
+        if self._client is None:
+            return None
+        return run_llm_resilience_coach(
+            req, fallback, None, self._client, self._settings.openai_model, 0.6
+        )
+
+
+def build_resilience_prompt(req: ResilienceCoachRequest) -> str:
+    axis_lines = []
+    for key, label in AXIS_LABELS_KO.items():
+        if key in req.axisScores:
+            axis_lines.append(f"- {label}: {req.axisScores[key]:.0f}/100")
+    axes = "\n".join(axis_lines) if axis_lines else "- (평가된 축 없음)"
+    scenario = f"\n시나리오: {req.scenarioTitle}" if req.scenarioTitle else ""
+    return (
+        f"지역: {req.region}{scenario}\n"
+        f"축별 점수:\n{axes}\n"
+        f"종합 회복탄력성: {req.resilienceScore:.0f}/100 "
+        f"(균형 패널티 -{req.balancePenalty:.1f})\n"
+        "가장 약한 축을 끌어올려 균형 잡힌 회복도시를 만들기 위한 제안을 JSON으로 주세요."
+    )
+
+
+def run_llm_resilience_coach(
+    req: ResilienceCoachRequest,
+    fallback: CoachResponse,
+    settings: CoachSettings | None,
+    client=None,
+    default_model: str | None = None,
+    default_temperature: float = 0.6,
+) -> CoachResponse | None:
+    if client is None and settings:
+        if not settings.apiKey or not settings.llmEnabled:
+            return None
+        client = _create_client(settings.apiKey, settings.baseUrl or "")
+    if client is None:
+        return None
+
+    system_prompt = RESILIENCE_SYSTEM_PROMPT
+    model = default_model or "gpt-4o-mini"
+    temperature = default_temperature
+    if settings:
+        if settings.systemPrompt:
+            system_prompt = settings.systemPrompt
+        if settings.model:
+            model = settings.model
+        if settings.temperature is not None:
+            temperature = settings.temperature
+
+    try:
+        logger.info("LLM resilience coach call model=%s region=%s", model, req.region)
+        user_prompt = build_resilience_prompt(req)
+        content = _complete(client, system_prompt, user_prompt, model, temperature)
+        data = _parse_json(content)
+        if data is None:
+            return None
+        return CoachResponse(
+            score=int(data.get("score", fallback.score)),
+            grade=str(data.get("grade", fallback.grade)),
+            strengths=list(data.get("strengths", fallback.strengths))[:3],
+            weaknesses=list(data.get("weaknesses", fallback.weaknesses))[:3],
+            suggestions=list(data.get("suggestions", fallback.suggestions))[:3],
+            learningPoint=str(data.get("learningPoint", fallback.learningPoint)),
+            source="llm",
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("LLM resilience coach failed: %s", exc)
+        return None
 
 
 def _create_client(api_key: str, base_url: str):

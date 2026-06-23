@@ -49,6 +49,12 @@ public class DesignController {
         return ApiResponse.ok(resilienceOrchestrator.evaluate(request));
     }
 
+    /** Unified multi-axis AI coach (heat/air/disaster/agriculture together). */
+    @PostMapping("/coach/resilience")
+    public ApiResponse<CoachResponse> coachResilience(@Valid @RequestBody EvaluateRequest request) {
+        return ApiResponse.ok(resilienceOrchestrator.coach(request));
+    }
+
     @PostMapping("/simulate/timeline")
     public ApiResponse<SimulationTimeline> simulateTimeline(@Valid @RequestBody SimulateRequest request) {
         return ApiResponse.ok(designService.simulateTimeline(request));
