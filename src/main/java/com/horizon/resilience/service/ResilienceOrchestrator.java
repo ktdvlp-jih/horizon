@@ -3,6 +3,7 @@ package com.horizon.resilience.service;
 import com.horizon.design.dto.SimulationResult;
 import com.horizon.design.dto.TileType;
 import com.horizon.design.service.SimulationEngine;
+import com.horizon.disaster.dto.DisasterMode;
 import com.horizon.disaster.dto.DisasterSimulateRequest;
 import com.horizon.disaster.dto.DisasterSimulationResult;
 import com.horizon.disaster.entity.DisasterScenario;
@@ -51,11 +52,11 @@ public class ResilienceOrchestrator {
 
         SimulationResult heat = addHeatLens(region, request, lenses, axisScores);
         AirQualityEvaluator.Result air = addAirLens(request, grid, lenses, axisScores);
-        addDisasterLens(request, lenses, axisScores);
+        DisasterMode disasterMode = addDisasterLens(request, lenses, axisScores);
         addAgricultureLens(request, heat, air, lenses, axisScores);
 
         int gridSize = heat.gridSize();
-        ScenarioWeights weights = weightsResolver.resolve(request.scenarioId());
+        ScenarioWeights weights = weightsResolver.resolve(request.scenarioId(), disasterMode);
         ResilienceScoring.Composite composite = scoring.composite(axisScores, weights);
 
         return new EvaluateResponse(
@@ -109,10 +110,10 @@ public class ResilienceOrchestrator {
         axisScores.put("agriculture", score);
     }
 
-    private void addDisasterLens(EvaluateRequest request,
-                                 Map<String, LensResult> lenses, Map<String, Double> axisScores) {
+    private DisasterMode addDisasterLens(EvaluateRequest request,
+                                         Map<String, LensResult> lenses, Map<String, Double> axisScores) {
         if (request.scenarioId() == null || request.scenarioId().isBlank()) {
-            return;
+            return null;
         }
         DisasterScenario scenario = scenarioService.getRequired(request.scenarioId());
         DisasterSimulationResult disaster = disasterSimulationService.simulate(new DisasterSimulateRequest(
@@ -132,5 +133,6 @@ public class ResilienceOrchestrator {
                 score,
                 disaster.metrics()));
         axisScores.put("disaster", score);
+        return scenario.getMode();
     }
 }
