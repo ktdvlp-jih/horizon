@@ -34,6 +34,7 @@
 | 문서 | 용도 |
 |------|------|
 | [MVP.md](MVP.md) | 기획 · 데모 시나리오 |
+| [RESILIENCE_DESIGN.md](RESILIENCE_DESIGN.md) | **통합 컨셉 기획서** (도시 회복탄력성 설계자) |
 | [DISASTER_SIM.md](DISASTER_SIM.md) | 3대 재난 시뮬레이션 |
 
 ---
