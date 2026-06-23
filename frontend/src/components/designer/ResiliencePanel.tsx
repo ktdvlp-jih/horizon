@@ -63,6 +63,21 @@ interface AgricultureMetricsShape {
   warmingDeltaC: number
 }
 
+interface StressPhase {
+  label: string
+  emoji: string
+  lens: LensKind
+  scenarioId?: string
+}
+
+/** Sequenced climate stress timeline: heatwave → typhoon → fine dust → harvest. */
+const STRESS_PHASES: StressPhase[] = [
+  { label: '폭염', emoji: '🔥', lens: 'heat' },
+  { label: '태풍', emoji: '🌀', lens: 'disaster', scenarioId: 'typhoon-maemi-2003' },
+  { label: '미세먼지', emoji: '🌫️', lens: 'air' },
+  { label: '수확기', emoji: '🌾', lens: 'agriculture' },
+]
+
 function scoreColor(score: number): string {
   if (score >= 75) return 'text-emerald-600'
   if (score >= 50) return 'text-amber-600'
@@ -84,6 +99,7 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
   const [activeLevelId, setActiveLevelId] = useState<string | null>(null)
   const [completed, setCompleted] = useState<string[]>(() => loadProgress().completed)
   const [levelMessage, setLevelMessage] = useState<string | null>(null)
+  const [stressPhase, setStressPhase] = useState<number | null>(null)
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedGrid(grid), 500)
@@ -164,6 +180,25 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
   }, [evalResult, activeLens, onOverlayChange])
 
   useEffect(() => () => onOverlayChange(null), [onOverlayChange])
+
+  // Stress timeline: advance phases, switching the active lens for each stage.
+  useEffect(() => {
+    if (stressPhase == null) return
+    const phase = STRESS_PHASES[stressPhase]
+    setActiveLens(phase.lens)
+    setScenarioId(phase.scenarioId ?? '')
+    const id = window.setTimeout(() => {
+      setStressPhase((prev) => {
+        if (prev == null) return null
+        return prev + 1 < STRESS_PHASES.length ? prev + 1 : null
+      })
+    }, 2600)
+    return () => window.clearTimeout(id)
+  }, [stressPhase])
+
+  const toggleStress = () => {
+    setStressPhase((prev) => (prev == null ? 0 : null))
+  }
 
   const axisScores = evalResult?.axisScores ?? {}
 
@@ -276,6 +311,42 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="space-y-1.5 rounded-lg border border-orange-100 bg-orange-50/50 p-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-orange-700">스트레스 테스트</span>
+            <button
+              type="button"
+              onClick={toggleStress}
+              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition ${
+                stressPhase != null
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-orange-500 text-white hover:bg-orange-600'
+              }`}
+            >
+              {stressPhase != null ? '■ 중지' : '▶ 시작'}
+            </button>
+          </div>
+          <div className="flex gap-1">
+            {STRESS_PHASES.map((p, i) => (
+              <div
+                key={p.label}
+                className={`flex-1 rounded px-1 py-0.5 text-center text-[10px] transition ${
+                  stressPhase === i
+                    ? 'bg-rose-500 text-white'
+                    : 'bg-white text-slate-500'
+                }`}
+              >
+                {p.emoji} {p.label}
+              </div>
+            ))}
+          </div>
+          {stressPhase != null && (
+            <p className="text-[11px] text-rose-600">
+              {STRESS_PHASES[stressPhase].emoji} {STRESS_PHASES[stressPhase].label} 충격 중 — 이 설계의 대응을 확인하세요.
+            </p>
+          )}
         </div>
 
         {activeLens === 'agriculture' && (
