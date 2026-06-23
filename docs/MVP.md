@@ -93,7 +93,7 @@
 - 0:55 제안 반영 → 점수 상승. 마무리.
 
 ### 예상 기술 스택
-[TECH_STACK.md](TECH_STACK.md) 그대로: React 19/Vite → Spring Boot 3.5 → Python FastAPI, PostgreSQL, Docker Compose.
+[TECH_STACK.md](../template/TECH_STACK.md) 그대로: React 19/Vite → Spring Boot 3.5 → Python FastAPI, PostgreSQL, Docker Compose.
 
 ### 운영·관리 (MVP 이후)
 관리자 콘솔(사용자·AI 코치·설계·지역·시스템) 구현 명세: [admin_PROMPT.md](admin_PROMPT.md).

@@ -1,6 +1,17 @@
 # Horizon 문서
 
-> **처음 시작:** [onboarding/SETUP.md](onboarding/SETUP.md) — 집 PC · GitHub · 개발 PC · 배포 **순서대로**
+> **처음 시작:** [onboarding/SETUP.md](onboarding/SETUP.md) — 집 PC · GitHub · 개발 PC · 배포 **순서대로**  
+> **다른 프로젝트 이식:** [template/BOOTSTRAP.md](template/BOOTSTRAP.md)
+
+---
+
+## 템플릿 (다른 레포 이식)
+
+| 문서 | 용도 |
+|------|------|
+| **[template/BOOTSTRAP.md](template/BOOTSTRAP.md)** | Agent 프롬프트 · 복사 파일 목록 |
+| [template/TECH_STACK.md](template/TECH_STACK.md) | 스택·아키텍처·배포 파이프라인 상세 |
+| [template/README.md](template/README.md) | 템플릿 폴더 안내 |
 
 ---
 
@@ -23,7 +34,6 @@
 | 문서 | 용도 |
 |------|------|
 | [MVP.md](MVP.md) | 기획 · 데모 시나리오 |
-| [TECH_STACK.md](TECH_STACK.md) | 기술 스택 상세 |
 | [DISASTER_SIM.md](DISASTER_SIM.md) | 3대 재난 시뮬레이션 |
 
 ---

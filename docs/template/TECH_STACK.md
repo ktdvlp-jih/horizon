@@ -1,8 +1,12 @@
-# 기술 스택 선정 문서
+# 기술 스택 · 프로젝트 템플릿
 
-> **용도:** 새 프로젝트를 Cursor로 부트스트랩할 때 이 문서 전체를 컨텍스트로 붙여 넣으세요.  
-> **기준 프로젝트:** `price-tracker` (패턴) · **대상 프로젝트:** `horizon` (기상 데이터 + AI)  
-> **작성일:** 2026-06-18
+> **용도:** 새 프로젝트를 Cursor로 부트스트랩하거나, **다른 레포에 동일 스택·인프라를 이식**할 때 이 문서(특히 **§9 프롬프트**)를 Agent 컨텍스트로 붙이세요.  
+> **기준 구현:** [Horizon](https://github.com/ktdvlp-jih/horizon) (`price-tracker` 패턴 + AI + Tailscale 배포)  
+> **작성일:** 2026-06-18 · **인프라 갱신:** 2026-06-23
+
+> **폴더:** [README.md](README.md) · **Agent 프롬프트:** [BOOTSTRAP.md](BOOTSTRAP.md)
+
+**다른 프로젝트 이식:** `@docs/template/BOOTSTRAP.md` + `@docs/template/TECH_STACK.md` + `@docs/onboarding/SETUP.md`
 
 ---
 
@@ -14,7 +18,7 @@
 | 백엔드 | REST API + 스케줄러 + 외부 API 연동 + AI 오케스트레이션 |
 | 프론트엔드 | SPA (관리/조회 UI, 테이블·차트, AI 인사이트 표시) |
 | AI | Python 마이크로서비스 (LLM·데이터 분석·추론) |
-| 배포 | 로컬 개발 (Docker 없이) / 집 PC Docker Compose / Tailscale DB / Cloudflare Tunnel(선택) |
+| 배포 | 로컬 개발 (Docker 없이) / 집 PC Docker Compose / **Tailscale + GitHub Actions SSH 배포** / Cloudflare Tunnel(선택) |
 | 타임존 | `Asia/Seoul` 고정 |
 
 ---
@@ -32,7 +36,11 @@ AI       : Python 3.12 · FastAPI · Uvicorn · uv (패키지 관리)
            · LangChain · OpenAI SDK (LLM 연동)
            · scikit-learn (분류·예측, 선택) · xarray (기상 NetCDF, 선택)
 Infra    : Docker · Docker Compose · Eclipse Temurin 21 · python:3.12-slim
-           · Tailscale (원격 DB SSH 터널) · Cloudflare Tunnel (외부 데모, 선택)
+           · Tailscale (원격 DB SSH 터널 + Actions→집 PC SSH)
+           · GitHub Actions (ubuntu + tailscale/github-action + appleboy/ssh-action)
+           · Windows 예약 작업 (Docker credential 우회, -WindowStyle Hidden)
+           · Cloudflare Tunnel (외부 데모, 선택)
+           · SpecStory / docs/chat-exports (Cursor 대화 git 동기화, 선택)
 ```
 
 ---
@@ -453,9 +461,9 @@ Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ### 6.4 실행 방식
 
-1. **로컬 개발 + 원격 DB (권장):** Tailscale + `ssh-db-tunnel-tailscale.bat` → `bootRun` + 로컬 `uvicorn` + `npm run dev` — [SETUP.md](onboarding/SETUP.md) · [DEV_SETUP.md](onboarding/DEV_SETUP.md)
+1. **로컬 개발 + 원격 DB (권장):** Tailscale + `ssh-db-tunnel-tailscale.bat` → `bootRun` + 로컬 `uvicorn` + `npm run dev` — [SETUP.md](../onboarding/SETUP.md) · [DEV_SETUP.md](../onboarding/DEV_SETUP.md)
 2. **로컬 개발 (이 PC DB):** `docker compose up db -d` 또는 로컬 PG + `.env.dev.example`
-3. **Docker 전체 (집 PC):** `docker compose up -d --build` — [SETUP.md](onboarding/SETUP.md) · [DEPLOY.md](onboarding/DEPLOY.md)
+3. **Docker 전체 (집 PC):** `docker compose up -d --build` — [SETUP.md](../onboarding/SETUP.md) · [DEPLOY.md](../onboarding/DEPLOY.md)
 4. **외부 데모:** Cloudflare Quick Tunnel + `HORIZON_SERVE_FRONTEND=true`
 
 ### 6.4.1 Tailscale DB 터널
@@ -466,8 +474,53 @@ Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 - 스크립트: `scripts/ssh-db-tunnel-tailscale.bat`
-- `.env.dev`: `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:55432/horizon`
+- `.env.dev`: `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:55432/{db}` (템플릿: `.env.dev.remote.example`)
 - 공유기 포트포워딩 불필요
+
+### 6.6 배포 파이프라인 (집 PC · 0원)
+
+```
+[개발 PC] git push master
+       ↓
+[GitHub Actions ubuntu-latest]
+  1. tailscale/github-action@v2  (TAILSCALE_AUTHKEY)
+  2. appleboy/ssh-action → deploy-docker-trigger.ps1
+       ↓
+[집 PC Windows]
+  예약 작업 HorizonGitHubDeploy (-WindowStyle Hidden)
+  → deploy-docker.ps1 (git pull + docker compose build/up + health retry)
+       ↓
+http://localhost:9080/api/health
+```
+
+| 구성요소 | 파일 |
+|----------|------|
+| Workflow | `.github/workflows/deploy.yml` |
+| SSH 트리거 | `scripts/deploy-docker-trigger.ps1` |
+| 실제 배포 | `scripts/deploy-docker.ps1` |
+| 예약 작업 등록 | `scripts/setup-deploy-task.ps1` (관리자, 1회) |
+| 배포 SSH 키 | `scripts/setup-deploy-ssh.ps1` (관리자, 1회) |
+| OpenSSH 서버 | `scripts/setup_openssh_tunnel.ps1` (관리자, 1회) |
+| Git push SSH | `scripts/setup-github-ssh.ps1` (PC마다 1회) |
+| DB 터널 (개발) | `scripts/ssh-db-tunnel-tailscale.bat` |
+
+**GitHub Secrets (4):** `TAILSCALE_AUTHKEY`, `DEPLOY_HOST` (집 PC Tailscale IP), `DEPLOY_USER`, `DEPLOY_SSH_KEY`
+
+**집 PC 유지 조건:** Windows 로그인 · Docker Desktop · Tailscale · `sshd` Running
+
+**Self-hosted Runner 사용 안 함** — SSH로 트리거만 하고 Docker는 interactive session 예약 작업에서 실행 (credential 오류 방지).
+
+상세: [SETUP.md](../onboarding/SETUP.md) · [DEPLOY.md](../onboarding/DEPLOY.md)
+
+### 6.7 Cursor 대화 동기화 (선택)
+
+| 방식 | 경로 | 용도 |
+|------|------|------|
+| SpecStory 확장 | `.specstory/history/*.md` | 채팅 자동 저장 → git sync (Cloud Sync 불필요) |
+| Export Transcript | `docs/chat-exports/` | 중요 세션 수동 export |
+| 핸드오프 | `docs/onboarding/SESSION_HANDOFF.md` | IP·체크리스트만 짧게 |
+
+---
 
 ### 6.5 환경 변수 (.env)
 
@@ -486,6 +539,7 @@ Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 | `AI_PORT` | Docker AI 호스트 포트 (기본 `9800`) |
 | `OPENAI_API_KEY` | LLM API 키 (ai 서비스에 전달) |
 | `OPENAI_MODEL` | 기본 LLM 모델 (예: `gpt-4o-mini`) |
+| `JWT_SECRET` | JWT 서명 (로그인 사용 시) |
 
 ---
 
@@ -493,7 +547,7 @@ Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ```
 com.{company}.{project}/
-├── HorizonApplication.java
+├── {Project}Application.java
 ├── config/              # WebConfig, QuerydslConfig, RestClientConfig, AiClientConfig, FrontendSpaConfig
 ├── common/
 │   ├── entity/          # BaseEntity
@@ -542,64 +596,21 @@ com.{company}.{project}/
 
 ---
 
-## 9. Cursor 부트스트랩 프롬프트 (복사용)
+## 9. Cursor 부트스트랩 · 다른 프로젝트 이식
 
-아래 블록을 새 Cursor 채팅에 그대로 붙여 넣으세요.
+**전용 문서:** [BOOTSTRAP.md](BOOTSTRAP.md) — Agent 프롬프트·복사 파일 목록·완료 기준
 
----
+### 9.1 한 줄로 시작 (복사용)
 
 ```
-이 프로젝트는 아래 기술 스택·구조를 따릅니다. price-tracker와 동일한 패턴 + AI 서비스로 초기 세팅해 주세요.
+@docs/template/BOOTSTRAP.md @docs/template/TECH_STACK.md @docs/onboarding/SETUP.md
 
-## 스택
-- Backend: Java 21, Spring Boot 3.5, Gradle 8 (Kotlin DSL), PostgreSQL 17
-  - Spring Web, Data JPA, Validation
-  - QueryDSL 5 (jakarta), MapStruct, Lombok
-  - RestClient + Java HttpClient (외부 API, AI 서비스)
-  - @Scheduled 크론, SSE 스트림 (장시간 작업·LLM 스트리밍)
-- Frontend: React 19, TypeScript 6, Vite 8, Tailwind CSS 4
-  - TanStack React Query 5, React Router 7, Axios
-  - AG Grid Community, Recharts, Radix/shadcn 스타일 UI
-- AI: Python 3.12, FastAPI, Uvicorn, uv, Pydantic v2
-  - httpx, pandas, NumPy, LangChain, openai
-  - scikit-learn, xarray (선택)
-- Infra: Docker Compose (postgres:17 + eclipse-temurin:21 + python:3.12-slim), .env 기반 설정
-
-## 구조
-- Monorepo: 루트 백엔드 + frontend/ + ai/
-- 백엔드 패키지: config, common, {domain}/, ai/(client|dto), crawler, scheduler
-- AI 패키지: app/(routers|services|schemas|core), pyproject.toml
-- API 응답: ApiResponse<T> 래퍼, PageResponse<T> 페이징
-- 예외: BusinessException + ErrorCode + GlobalExceptionHandler
-- Entity: BaseEntity (createdAt, updatedAt), open-in-view: false
-- 프론트: api/, hooks/, pages/, components/ui/, types/, lib/
-- Axios apiClient + X-API-Key 인터셉터
-- 연동: React → Spring /api → Python /internal/v1 (프론트는 Python 직접 호출 금지)
-
-## 포트
-- 로컬: API 8080, AI 8000, Vite 5173, PG 5432 또는 Docker PG 55432
-- Docker: API 9080, AI 9800, PG 55432
-- Vite proxy: /api, /files → 백엔드
-
-## 배포 옵션
-1. gradlew bootRun + uvicorn (ai) + npm run dev
-2. docker compose up (frontend dist 빌드 후 Spring SPA 서빙)
-3. Cloudflare Tunnel + SERVE_FRONTEND=true
-
-## 타임존
-Asia/Seoul (JPA, Jackson, 스케줄러)
-
-## 하지 말 것
-- Spring Security 전체 도입 (API Key 인터셉터만)
-- WebFlux
-- open-in-view: true
-- 프론트에 UI 프레임워크 추가 (MUI, Ant Design 등) — Tailwind + shadcn 스타일 유지
-- 프론트에서 LLM API Key 사용 또는 Python 직접 호출
-- Celery / Redis / Kafka (초기)
-
-프로젝트명: Horizon
-도메인 설명: AI와 실시간 기상 데이터로 탐험하는 인터랙티브 웹앱
+Horizon(git@github.com:ktdvlp-jih/horizon.git)과 동일 스택·인프라로 `{PROJECT_NAME}` 부트스트랩.
+경로 `{WORKSPACE_PATH}`, GitHub `{GITHUB_REPO}`, slug `{PROJECT_SLUG}`.
+BOOTSTRAP.md §2·§3 순서대로. Self-hosted Runner 금지.
 ```
+
+상세는 **[BOOTSTRAP.md](BOOTSTRAP.md)** · **[README.md](README.md)** 참고.
 
 ---
 
@@ -630,11 +641,17 @@ Asia/Seoul (JPA, Jackson, 스케줄러)
 - [ ] `App.tsx` — Provider + Router 조립
 - [ ] `components/ui/button.tsx` (shadcn 스타일)
 
-### 인프라
-- [ ] `compose.yaml` — postgres:17 + app + ai
-- [ ] `Dockerfile` — 멀티스테이지 Temurin 21
-- [ ] `.env.example` — 포트·DB·API Key·AI·LLM 변수
-- [ ] `README.md` — 4가지 실행 방식 문서화
+### 인프라 · 배포 파이프라인
+- [ ] `compose.yaml` — postgres:17 + app + ai (포트 55432/9080/9800)
+- [ ] `Dockerfile`, `ai/Dockerfile` — 멀티스테이지
+- [ ] `.env.example`, `.env.dev.example`, `.env.dev.remote.example`
+- [ ] `.github/workflows/deploy.yml` — Tailscale + SSH
+- [ ] `scripts/deploy-docker.ps1`, `deploy-docker-trigger.ps1`
+- [ ] `scripts/setup-deploy-task.ps1`, `setup-deploy-ssh.ps1`, `setup_openssh_tunnel.ps1`
+- [ ] `scripts/setup-github-ssh.ps1`, `ssh-db-tunnel-tailscale.bat`
+- [ ] `docs/template/` — TECH_STACK, BOOTSTRAP, README
+- [ ] `docs/onboarding/` — SETUP, DEV_SETUP, DEPLOY, SESSION_HANDOFF
+- [ ] `README.md` — onboarding/SETUP.md 링크
 
 ---
 
@@ -657,8 +674,8 @@ cd ai && python -m pytest
 cd frontend && npm run lint
 ```
 
-상세: [SETUP.md](onboarding/SETUP.md) · [DEV_SETUP.md](onboarding/DEV_SETUP.md) · [DEPLOY.md](onboarding/DEPLOY.md) · [SESSION_HANDOFF.md](onboarding/SESSION_HANDOFF.md)
+상세: [SETUP.md](../onboarding/SETUP.md) · [DEV_SETUP.md](../onboarding/DEV_SETUP.md) · [DEPLOY.md](../onboarding/DEPLOY.md) · [SESSION_HANDOFF.md](../onboarding/SESSION_HANDOFF.md)
 
 ---
 
-*이 문서는 `price-tracker` 저장소의 실제 구현을 기준으로 하며, Horizon 프로젝트용 AI 스택을 확장하였습니다.*
+*기준: `price-tracker` 패턴 · Horizon 검증 인프라 · [BOOTSTRAP.md](BOOTSTRAP.md)로 다른 레포 이식*

@@ -15,7 +15,7 @@
 | [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md) | 집 PC | 외부 데모 URL (trycloudflare) |
 | [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | PC 전환 | IP·체크리스트·대화 동기화 |
 
-프로젝트 문서: [../README.md](../README.md) · [MVP](../MVP.md) · [TECH_STACK](../TECH_STACK.md) · [DISASTER_SIM](../DISASTER_SIM.md)
+프로젝트 문서: [../README.md](../README.md) · [MVP](../MVP.md) · [TECH_STACK](../template/TECH_STACK.md) · [template](../template/) · [DISASTER_SIM](../DISASTER_SIM.md)
 
 ---
 

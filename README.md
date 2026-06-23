@@ -4,7 +4,7 @@
 > 사용자가 격자에 건물·도로·공원·나무·물을 칠하면 표면 온도 히트맵이 실시간으로 바뀌고,
 > AI 도시 코치가 설계를 평가·코칭한다.
 
-기획 배경과 아이디어 선정 근거는 [docs/MVP.md](docs/MVP.md), 기술 스택은 [docs/TECH_STACK.md](docs/TECH_STACK.md) 참고.
+기획 배경과 아이디어 선정 근거는 [docs/MVP.md](docs/MVP.md), 기술 스택·템플릿은 [docs/template/TECH_STACK.md](docs/template/TECH_STACK.md) 참고.
 
 **온보딩 (집 PC · 개발 PC · 배포 파이프라인):** **[docs/onboarding/SETUP.md](docs/onboarding/SETUP.md)** ← **여기서 시작**
 
