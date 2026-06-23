@@ -1,7 +1,11 @@
 # 로컬 개발 환경 (Docker 없이)
 
-> **권장 워크플로:** 이 PC에서 코드 작성 → Git push → `master` 병합 시 **집 PC Docker 자동 재빌드**  
-> 로컬에서는 Spring + Vite + AI만 실행하고, DB는 **집 PC Docker Postgres**에 Tailscale SSH 터널로 연결합니다.
+> **DB:** 집 PC Docker Postgres만 사용 (클라oud DB 없음)  
+> **밖에서 개발:** Tailscale + SSH 터널 → `localhost:55432`  
+> **배포:** `master` push/merge → GitHub Actions + Tailscale SSH → 집 Docker 재빌드 ([DEPLOY.md](DEPLOY.md))  
+> **데모:** trycloudflare / Cloudflare Tunnel ([CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md))
+
+로컬에서는 Spring + Vite + AI만 실행하고, DB는 **집 PC Docker Postgres**에 Tailscale SSH 터널로 연결합니다.
 
 ---
 
@@ -156,7 +160,7 @@ curl http://localhost:8080/api/health
 | `scripts/ssh-db-tunnel-tailscale.bat` | Tailscale 경유 DB 터널 |
 | `scripts/ssh-db-tunnel-public.bat` | 공인 IP SSH 터널 |
 | `scripts/start-local-dev.bat` | AI+Spring+Frontend 로컬 기동 (터널 별도) |
-| `scripts/deploy-docker.ps1` | 집 PC Docker 재빌드 (배포) |
+| `scripts/deploy-docker.ps1` | 집 PC Docker 재빌드 (수동·Actions 공통) |
 
 ---
 

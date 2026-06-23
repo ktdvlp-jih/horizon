@@ -4,6 +4,19 @@
 
 ---
 
+## 아키텍처 (2026-06-23 확정)
+
+| 역할 | 방식 |
+|------|------|
+| **DB** | 집 PC Docker Postgres (`55432`) — 클라oud DB 없음 |
+| **밖에서 개발** | Tailscale + `ssh-db-tunnel-tailscale.bat` → `localhost:55432` |
+| **배포** | `master` merge → **GitHub Actions + Tailscale SSH** → `deploy-docker.ps1` |
+| **데모 URL** | `start_trycloudflare.bat` / Cloudflare Tunnel (`9080`) |
+
+GitHub Secrets 4개 필요 → [DEPLOY.md](DEPLOY.md). 집 PC Runner 설치 **불필요**.
+
+---
+
 ## 빠른 시작 (새 PC)
 
 ```text
@@ -61,7 +74,8 @@
 
 ### 미완 / 다음 작업
 
-- [x] `master` push 시 집 PC Docker 자동 재빌드 — **GitHub Actions + Tailscale SSH** ([DEPLOY.md](DEPLOY.md), 1회 Secrets 설정 필요)
+- [x] `master` merge 시 집 PC Docker 자동 재빌드 — **GitHub Actions + Tailscale SSH** ([DEPLOY.md](DEPLOY.md))
+- [ ] GitHub Secrets 4개 + Actions 첫 실행 확인
 - [ ] 지진 30초 대피 UX, 해일 단면 UX
 - [ ] Gemini LLM 실연동 (`.env` `OPENAI_*`)
 - [ ] 기상청 API 실연동 (`HORIZON_KMA_API_KEY`)

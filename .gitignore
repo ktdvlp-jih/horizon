@@ -60,3 +60,6 @@ secrets/
 # Local logs / runtime
 *.log
 logs/
+.deploy-status.json
+.deploy-last.log
+.docker-deploy-ci/

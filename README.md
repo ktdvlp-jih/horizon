@@ -85,7 +85,7 @@ docker compose up -d --build
 # 앱: http://localhost:9080
 ```
 
-자동 재빌드: **[docs/DEPLOY.md](docs/DEPLOY.md)** (GitHub Actions + Tailscale SSH)
+자동 재빌드: **[docs/DEPLOY.md](docs/DEPLOY.md)** (`master` merge → GitHub Actions + Tailscale SSH)
 
 ### 4) 외부 데모 (Cloudflare Tunnel)
 
