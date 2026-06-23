@@ -4,6 +4,15 @@ import { evaluate } from '@/api/designApi'
 import { fetchScenarios } from '@/api/disasterApi'
 import type { DisasterMode, EvaluateResponse, Grid, LensKind } from '@/types'
 import type { HeatmapKind } from '@/lib/tiles'
+import {
+  TRACKS,
+  TRACK_BY_ID,
+  LEVEL_BY_ID,
+  loadProgress,
+  isLevelUnlocked,
+  carryOverGrid,
+  completeLevel,
+} from '@/lib/levels'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export interface LensOverlay {
@@ -17,6 +26,7 @@ interface Props {
   regionCode: string
   grid: Grid
   onOverlayChange: (overlay: LensOverlay | null) => void
+  onLoadGrid?: (grid: Grid) => void
 }
 
 const LENS_META: Record<LensKind, { label: string; emoji: string; needsScenario?: boolean }> = {
@@ -65,11 +75,15 @@ function barColor(score: number): string {
   return 'bg-rose-500'
 }
 
-export default function ResiliencePanel({ regionCode, grid, onOverlayChange }: Props) {
+export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onLoadGrid }: Props) {
   const [activeLens, setActiveLens] = useState<LensKind>('heat')
   const [scenarioId, setScenarioId] = useState<string>('')
   const [zones, setZones] = useState<AgricultureZonesState>(DEFAULT_ZONES)
   const [debouncedGrid, setDebouncedGrid] = useState<Grid>(grid)
+  const [activeTrackId, setActiveTrackId] = useState<string>(TRACKS[0].id)
+  const [activeLevelId, setActiveLevelId] = useState<string | null>(null)
+  const [completed, setCompleted] = useState<string[]>(() => loadProgress().completed)
+  const [levelMessage, setLevelMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedGrid(grid), 500)
@@ -98,6 +112,43 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange }: P
 
   const agriMetrics = evalResult?.lenses.agriculture?.metrics as AgricultureMetricsShape | undefined
 
+  const activeLevel = activeLevelId ? LEVEL_BY_ID[activeLevelId] : null
+
+  const startLevel = (levelId: string) => {
+    const level = LEVEL_BY_ID[levelId]
+    if (!level) return
+    const track = TRACKS.find((t) => t.levels.some((l) => l.id === levelId))
+    if (!track || !isLevelUnlocked(track, level, completed)) return
+    setActiveLevelId(levelId)
+    setActiveLens(level.lens)
+    setScenarioId(level.scenarioId ?? '')
+    setLevelMessage(null)
+    const carry = carryOverGrid(track, level)
+    if (carry && onLoadGrid) onLoadGrid(carry)
+  }
+
+  const levelMetricValue = (metric: 'resilience' | LensKind): number | null => {
+    if (!evalResult) return null
+    if (metric === 'resilience') return evalResult.resilienceScore
+    return evalResult.axisScores[metric] ?? null
+  }
+
+  useEffect(() => {
+    if (!activeLevel || !evalResult) return
+    if (completed.includes(activeLevel.id)) return
+    const value = levelMetricValue(activeLevel.goal.metric)
+    if (value != null && value >= activeLevel.goal.min) {
+      const next = completeLevel(activeLevel.id, grid)
+      setCompleted((prev) => (prev.includes(activeLevel.id) ? prev : [...prev, activeLevel.id]))
+      setLevelMessage(
+        next
+          ? `🎉 「${activeLevel.title}」 클리어! 다음 레벨이 해금되었습니다.`
+          : `🎉 「${activeLevel.title}」 클리어!`,
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [evalResult, activeLevel, completed, grid])
+
   useEffect(() => {
     if (!evalResult) {
       onOverlayChange(null)
@@ -122,6 +173,66 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange }: P
         <CardTitle className="text-base">회복탄력성 평가</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div className="space-y-2 rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+          <div className="flex flex-wrap gap-1">
+            {TRACKS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveTrackId(t.id)}
+                className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition ${
+                  activeTrackId === t.id
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-white text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                {t.emoji} {t.title}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-slate-500">{TRACK_BY_ID[activeTrackId].intro}</p>
+          <div className="space-y-1">
+            {TRACK_BY_ID[activeTrackId].levels.map((level) => {
+              const track = TRACK_BY_ID[activeTrackId]
+              const unlocked = isLevelUnlocked(track, level, completed)
+              const done = completed.includes(level.id)
+              const active = activeLevelId === level.id
+              const value = active ? levelMetricValue(level.goal.metric) : null
+              return (
+                <button
+                  key={level.id}
+                  type="button"
+                  disabled={!unlocked}
+                  onClick={() => startLevel(level.id)}
+                  className={`w-full rounded-md border px-2.5 py-1.5 text-left transition ${
+                    active
+                      ? 'border-sky-400 bg-sky-50'
+                      : unlocked
+                        ? 'border-slate-200 bg-white hover:border-slate-300'
+                        : 'cursor-not-allowed border-slate-100 bg-slate-50 opacity-60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-700">
+                      {done ? '✅ ' : unlocked ? '' : '🔒 '}
+                      Lv.{level.order} {level.title}
+                    </span>
+                    {active && value != null && (
+                      <span
+                        className={value >= level.goal.min ? 'text-[11px] text-emerald-600' : 'text-[11px] text-slate-400'}
+                      >
+                        {value.toFixed(0)} / {level.goal.min}
+                      </span>
+                    )}
+                  </div>
+                  {active && <p className="mt-0.5 text-[11px] text-slate-500">{level.brief}</p>}
+                </button>
+              )
+            })}
+          </div>
+          {levelMessage && <p className="text-[11px] font-medium text-emerald-600">{levelMessage}</p>}
+        </div>
+
         <div className="flex flex-wrap gap-1.5">
           {LENS_ORDER.map((kind) => {
             const meta = LENS_META[kind]

@@ -724,6 +724,8 @@ export default function DesignerPage() {
 
             onOverlayChange={setLensOverlay}
 
+            onLoadGrid={replaceWithHistory}
+
           />
 
         </div>
