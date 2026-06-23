@@ -14,7 +14,7 @@
 | 백엔드 | REST API + 스케줄러 + 외부 API 연동 + AI 오케스트레이션 |
 | 프론트엔드 | SPA (관리/조회 UI, 테이블·차트, AI 인사이트 표시) |
 | AI | Python 마이크로서비스 (LLM·데이터 분석·추론) |
-| 배포 | 로컬 개발 / Docker Compose / Cloudflare Tunnel(선택) |
+| 배포 | 로컬 개발 (Docker 없이) / 집 PC Docker Compose / Tailscale DB / Cloudflare Tunnel(선택) |
 | 타임존 | `Asia/Seoul` 고정 |
 
 ---
@@ -32,8 +32,7 @@ AI       : Python 3.12 · FastAPI · Uvicorn · uv (패키지 관리)
            · LangChain · OpenAI SDK (LLM 연동)
            · scikit-learn (분류·예측, 선택) · xarray (기상 NetCDF, 선택)
 Infra    : Docker · Docker Compose · Eclipse Temurin 21 · python:3.12-slim
-           · Cloudflare Tunnel (외부 데모, 선택)
-```
+           · Tailscale (원격 DB SSH 터널) · Cloudflare Tunnel (외부 데모, 선택)
 ```
 
 ---
@@ -443,19 +442,32 @@ Stage 1: python:3.12-slim  → uv sync --frozen
 Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-### 6.3 포트 규칙 (로컬·Docker 동시 실행 가능)
+### 6.3 포트 규칙
 
 | 환경 | API (Spring) | AI (FastAPI) | PostgreSQL (호스트) | Vite dev |
 |------|--------------|--------------|---------------------|----------|
-| 로컬 개발 | `8080` | `8000` | `5432` (PC PG) / `55432` (Docker DB) | 사용자 `5173`, 관리자 `5174` |
-| Docker | `9080` | `9800` | `55432` | — (dist 빌드 후 Spring 서빙) |
+| **로컬 개발 (권장)** | `8080` | `8000` (로컬 Python) | `55432` via **Tailscale SSH 터널** → 집 Docker DB | `5173`, `5174` |
+| 로컬 + 이 PC Docker DB | `8080` | `8000` | `55432` (compose `db` only) | `5173`, `5174` |
+| 로컬 + 이 PC PostgreSQL | `8080` | `8000` | `5432` | `5173`, `5174` |
+| Docker (집 PC 배포) | `9080` | `9800` | `55432` | — (dist → Spring `/`, `/admin`) |
 
-### 6.4 실행 방식 4가지
+### 6.4 실행 방식
 
-1. **로컬 개발 (전체):** `gradlew bootRun` + `uvicorn` (ai) + `npm run dev` (frontend `:5173`, frontend-admin `:5174`)
-2. **로컬 개발 (AI 제외):** Spring + Vite만 — AI 미기동 시 해당 API graceful degrade
-3. **Docker 전체:** `docker compose up` (DB + Spring + AI, 프론트 prod 빌드)
-4. **외부 데모:** Cloudflare Tunnel + `HORIZON_SERVE_FRONTEND=true`
+1. **로컬 개발 + 원격 DB (권장):** Tailscale + `ssh-db-tunnel-tailscale.bat` → `bootRun` + 로컬 `uvicorn` + `npm run dev` — [DEV_SETUP.md](DEV_SETUP.md)
+2. **로컬 개발 (이 PC DB):** `docker compose up db -d` 또는 로컬 PG + `.env.dev.example`
+3. **Docker 전체 (집 PC):** `docker compose up -d --build` — [DEPLOY.md](DEPLOY.md)
+4. **외부 데모:** Cloudflare Quick Tunnel + `HORIZON_SERVE_FRONTEND=true`
+
+### 6.4.1 Tailscale DB 터널
+
+```
+[개발 PC]  localhost:55432 ──SSH──► [집 PC Tailscale IP] localhost:55432 (Docker db)
+           bootRun / DBeaver              docker compose db
+```
+
+- 스크립트: `scripts/ssh-db-tunnel-tailscale.bat`
+- `.env.dev`: `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:55432/horizon`
+- 공유기 포트포워딩 불필요
 
 ### 6.5 환경 변수 (.env)
 
@@ -629,30 +641,23 @@ Asia/Seoul (JPA, Jackson, 스케줄러)
 ## 11. 참고 명령어
 
 ```powershell
-# 백엔드
-.\gradlew bootRun
+# === 로컬 개발 (Tailscale DB, 권장) ===
+.\scripts\ssh-db-tunnel-tailscale.bat    # 터미널 1 — 창 유지
+cd ai && python -m uvicorn app.main:app --reload --port 8000
+.\gradlew.bat bootRun
+cd frontend && npm run dev
 
-# AI 서비스 (로컬)
-cd ai
-uv sync
-uv run uvicorn app.main:app --reload --port 8000
+# === 집 PC Docker 배포 ===
+.\scripts\deploy-docker.ps1
+# 또는: git pull origin master && docker compose up -d --build
 
-# 프론트 (개발)
-cd frontend
-npm install
-npm run dev
-
-# 프론트 (프로덕션 빌드)
-npm run build
-
-# Docker 전체
-docker compose up --build
-
-# 테스트
+# === 테스트 ===
 .\gradlew test
-cd ai && uv run pytest
+cd ai && python -m pytest
 cd frontend && npm run lint
 ```
+
+상세: [DEV_SETUP.md](DEV_SETUP.md) · [DEPLOY.md](DEPLOY.md) · [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
 
 ---
 

@@ -5,7 +5,7 @@
 > AI 도시 코치가 설계를 평가·코칭한다.
 
 기획 배경과 아이디어 선정 근거는 [docs/MVP.md](docs/MVP.md), 기술 스택은 [docs/TECH_STACK.md](docs/TECH_STACK.md) 참고.  
-관리자 콘솔(별도 Vite 앱) 구현 프롬프트는 [docs/admin_PROMPT.md](docs/admin_PROMPT.md) 참고.
+**로컬 실행·Tailscale DB:** [docs/DEV_SETUP.md](docs/DEV_SETUP.md) · **배포:** [docs/DEPLOY.md](docs/DEPLOY.md) · **PC 간 맥락 동기화:** [docs/SESSION_HANDOFF.md](docs/SESSION_HANDOFF.md)
 
 ---
 
@@ -34,63 +34,77 @@ frontend-admin/ (Vite :5174, 관리자) ──/api──┼──▶  Spring Boo
 ## 빠른 시작
 
 ### 사전 요구사항
-- JDK 21, Node 22+, Docker (PostgreSQL/AI 실행용)
 
-### 1) 로컬 개발 (권장)
+- **로컬 개발 (권장):** JDK 21, Node 22+, Python 3.12+, Tailscale, OpenSSH Client
+- **Docker 배포 (집 PC):** Docker Desktop, `compose.yaml`
+
+### 1) 로컬 개발 — Docker 없이, 집 PC DB (Tailscale)
+
+코드는 이 PC, DB는 집 PC Docker Postgres. 상세: **[docs/DEV_SETUP.md](docs/DEV_SETUP.md)**
 
 ```powershell
-# 1. 환경 파일 (최초 1회)
-copy .env.dev.example .env.dev
-# .env.dev 에 API 키 등 입력 (git 제외)
+# 최초 1회
+copy .env.dev.remote.example .env.dev
+cd frontend && npm install && cd ..
+cd ai && python -m pip install -r requirements.txt && cd ..
 
-# 2. DB (+ AI 선택) — Compose와 동일 DB 설정(POSTGRES_*, 포트 55432)
-docker compose up db -d
-# docker compose up ai -d
+# 매일 — 터미널 1: DB 터널 (창 유지)
+.\scripts\ssh-db-tunnel-tailscale.bat
 
-# 3. 백엔드 (spring.profiles.active=dev, .env.dev 자동 로드)
+# 터미널 2: AI
+cd ai && python -m uvicorn app.main:app --reload --port 8000
+
+# 터미널 3: Backend (.env.dev 자동 로드)
 .\gradlew.bat bootRun
 
-# 4. 프론트엔드 (새 터미널)
-cd frontend
-npm install
-npm run dev   # http://localhost:5173
+# 터미널 4: Frontend
+cd frontend && npm run dev   # http://localhost:5173
 ```
 
-관리자 콘솔(구현 후):
+| 대상 | 접속 |
+|------|------|
+| 앱 | http://localhost:5173 |
+| API | http://localhost:8080 |
+| 관리자 | `cd frontend-admin && npm run dev` → http://localhost:5174 |
+| DBeaver | `localhost:55432` / `horizon` / `horizon` (터널 연 후) |
+
+### 2) 로컬 개발 — 이 PC Docker DB
 
 ```powershell
-cd frontend-admin
-npm install
-npm run dev   # http://localhost:5174  (admin / admin1234)
+copy .env.dev.example .env.dev
+docker compose up db -d
+.\gradlew.bat bootRun
+cd frontend && npm run dev
 ```
 
-| 용도 | 파일 | 실행 |
-|------|------|------|
-| **로컬 개발** | `.env.dev` (템플: `.env.dev.example`) | `bootRun` → profile `dev` |
-| **운영/Compose** | `.env` (템플: `.env.example`) | `docker compose up` |
-
-DB·AI 포트·계정(`horizon`/`horizon`, `55432`, `9800`)은 dev/prod 템플이 **동일**합니다. API 키·JWT만 `.env.dev` / `.env`에 각각 넣으면 됩니다.
-
-> AI 서비스를 로컬 Python으로 직접 실행하려면(uv 설치 시):
-> `cd ai; uv sync; uv run uvicorn app.main:app --reload --port 8000`
-> (uv 미설치 시 `pip install -r requirements.txt` 후 동일하게 실행)
-
-### 2) Docker 전체 실행
+### 3) Docker 전체 실행 (집 PC 배포·데모)
 
 ```powershell
-copy .env.example .env   # 필요 시 값 수정 (LLM 키 등)
-docker compose up --build
-# 앱: http://localhost:9080  (Spring이 SPA + API를 단일 포트로 서빙)
-# AI: http://localhost:9800,  DB: localhost:55432
+copy .env.example .env
+docker compose up -d --build
+# 앱: http://localhost:9080
 ```
 
-### 3) 외부 데모 (Cloudflare Tunnel)
+자동 재빌드: **[docs/DEPLOY.md](docs/DEPLOY.md)** (GitHub Actions + Tailscale SSH)
+
+### 4) 외부 데모 (Cloudflare Tunnel)
 
 ```powershell
-# docker compose 로 app(9080)을 띄운 뒤
+docker compose up -d
 cloudflared tunnel --url http://localhost:9080
-# 출력되는 https://*.trycloudflare.com URL을 심사위원에게 공유
 ```
+
+[docs/CLOUDFLARE_TUNNEL.md](docs/CLOUDFLARE_TUNNEL.md) 참고.
+
+---
+
+## 환경 파일
+
+| 용도 | 파일 | 설명 |
+|------|------|------|
+| 로컬 + 집 DB (Tailscale) | `.env.dev` ← `.env.dev.remote.example` | `localhost:55432` 터널 |
+| 로컬 + 이 PC PG/Docker | `.env.dev` ← `.env.dev.example` | `localhost:5432` 또는 `55432` |
+| Docker Compose | `.env` ← `.env.example` | 집 PC `9080` / `9800` / `55432` |
 
 ---
 
