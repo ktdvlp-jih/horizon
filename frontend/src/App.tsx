@@ -9,7 +9,6 @@ import LeaderboardPage from '@/pages/LeaderboardPage'
 import LoginPage from '@/pages/LoginPage'
 import SignupPage from '@/pages/SignupPage'
 import MyDesignsPage from '@/pages/MyDesignsPage'
-import DisasterDesignerPage from '@/pages/DisasterDesignerPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,9 +28,10 @@ export default function App() {
             <Route element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="designer" element={<DesignerPage />} />
-              <Route path="disaster" element={<DisasterDesignerPage />} />
+              {/* Disaster response is absorbed into the unified designer (재난 lens). */}
+              <Route path="disaster" element={<Navigate to="/designer" replace />} />
               <Route path="experiences/urban-climate" element={<Navigate to="/designer" replace />} />
-              <Route path="experiences/disaster-response" element={<Navigate to="/disaster" replace />} />
+              <Route path="experiences/disaster-response" element={<Navigate to="/designer" replace />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="signup" element={<SignupPage />} />

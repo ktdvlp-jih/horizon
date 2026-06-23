@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowRight, Lock, Trophy } from 'lucide-react'
+import { ArrowRight, Trophy } from 'lucide-react'
 import { fetchLeaderboard } from '@/api/designApi'
 import { useRegions } from '@/hooks/useRegions'
-import { EXPERIENCES } from '@/lib/experiences'
+import { RESILIENCE_AXES } from '@/lib/experiences'
 import { regionNameByCode } from '@/lib/regions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -23,8 +23,8 @@ export default function HomePage() {
           AI와 데이터로 탐험하는 보이지 않는 환경
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sky-100">
-          6가지 체험 중 도시 기후 설계자를 지금 바로 플레이할 수 있습니다. 로그인 없이도 체험하고,
-          저장·코치는 로그인 후 이용하세요.
+          하나의 도시를 열섬·미세먼지·재난·농어업 4축으로 동시에 설계하는 도시 기후 설계자.
+          로그인 없이도 체험하고, 저장·코치는 로그인 후 이용하세요.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link to="/designer?guest=1">
@@ -41,36 +41,27 @@ export default function HomePage() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-lg font-bold text-slate-900">체험 선택</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {EXPERIENCES.map((exp) =>
-            exp.status === 'active' ? (
-              <Link key={exp.id} to={exp.route}>
-                <Card className="h-full transition-shadow hover:shadow-md">
-                  <CardContent className="space-y-2 pt-5">
-                    <span className="text-2xl">{exp.emoji}</span>
-                    <h3 className="font-bold text-slate-800">{exp.title}</h3>
-                    <p className="text-sm text-slate-500">{exp.description}</p>
-                    <span className="inline-block text-xs font-semibold text-sky-600">지금 플레이 →</span>
-                  </CardContent>
-                </Card>
-              </Link>
-            ) : (
-              <Card key={exp.id} className="h-full opacity-60">
-                <CardContent className="space-y-2 pt-5">
-                  <span className="text-2xl">{exp.emoji}</span>
-                  <h3 className="flex items-center gap-1.5 font-bold text-slate-600">
-                    {exp.title}
-                    <Lock className="h-3.5 w-3.5" />
-                  </h3>
-                  <p className="text-sm text-slate-400">{exp.description}</p>
-                  <span className="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
-                    준비 중
-                  </span>
-                </CardContent>
-              </Card>
-            ),
-          )}
+        <h2 className="mb-1 text-lg font-bold text-slate-900">하나의 도시, 네 개의 축</h2>
+        <p className="mb-4 text-sm text-slate-500">
+          개별 체험을 나누지 않고, 같은 설계를 여러 렌즈로 평가해 균형 잡힌 회복도시를 만듭니다.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {RESILIENCE_AXES.map((axis) => (
+            <Card key={axis.title} className="h-full">
+              <CardContent className="space-y-2 pt-5">
+                <span className="text-2xl">{axis.emoji}</span>
+                <h3 className="font-bold text-slate-800">{axis.title}</h3>
+                <p className="text-sm text-slate-500">{axis.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="mt-4">
+          <Link to="/designer">
+            <Button size="lg" className="gap-1">
+              도시 기후 설계자 열기 <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 
