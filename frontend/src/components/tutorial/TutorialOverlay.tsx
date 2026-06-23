@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const STORAGE_KEY = 'horizon.tutorial.urban-climate.v1'
+const STORAGE_KEY = 'horizon.tutorial.urban-climate.v2'
 
 const STEPS = [
   {
@@ -11,8 +11,8 @@ const STEPS = [
     anchor: '[data-tutorial="region"]',
   },
   {
-    title: '녹지 칠하기',
-    body: '왼쪽 팔레트에서 타일을 고른 뒤 격자를 클릭·드래그해 공원·가로수·수변을 배치하세요.',
+    title: '타일 칠하기',
+    body: '왼쪽 팔레트에서 타일을 고른 뒤 격자를 클릭·드래그해 배치하세요. 공원·가로수·수변은 식히고, 도로·건물·공장(🏭)은 열·미세먼지를 늘립니다.',
     anchor: '[data-tutorial="palette"]',
   },
   {
@@ -24,6 +24,16 @@ const STEPS = [
     title: '온도 변화 확인',
     body: '왼쪽 패널에서 평균 온도와 기준 대비 ΔT를 확인하세요. Before/After로 변화량도 볼 수 있습니다.',
     anchor: '[data-tutorial="metrics"]',
+  },
+  {
+    title: '회복탄력성 4축 평가',
+    body: '하나의 설계를 열섬·미세먼지·재난·농어업 4축으로 동시에 평가합니다. 렌즈 탭을 바꾸면 격자 위 위험도 색이 축에 맞게 바뀌고, 종합 회복탄력성 점수와 축별 점수를 볼 수 있어요. 한 축만 잘하면 균형 패널티가 붙습니다.',
+    anchor: '[data-tutorial="resilience"]',
+  },
+  {
+    title: '레벨·스트레스·AI 코치',
+    body: '시나리오 트랙의 레벨을 차례로 깨며 단계별로 학습하고(이전 설계 이어받기), 재난 시나리오 선택 후 ▶ 스트레스 테스트로 폭염→태풍→미세먼지→수확기 충격을 점검하세요. 🤖 통합 AI 코치는 4축을 함께 보고 조언합니다.',
+    anchor: '[data-tutorial="resilience"]',
   },
   {
     title: '저장·코치 (로그인)',

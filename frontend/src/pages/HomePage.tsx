@@ -99,9 +99,9 @@ export default function HomePage() {
         <h2 className="text-lg font-bold text-slate-900">도시 기후 설계자 — 이렇게 학습합니다</h2>
         <ol className="mt-3 space-y-2 text-sm text-slate-600">
           <li>1. 지역을 고르면 그 지역의 실제 기온·일사량이 기준값으로 설정됩니다.</li>
-          <li>2. 콘크리트로 가득한 기본 도시를 공원·가로수·수변으로 바꿔봅니다.</li>
-          <li>3. Before/After로 평균 온도 변화를 보며 열섬 완화 원리를 체득합니다.</li>
-          <li>4. 로그인 후 AI 코치의 제안을 반영해 점수를 높여갑니다.</li>
+          <li>2. 타일로 도시를 설계하고, 열섬·미세먼지·재난·농어업 4축으로 동시에 평가합니다.</li>
+          <li>3. 렌즈를 바꿔 위험도를 확인하고, 균형 잡힌 종합 회복탄력성 점수를 높여갑니다.</li>
+          <li>4. 시나리오 레벨로 단계별 학습하고, 스트레스 테스트와 통합 AI 코치로 설계를 보완합니다.</li>
         </ol>
       </section>
     </div>
