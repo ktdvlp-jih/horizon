@@ -35,6 +35,7 @@
 |------|------|
 | [MVP.md](MVP.md) | 기획 · 데모 시나리오 |
 | [RESILIENCE_DESIGN.md](RESILIENCE_DESIGN.md) | **통합 컨셉 기획서** (도시 회복탄력성 설계자) |
+| [RESILIENCE_TEST_GUIDE.md](RESILIENCE_TEST_GUIDE.md) | **4축 통합 테스트·확인 체크리스트** (P1~P9) |
 | [DISASTER_SIM.md](DISASTER_SIM.md) | 3대 재난 시뮬레이션 |
 
 ---
