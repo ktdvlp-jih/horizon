@@ -2,7 +2,7 @@
 
 > **DB:** 집 PC Docker Postgres (클라oud DB 없음)  
 > **개발:** 다른 PC에서 Tailscale SSH 터널 → [DEV_SETUP.md](DEV_SETUP.md)  
-> **배포:** `master` push/merge → GitHub Actions → Tailscale → SSH → `deploy-docker.ps1`  
+> **배포:** `master` push/merge → GitHub Actions → Tailscale → SSH → `deploy-docker-trigger.ps1` → 예약 작업 → `deploy-docker.ps1`  
 > **데모:** trycloudflare (기존) → [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md)
 
 ---
@@ -15,7 +15,8 @@
 [GitHub Actions — 클라oud Runner]
   1. Tailscale 가입 (TAILSCALE_AUTHKEY)
   2. SSH → 집 PC Tailscale IP (DEPLOY_HOST)
-  3. scripts/deploy-docker.ps1
+  3. scripts/deploy-docker-trigger.ps1 → HorizonGitHubDeploy (예약 작업)
+  4. scripts/deploy-docker.ps1
        ↓
 [집 PC] git pull + docker compose up -d --build
        ↓
@@ -96,6 +97,8 @@ HTTPS PAT 또는 deploy key 필요.
 ---
 
 ## 동작 확인
+
+> Pipeline test: `master` push → Actions **Deploy Docker (home PC)** (2026-06-23)
 
 1. `master` push 또는 Actions → **Deploy Docker (home PC)** → **Run workflow**
 2. 집 PC:
