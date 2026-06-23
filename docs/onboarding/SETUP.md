@@ -125,18 +125,22 @@ cd e:\workspace\horizon
 ### 2-5. Docker 배포 예약 작업
 
 SSH 세션에서 `docker compose build`를 직접 실행하면 credential 오류가 납니다.  
+예약 작업은 **로그인한 사용자 세션**에서 `deploy-docker.ps1`을 **백그라운드(창 없음)** 로 실행합니다.  
 **관리자 PowerShell**:
 
 ```powershell
 .\scripts\setup-deploy-task.ps1
 ```
 
+> `setup-deploy-task.ps1`을 수정·pull 한 뒤에는 위 명령을 **다시 실행**해야 예약 작업에 반영됩니다.
+
 테스트:
 
 ```powershell
 schtasks /run /tn HorizonGitHubDeploy
-# 1~2분 후
+# 1~2분 후 (PowerShell 창은 뜨지 않음)
 Get-Content e:\workspace\horizon\.deploy-status.json   # "status":"success"
+Get-Content e:\workspace\horizon\.deploy-last.log -Tail 20
 ```
 
 ### 2-6. GitHub pull 인증 (배포 시 git pull)
@@ -296,7 +300,7 @@ git push origin master
 ```
 
 → GitHub Actions **Deploy Docker (home PC)** 자동 실행  
-→ 집 PC Docker app/ai 재빌드 (DB 유지)
+→ 집 PC Docker app/ai 재빌드 (DB 유지, **백그라운드** — PowerShell 창 없음)
 
 **집 PC 조건:** Windows **로그인** + Docker Desktop **실행 중**
 
@@ -319,6 +323,7 @@ Set-ExecutionPolicy -Scope Process Bypass -Force
 
 ```powershell
 ssh -T git@github.com
+# Are you sure you want to continue connecting (yes/no)? → yes
 # Hi <username>! You've successfully authenticated...
 ```
 
@@ -328,7 +333,8 @@ ssh -T git@github.com
 git push origin master
 ```
 
-> PC마다 **별도 키** 등록. `~/.ssh/config` BOM 오류 시 `setup-github-ssh.ps1` 재실행.
+> PC마다 **별도 키** 등록. `~/.ssh/config` BOM 오류 시 `setup-github-ssh.ps1` 재실행.  
+> **SourceTree 등 GUI:** 첫 push 전에 터미널에서 `ssh -T git@github.com` → `yes` 로 호스트 키 등록. SSH 클라이언트는 **OpenSSH** 권장.
 
 ---
 
@@ -363,6 +369,7 @@ docker compose up -d
 | Docker credential / logon session | `setup-deploy-task.ps1` + 집 PC 로그인 유지 |
 | DB 연결 실패 (개발 PC) | 터널 창 열림? `.env.dev` 비밀번호? |
 | push workflow scope 오류 | [7. Git push SSH](#7-git-push-ssh-설정-개발-pc--집-pc-각-1회) |
+| SourceTree push 멈춤 (host key) | 터미널 `ssh -T git@github.com` → `yes` |
 | AhnLab hosts 알림 | Tailscale 예외 등록 — [DEPLOY.md](DEPLOY.md) |
 
 ---

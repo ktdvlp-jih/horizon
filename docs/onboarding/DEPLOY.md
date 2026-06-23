@@ -22,6 +22,7 @@ http://localhost:9080
 
 - 집 PC **Self-hosted Runner 불필요**
 - DB 컨테이너는 유지, **app/ai만** 재빌드
+- 배포는 예약 작업으로 **백그라운드** 실행 (`-WindowStyle Hidden`) — PowerShell 창이 뜨지 않음
 
 ---
 
@@ -93,6 +94,7 @@ cd e:\workspace\horizon
 | `git pull` 실패 | 집 PC GitHub PAT 또는 SSH remote |
 | Docker credential / logon session | `setup-deploy-task.ps1` 미설정 또는 PC 잠금/로그아웃 |
 | Deploy OK but health fail (로컬) | Spring 기동 대기 — `deploy-docker.ps1` 재시도 (재시도 로직 내장) |
+| 예약 작업 옵션 변경 후 동작 이상 | **관리자** → `setup-deploy-task.ps1` 재실행 |
 | Actions Queued forever | 집 PC 꺼짐 / Tailscale 끊김 |
 
 ### AhnLab / hosts 파일
@@ -115,7 +117,7 @@ cd e:\workspace\horizon
 | `scripts/deploy-docker-trigger.ps1` | SSH → 예약 작업 트리거 |
 | `scripts/deploy-docker.ps1` | pull + compose rebuild + health |
 | `scripts/setup-deploy-ssh.ps1` | 배포 SSH 키 |
-| `scripts/setup-deploy-task.ps1` | 예약 작업 등록 |
+| `scripts/setup-deploy-task.ps1` | 예약 작업 등록 (`-WindowStyle Hidden`) |
 
 ---
 

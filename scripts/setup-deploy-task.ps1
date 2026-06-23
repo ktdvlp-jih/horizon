@@ -17,7 +17,7 @@ if (-not (Test-Path $Script)) {
 
 $action = New-ScheduledTaskAction `
     -Execute 'powershell.exe' `
-    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$Script`"" `
+    -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$Script`"" `
     -WorkingDirectory $Root
 
 $principal = New-ScheduledTaskPrincipal `
@@ -36,7 +36,8 @@ Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction Silent
 Register-ScheduledTask -TaskName $TaskName -Action $action -Principal $principal -Settings $settings -Trigger $trigger -ErrorAction Stop | Out-Null
 
 Write-Host "[ok] Registered scheduled task: $TaskName" -ForegroundColor Green
-Write-Host "     Runs deploy-docker.ps1 in your interactive session (Docker Desktop works)." -ForegroundColor Gray
+Write-Host "     Runs deploy-docker.ps1 hidden (interactive session, no console window)." -ForegroundColor Gray
+Write-Host "     Re-run this script after pulling changes to setup-deploy-task.ps1." -ForegroundColor Gray
 Write-Host "     GitHub Actions SSH calls scripts/deploy-docker-trigger.ps1" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Test: schtasks /run /tn $TaskName" -ForegroundColor Cyan

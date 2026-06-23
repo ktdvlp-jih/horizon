@@ -72,7 +72,7 @@
 1. Cursor → Export Transcript
 2. `docs/chat-exports/YYYY-MM-DD-주제.md`
 3. `git commit` + `push`
-4. 다른 PC: `@docs/chat-exports/...` + 「이어서 작업해줘」
+4. 다른 PC: `@docs/onboarding/SESSION_HANDOFF.md` 또는 `@docs/chat-exports/...` + 「이어서 작업해줘」
 
 ### 이 문서 (SESSION_HANDOFF)
 
