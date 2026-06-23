@@ -28,6 +28,7 @@ public class AdminDesignDetailMapper {
                 design.getGreenRatio(),
                 design.getExperienceId(),
                 design.getScenarioId(),
+                design.getMetricsJson(),
                 design.getCreatedAt()
         );
     }

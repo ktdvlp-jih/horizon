@@ -15,6 +15,7 @@ public record DesignDetail(
         double greenRatio,
         String experienceId,
         String scenarioId,
+        String metricsJson,
         LocalDateTime createdAt
 ) {
 }

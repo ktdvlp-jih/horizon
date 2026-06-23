@@ -191,6 +191,28 @@ export interface DisasterSummary {
   createdAt: string
 }
 
+export type LensKind = 'heat' | 'air' | 'disaster' | 'agriculture'
+
+export interface LensResult {
+  kind: LensKind
+  label: string
+  heatmap: number[][]
+  min: number
+  max: number
+  score: number
+  metrics: unknown
+}
+
+export interface EvaluateResponse {
+  region: RegionWeather
+  gridSize: number
+  scenarioId: string | null
+  lenses: Partial<Record<LensKind, LensResult>>
+  axisScores: Partial<Record<LensKind, number>>
+  resilienceScore: number
+  balancePenalty: number
+}
+
 export interface AuthUser {
   userId: number
   loginId: string

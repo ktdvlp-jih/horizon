@@ -1,7 +1,7 @@
 import { memo, useCallback, useRef } from 'react'
 import type { Grid, SimulationResult, TileType } from '@/types'
 import { cellFromPointer } from '@/lib/grid'
-import { TILE_BY_TYPE, tempToColor, riskToColor } from '@/lib/tiles'
+import { TILE_BY_TYPE, tempToColor, lensColor, type HeatmapKind } from '@/lib/tiles'
 import ClimateParticles from './ClimateParticles'
 
 interface Props {
@@ -17,10 +17,10 @@ interface Props {
   ambient?: boolean
   particles?: boolean
   solarIntensity?: number
-  /** When set, renders risk heatmap instead of temperature. */
+  /** Generic lens value overlay (risk / air) instead of temperature. */
   riskValues?: number[][] | null
   animatedRisk?: number[][] | null
-  heatmapKind?: 'temp' | 'risk'
+  heatmapKind?: HeatmapKind
 }
 
 function isCoolingTile(tile: TileType): boolean {
@@ -67,17 +67,17 @@ function CityGrid({
   const size = grid.length
   const cellTextClass = size >= 12 ? 'text-[8px]' : 'text-[10px]'
   const animating = !!animatedTemps || !!animatedRisk
-  const isRisk = heatmapKind === 'risk'
-  const temps = !isRisk && animating ? animatedTemps : !isRisk ? result?.surfaceTemps ?? null : null
-  const risks = isRisk ? (animating ? animatedRisk : riskValues) : null
+  const isValueOverlay = heatmapKind === 'risk' || heatmapKind === 'air'
+  const temps = !isValueOverlay && animating ? animatedTemps : !isValueOverlay ? result?.surfaceTemps ?? null : null
+  const risks = isValueOverlay ? (animating ? animatedRisk : riskValues) : null
   const heat = animating || showHeatmap
-  const min = isRisk
-    ? (animating ? colorMin ?? 0 : 0)
+  const min = isValueOverlay
+    ? (animating ? colorMin ?? 0 : colorMin ?? 0)
     : animating
       ? colorMin ?? 0
       : result?.metrics.minSurfaceTemp ?? 0
-  const max = isRisk
-    ? (animating ? colorMax ?? 1 : 1)
+  const max = isValueOverlay
+    ? (animating ? colorMax ?? 1 : colorMax ?? 1)
     : animating
       ? colorMax ?? 1
       : result?.metrics.maxSurfaceTemp ?? 1
@@ -159,8 +159,8 @@ function CityGrid({
       >
         {grid.map((row, r) =>
           row.map((tile, c) => {
-            const temp = !isRisk && heat && temps ? temps[r][c] : null
-            const risk = isRisk && heat && risks ? risks[r][c] : null
+            const temp = !isValueOverlay && heat && temps ? temps[r][c] : null
+            const risk = isValueOverlay && heat && risks ? risks[r][c] : null
             const norm =
               temp != null && span >= 0.001
                 ? Math.min(1, Math.max(0, (temp - min) / span))
@@ -171,7 +171,7 @@ function CityGrid({
               heat && temp != null
                 ? tempToColor(temp, min, max)
                 : heat && risk != null
-                  ? riskToColor(risk, min, max)
+                  ? lensColor(heatmapKind, risk, min, max)
                   : TILE_BY_TYPE[tile]?.swatch ?? '#ccc'
 
             return (
@@ -200,7 +200,7 @@ function CityGrid({
                 )}
                 {heat && risk != null && (
                   <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[9px] font-semibold text-white/90">
-                    {Math.round(risk * 100)}
+                    {heatmapKind === 'air' ? Math.round(risk) : Math.round(risk * 100)}
                   </span>
                 )}
               </div>

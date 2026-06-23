@@ -5,10 +5,33 @@ import type {
   DesignDetail,
   DesignListItem,
   DesignSummary,
+  EvaluateResponse,
   Grid,
   SimulationResult,
   SimulationTimeline,
 } from '@/types'
+
+export interface EvaluateOptions {
+  scenarioId?: string | null
+  date?: string
+  zones?: { farmland: number; fishery: number; forest: number; solar: number }
+}
+
+/** Unified multi-lens evaluation over a single shared city grid. */
+export async function evaluate(
+  regionCode: string,
+  grid: Grid,
+  options: EvaluateOptions = {},
+): Promise<EvaluateResponse> {
+  const res = await apiClient.post<ApiResponse<EvaluateResponse>>('/designs/evaluate', {
+    regionCode,
+    grid,
+    scenarioId: options.scenarioId ?? null,
+    date: options.date,
+    zones: options.zones,
+  })
+  return unwrap(res)
+}
 
 export async function simulate(regionCode: string, grid: Grid): Promise<SimulationResult> {
   const res = await apiClient.post<ApiResponse<SimulationResult>>('/designs/simulate', {

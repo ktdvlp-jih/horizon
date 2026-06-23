@@ -197,6 +197,7 @@ public class DesignService {
                 design.getGreenRatio(),
                 design.getExperienceId(),
                 design.getScenarioId(),
+                design.getMetricsJson(),
                 design.getCreatedAt()
         );
     }

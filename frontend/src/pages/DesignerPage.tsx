@@ -57,6 +57,8 @@ import MetricsPanel from '@/components/designer/MetricsPanel'
 
 import CoachPanel from '@/components/designer/CoachPanel'
 
+import ResiliencePanel, { type LensOverlay } from '@/components/designer/ResiliencePanel'
+
 import GridViewToggle, { gridViewHint } from '@/components/designer/GridViewToggle'
 
 import HeatmapGuideButton from '@/components/designer/HeatmapGuideButton'
@@ -132,6 +134,8 @@ export default function DesignerPage() {
   const [brush, setBrush] = useState<TileType>('TREE')
 
   const [showHeatmap, setShowHeatmap] = useState(false)
+
+  const [lensOverlay, setLensOverlay] = useState<LensOverlay | null>(null)
 
   const [result, setResult] = useState<SimulationResult | null>(null)
 
@@ -712,6 +716,16 @@ export default function DesignerPage() {
 
           />
 
+          <ResiliencePanel
+
+            regionCode={regionCode}
+
+            grid={grid}
+
+            onOverlayChange={setLensOverlay}
+
+          />
+
         </div>
 
 
@@ -752,7 +766,7 @@ export default function DesignerPage() {
 
               result={result}
 
-              showHeatmap={showHeatmap}
+              showHeatmap={lensOverlay ? true : showHeatmap}
 
               onPaint={onPaint}
 
@@ -760,17 +774,21 @@ export default function DesignerPage() {
 
               onStrokeEnd={onStrokeEnd}
 
-              animatedTemps={anim.snapshot?.temps ?? null}
+              animatedTemps={lensOverlay ? null : anim.snapshot?.temps ?? null}
 
-              colorMin={anim.timeline?.globalMin}
+              colorMin={lensOverlay ? lensOverlay.min : anim.timeline?.globalMin}
 
-              colorMax={anim.timeline?.globalMax}
+              colorMax={lensOverlay ? lensOverlay.max : anim.timeline?.globalMax}
 
               ambient={ambient}
 
               particles={particles}
 
               solarIntensity={anim.snapshot?.solarIntensity ?? 1}
+
+              riskValues={lensOverlay?.values ?? null}
+
+              heatmapKind={lensOverlay?.kind ?? 'temp'}
 
             />
 

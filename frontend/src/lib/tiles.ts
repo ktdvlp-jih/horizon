@@ -57,3 +57,27 @@ export function riskToColor(risk: number, min: number, max: number): string {
   const hue = 120 - t * 120
   return `hsl(${hue}, 75%, ${52 - t * 10}%)`
 }
+
+/** Maps PM concentration (clean cyan -> hazardous deep purple). */
+export function airToColor(pm: number, min: number, max: number): string {
+  if (max - min < 0.001) return 'hsl(190, 65%, 55%)'
+  const t = Math.min(1, Math.max(0, (pm - min) / (max - min)))
+  // hue 190 (clean cyan) -> 290 (hazardous purple)
+  const hue = 190 + t * 100
+  return `hsl(${hue}, ${55 + t * 25}%, ${62 - t * 26}%)`
+}
+
+export type HeatmapKind = 'temp' | 'risk' | 'air'
+
+/** Color for a lens overlay value given its kind. */
+export function lensColor(kind: HeatmapKind, value: number, min: number, max: number): string {
+  switch (kind) {
+    case 'temp':
+      return tempToColor(value, min, max)
+    case 'air':
+      return airToColor(value, min, max)
+    case 'risk':
+    default:
+      return riskToColor(value, min, max)
+  }
+}
