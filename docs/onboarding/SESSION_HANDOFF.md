@@ -92,7 +92,54 @@ git push
 
 ### 이 문서 (SESSION_HANDOFF)
 
-IP·체크리스트만 짧게 유지. 변경 시 commit.
+IP·체크리스트 + **Agent 이어하기 맥락** 유지. 변경 시 commit.
+
+---
+
+## 현재 작업 맥락 (Agent 이어하기)
+
+> **마지막 동기화:** 2026-06-24 · 집 PC 새벽 커밋 `4eb116a`~`38ac9cc` 반영  
+> **주의:** 4축 회복탄력성 작업은 **SpecStory 채팅 파일 없이 코드만 commit**됨. 아래 + `RESILIENCE_*.md`를 @ 로 넘기면 Agent가 맥락을 잡을 수 있음.
+
+### 완료 — 도시 기후 설계자 4축 통합 (M1~M5)
+
+| 단계 | 커밋 | 내용 |
+|------|------|------|
+| 기획 | `4eb116a` | [RESILIENCE_DESIGN.md](../RESILIENCE_DESIGN.md) — 6개 병렬 → `/designer` 단일 메인 |
+| M1 P1·P2 | `bc6be7d` | 다중 렌즈 평가 (열섬·미세먼지·재난·농어업), 종합 회복탄력성 점수 |
+| M2 P3 | `5b1011a` | INDUSTRY 타일 + 미세먼지 렌즈 |
+| M3 P4 | `aa39191` | 농어업 광역 레이어 (coarse zone) |
+| M4 P5~P7 | `1712459`~`a070a85` | 시나리오 고정 가중치 · 레벨 시스템 · 스트레스 테스트 타임라인 |
+| M5 P8~P9 | `bd420ae`~`2e45109` | 통합 AI 코치 · `/disaster` → `/designer` 리다이렉트 |
+| 문서 | `d44ec49`~`38ac9cc` | [RESILIENCE_TEST_GUIDE.md](../RESILIENCE_TEST_GUIDE.md) · 튜토리얼 4축 반영 |
+
+### 핵심 진입점
+
+| 영역 | 경로 |
+|------|------|
+| UI | `/designer` → `ResiliencePanel` (렌즈·레벨·스트레스·코치) |
+| 프론트 | `frontend/src/components/designer/ResiliencePanel.tsx`, `lib/levels.ts` |
+| 백엔드 | `com.horizon.resilience.service.ResilienceScoring`, `ResilienceOrchestrator` |
+| AI | `ai/app/services/resilience_coach_service.py` (없으면 rule 폴백) |
+| 라우트 | `/disaster`, `/experiences/*` → `/designer` |
+
+### Agent 이어하기 (새 채팅)
+
+```text
+@docs/onboarding/SESSION_HANDOFF.md
+@docs/RESILIENCE_DESIGN.md
+@docs/RESILIENCE_TEST_GUIDE.md
+4축 회복탄력성 작업 이어서 해줘
+```
+
+개발 환경·Tailscale·배포 맥락은 `@.specstory/history/2026-06-23_07-16-07Z-project-tech-stack-integration.md` 참고.
+
+### 다음 후보 (미착수·검증 필요)
+
+- [ ] `RESILIENCE_TEST_GUIDE.md` 체크리스트 로컬 검증 (개발 PC: 터널 + bootRun + npm dev)
+- [ ] 지진 30초 대피 UX, 쓰나미 프로필 UX (기존 백로그)
+- [ ] Gemini LLM · KMA API 실연동 (현재 폴백/목 데이터)
+- [ ] P1 격자·설계 스키마 단일화 아키텍처 (DESIGN §11)
 
 ---
 
