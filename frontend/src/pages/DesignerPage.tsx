@@ -67,6 +67,8 @@ import HeatmapGuideButton from '@/components/designer/HeatmapGuideButton'
 
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay'
 
+import DesignerMobileTabs, { type DesignerMobileTab } from '@/components/designer/DesignerMobileTabs'
+
 
 
 function isoDaysAgo(n: number): string {
@@ -165,6 +167,8 @@ export default function DesignerPage() {
   const [completedChallengeMetrics, setCompletedChallengeMetrics] = useState(() =>
     loadCompletedChallengeMetrics('urban-climate'),
   )
+
+  const [mobileTab, setMobileTab] = useState<DesignerMobileTab>('grid')
 
   const simToken = useRef(0)
   const guestRestored = useRef(false)
@@ -590,13 +594,162 @@ export default function DesignerPage() {
 
   }, [loadLoading, designId, refLoading, refId, loadMessage, saveMessage])
 
+  const palettePanel = (
+    <Card data-tutorial="palette">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-base">타일 팔레트</CardTitle>
+        <TileGuideButton />
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <TilePalette brush={brush} onSelect={setBrush} />
+        <div className="grid grid-cols-2 gap-1.5">
+          <Button
+            size="sm"
+            variant="outline"
+            type="button"
+            disabled={!canUndo}
+            title="Ctrl+Z"
+            className="touch-manipulation select-none whitespace-nowrap px-2 text-xs"
+            onClick={() => undo()}
+          >
+            <Undo2 className="h-3.5 w-3.5 shrink-0" />
+            실행 취소
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            type="button"
+            disabled={!canRedo}
+            title="Ctrl+Y"
+            className="touch-manipulation select-none whitespace-nowrap px-2 text-xs"
+            onClick={() => redo()}
+          >
+            <Redo2 className="h-3.5 w-3.5 shrink-0" />
+            다시 실행
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
+          <Button size="sm" variant="outline" className="whitespace-nowrap" onClick={onFillPark}>
+            <Trees className="h-4 w-4" /> 전부 공원
+          </Button>
+          <Button size="sm" variant="outline" className="whitespace-nowrap" onClick={onResetGrid}>
+            <Eraser className="h-4 w-4" /> 초기화
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
+  const gridPanel = (
+    <Card className="h-fit">
+      <CardHeader className="flex flex-col gap-2 pb-2 sm:flex-row sm:items-center sm:justify-between">
+        <CardTitle className="shrink-0 text-base">도시 격자 ({GRID_SIZE}×{GRID_SIZE})</CardTitle>
+        <div
+          className="flex w-full shrink-0 items-center gap-1 overflow-x-auto pb-0.5 sm:w-auto"
+          data-tutorial="heatmap"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          <Button
+            size="sm"
+            variant="outline"
+            type="button"
+            className="shrink-0 whitespace-nowrap px-2 text-xs"
+            onClick={() => setShow3D(true)}
+          >
+            <Boxes className="h-4 w-4" /> 3D
+          </Button>
+          <GridViewToggle
+            mode={showHeatmap ? 'heatmap' : 'tile'}
+            onChange={(m) => setShowHeatmap(m === 'heatmap')}
+          />
+          <HeatmapGuideButton />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="hidden rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600 sm:block">
+          {gridViewHint(showHeatmap ? 'heatmap' : 'tile', !!anim.snapshot)}
+        </p>
+        <div className="mx-auto w-full max-w-[min(100%,26rem)]">
+          <CityGrid
+            grid={grid}
+            result={result}
+            showHeatmap={lensOverlay ? true : showHeatmap}
+            onPaint={onPaint}
+            onStrokeStart={onStrokeStart}
+            onStrokeEnd={onStrokeEnd}
+            animatedTemps={lensOverlay ? null : anim.snapshot?.temps ?? null}
+            colorMin={lensOverlay ? lensOverlay.min : anim.timeline?.globalMin}
+            colorMax={lensOverlay ? lensOverlay.max : anim.timeline?.globalMax}
+            ambient={ambient}
+            particles={particles}
+            solarIntensity={anim.snapshot?.solarIntensity ?? 1}
+            riskValues={lensOverlay?.values ?? null}
+            heatmapKind={lensOverlay?.kind ?? 'temp'}
+          />
+        </div>
+        <AnimationControls
+          anim={anim}
+          ambient={ambient}
+          onToggleAmbient={() => setAmbient((v) => !v)}
+          particles={particles}
+          onToggleParticles={() => setParticles((v) => !v)}
+          date={timelineDate}
+          maxDate={isoDaysAgo(0)}
+          onDateChange={setTimelineDate}
+        />
+        <p className="text-center text-[10px] text-slate-400 sm:text-[11px]">
+          교육용 근사 모델 · 기상청 baseline
+        </p>
+      </CardContent>
+    </Card>
+  )
+
+  const insightPanel = (
+    <>
+      <MetricsPanel
+        result={result}
+        baselineResult={baselineResult}
+        frame={anim.snapshot}
+        onSetBaseline={onSetBaseline}
+      />
+      <ResiliencePanel
+        regionCode={regionCode}
+        grid={grid}
+        onOverlayChange={setLensOverlay}
+        onLoadGrid={replaceWithHistory}
+      />
+    </>
+  )
+
+  const coachPanel = (
+    <CoachPanel
+      coach={coach}
+      loading={coachMutation.isPending}
+      error={coachMutation.isError ? '코치 호출에 실패했습니다. 잠시 후 다시 시도하세요.' : null}
+      onRequest={() => coachMutation.mutate()}
+      locked={!isAuthenticated}
+    />
+  )
 
   return (
 
     <div className="space-y-4">
 
-      <TutorialOverlay force={showTutorial} />
+      <TutorialOverlay
+        force={showTutorial}
+        onStepChange={(step) => {
+          const tabByStep: Partial<Record<number, DesignerMobileTab>> = {
+            1: 'tiles',
+            2: 'grid',
+            3: 'grid',
+            4: 'insight',
+            5: 'insight',
+            6: 'coach',
+          }
+          const tab = tabByStep[step]
+          if (tab) setMobileTab(tab)
+        }}
+      />
 
       <ChallengePanel
         challenges={challenges}
@@ -649,220 +802,28 @@ export default function DesignerPage() {
 
       </div>
 
-
-
-      <div className="grid gap-4 lg:grid-cols-[280px_1fr_320px]">
-
-        <div className="space-y-4">
-
-          <Card data-tutorial="palette">
-
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-
-              <CardTitle className="text-base">타일 팔레트</CardTitle>
-
-              <TileGuideButton />
-
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-
-              <TilePalette brush={brush} onSelect={setBrush} />
-
-              <div className="grid grid-cols-2 gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  type="button"
-                  disabled={!canUndo}
-                  title="Ctrl+Z"
-                  className="touch-manipulation select-none whitespace-nowrap px-2 text-xs"
-                  onClick={() => undo()}
-                >
-                  <Undo2 className="h-3.5 w-3.5 shrink-0" />
-                  실행 취소
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  type="button"
-                  disabled={!canRedo}
-                  title="Ctrl+Y"
-                  className="touch-manipulation select-none whitespace-nowrap px-2 text-xs"
-                  onClick={() => redo()}
-                >
-                  <Redo2 className="h-3.5 w-3.5 shrink-0" />
-                  다시 실행
-                </Button>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-
-                <Button size="sm" variant="outline" onClick={onFillPark}>
-
-                  <Trees className="h-4 w-4" /> 전부 공원
-
-                </Button>
-
-                <Button size="sm" variant="outline" onClick={onResetGrid}>
-
-                  <Eraser className="h-4 w-4" /> 초기화
-
-                </Button>
-
-              </div>
-
-            </CardContent>
-
-          </Card>
-
-          <MetricsPanel
-
-            result={result}
-
-            baselineResult={baselineResult}
-
-            frame={anim.snapshot}
-
-            onSetBaseline={onSetBaseline}
-
-          />
-
-          <ResiliencePanel
-
-            regionCode={regionCode}
-
-            grid={grid}
-
-            onOverlayChange={setLensOverlay}
-
-            onLoadGrid={replaceWithHistory}
-
-          />
-
-        </div>
-
-
-
-        <Card>
-
-          <CardHeader className="flex flex-row items-center justify-between gap-2">
-
-            <CardTitle>도시 격자 ({GRID_SIZE}×{GRID_SIZE})</CardTitle>
-
-            <div className="flex items-center gap-1" data-tutorial="heatmap">
-
-              <Button
-                size="sm"
-                variant="outline"
-                type="button"
-                className="whitespace-nowrap px-2 text-xs"
-                onClick={() => setShow3D(true)}
-              >
-                <Boxes className="h-4 w-4" /> 3D로 보기
-              </Button>
-
-              <GridViewToggle
-
-                mode={showHeatmap ? 'heatmap' : 'tile'}
-
-                onChange={(m) => setShowHeatmap(m === 'heatmap')}
-
-              />
-
-              <HeatmapGuideButton />
-
-            </div>
-
-          </CardHeader>
-
-          <CardContent className="space-y-3">
-
-            <p className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
-
-              {gridViewHint(showHeatmap ? 'heatmap' : 'tile', !!anim.snapshot)}
-
-            </p>
-
-            <CityGrid
-
-              grid={grid}
-
-              result={result}
-
-              showHeatmap={lensOverlay ? true : showHeatmap}
-
-              onPaint={onPaint}
-
-              onStrokeStart={onStrokeStart}
-
-              onStrokeEnd={onStrokeEnd}
-
-              animatedTemps={lensOverlay ? null : anim.snapshot?.temps ?? null}
-
-              colorMin={lensOverlay ? lensOverlay.min : anim.timeline?.globalMin}
-
-              colorMax={lensOverlay ? lensOverlay.max : anim.timeline?.globalMax}
-
-              ambient={ambient}
-
-              particles={particles}
-
-              solarIntensity={anim.snapshot?.solarIntensity ?? 1}
-
-              riskValues={lensOverlay?.values ?? null}
-
-              heatmapKind={lensOverlay?.kind ?? 'temp'}
-
-            />
-
-            <AnimationControls
-
-              anim={anim}
-
-              ambient={ambient}
-
-              onToggleAmbient={() => setAmbient((v) => !v)}
-
-              particles={particles}
-
-              onToggleParticles={() => setParticles((v) => !v)}
-
-              date={timelineDate}
-
-              maxDate={isoDaysAgo(0)}
-
-              onDateChange={setTimelineDate}
-
-            />
-
-            <p className="text-center text-[11px] text-slate-400">
-
-              교육용 근사 모델 · 실제 기상 데이터 기반 baseline
-
-            </p>
-
-          </CardContent>
-
-        </Card>
-
-
-
-        <CoachPanel
-
-          coach={coach}
-
-          loading={coachMutation.isPending}
-
-          error={coachMutation.isError ? '코치 호출에 실패했습니다. 잠시 후 다시 시도하세요.' : null}
-
-          onRequest={() => coachMutation.mutate()}
-
-          locked={!isAuthenticated}
-
-        />
-
+      <DesignerMobileTabs active={mobileTab} onChange={setMobileTab} />
+
+      {/* 모바일: 탭별 한 화면씩 — 줄바꿈·빈 공간 최소화 */}
+      <div className="space-y-4 lg:hidden">
+        {mobileTab === 'grid' && gridPanel}
+        {mobileTab === 'tiles' && palettePanel}
+        {mobileTab === 'insight' && <div className="space-y-4">{insightPanel}</div>}
+        {mobileTab === 'coach' && coachPanel}
+      </div>
+
+      {/* 데스크톱: 격자 중앙 · 분석·코치 우측 스택 (열 높이 맞춤 없음) */}
+      <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(220px,240px)_minmax(0,1fr)_minmax(280px,300px)] lg:items-start">
+        <aside className="space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+          {palettePanel}
+        </aside>
+
+        <section>{gridPanel}</section>
+
+        <aside className="space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+          {insightPanel}
+          {coachPanel}
+        </aside>
       </div>
 
       {show3D && (

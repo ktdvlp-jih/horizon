@@ -20,7 +20,7 @@ function Chip({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
+        'inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium tabular-nums whitespace-nowrap',
         live
           ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
           : 'border-slate-200 bg-slate-50 text-slate-600',
@@ -51,8 +51,9 @@ export default function ClimateDataStrip({ climate, className }: Props) {
 
   return (
     <div
-      className={cn('flex flex-wrap items-center gap-1.5', className)}
+      className={cn('flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5', className)}
       aria-label="기상청 실시간 기후 데이터"
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
       {climate.pm10 != null && (
         <Chip

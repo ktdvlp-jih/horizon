@@ -16,7 +16,7 @@ export default function Layout() {
             <span className="font-bold tracking-tight text-slate-900">Horizon</span>
             <span className="hidden text-xs text-slate-400 sm:inline">도시 기후 설계자</span>
           </Link>
-          <nav className="flex items-center gap-1 text-sm">
+          <nav className="flex max-w-[100vw] items-center gap-0.5 overflow-x-auto pb-0.5 text-sm sm:gap-1" style={{ scrollbarWidth: 'none' }}>
             <NavItem to="/" label="소개" end />
             <NavItem to="/designer" label="설계 시작" />
             <NavItem to="/leaderboard" label="리더보드" />
@@ -62,7 +62,7 @@ function NavItem({ to, label, end }: { to: string; label: string; end?: boolean 
       end={end}
       className={({ isActive }) =>
         cn(
-          'rounded-lg px-3 py-1.5 font-medium transition-colors',
+          'shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1.5 font-medium transition-colors sm:px-3',
           isActive ? 'bg-sky-50 text-sky-700' : 'text-slate-600 hover:bg-slate-100',
         )
       }

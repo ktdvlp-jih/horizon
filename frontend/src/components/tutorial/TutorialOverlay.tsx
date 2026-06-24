@@ -45,6 +45,7 @@ const STEPS = [
 interface Props {
   force?: boolean
   onDone?: () => void
+  onStepChange?: (step: number) => void
 }
 
 function measureAnchor(selector: string): DOMRect | null {
@@ -52,7 +53,7 @@ function measureAnchor(selector: string): DOMRect | null {
   return el ? el.getBoundingClientRect() : null
 }
 
-export default function TutorialOverlay({ force = false, onDone }: Props) {
+export default function TutorialOverlay({ force = false, onDone, onStepChange }: Props) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null)
@@ -87,6 +88,7 @@ export default function TutorialOverlay({ force = false, onDone }: Props) {
 
   useEffect(() => {
     if (!open) return
+    onStepChange?.(step)
     const clearScrollTimer = scrollToStep(step)
     const onLayout = () => {
       const anchor = STEPS[step]?.anchor
@@ -99,7 +101,7 @@ export default function TutorialOverlay({ force = false, onDone }: Props) {
       window.removeEventListener('scroll', onLayout, true)
       window.removeEventListener('resize', onLayout)
     }
-  }, [open, step, scrollToStep])
+  }, [open, step, scrollToStep, onStepChange])
 
   const close = (persist: boolean) => {
     if (persist) localStorage.setItem(STORAGE_KEY, '1')

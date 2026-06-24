@@ -34,7 +34,7 @@ export default function MetricsPanel({
 }: Props) {
   if (!result) {
     return (
-      <Card data-tutorial="metrics">
+      <Card className="h-fit" data-tutorial="metrics">
         <CardContent className="py-8 text-center text-sm text-slate-400">
           타일을 칠하면 실시간으로 온도가 계산됩니다.
         </CardContent>
@@ -58,7 +58,7 @@ export default function MetricsPanel({
   const changeDelta = baseDelta != null && !frame ? deltaT - baseDelta : null
 
   return (
-    <Card data-tutorial="metrics">
+    <Card className="h-fit" data-tutorial="metrics">
       <CardHeader className="space-y-2">
         <CardTitle className="flex items-center justify-between">
           <span>시뮬레이션 결과</span>

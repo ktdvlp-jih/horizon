@@ -209,7 +209,7 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
   const axisScores = evalResult?.axisScores ?? {}
 
   return (
-    <Card data-tutorial="resilience">
+    <Card className="h-fit" data-tutorial="resilience">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">회복탄력성 평가</CardTitle>
         <p className="text-[11px] leading-relaxed text-slate-500">

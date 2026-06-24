@@ -28,9 +28,9 @@ export default function CoachPanel({
   scoreLabel = '설계 점수',
 }: Props) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-1.5">
+    <Card className="h-fit">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+        <CardTitle className="flex shrink-0 items-center gap-1.5 text-base">
           <Sparkles className="h-4 w-4 text-violet-500" />
           {title}
         </CardTitle>

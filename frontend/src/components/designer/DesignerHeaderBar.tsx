@@ -48,20 +48,20 @@ export default function DesignerHeaderBar({
 
   return (
     <Card className="overflow-hidden shadow-sm">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-stretch">
+      <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-stretch">
         {/* 지역 · 기온 */}
         <div
-          className="flex min-w-0 flex-col justify-center gap-2 px-4 py-3"
+          className="flex min-w-0 flex-col justify-center gap-2 px-3 py-3 sm:px-4"
           data-tutorial="region"
         >
           {description && (
-            <p className="truncate text-xs leading-snug text-slate-500" title={description}>
+            <p className="line-clamp-2 text-xs leading-snug text-slate-500 sm:line-clamp-1" title={description}>
               {description}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex flex-nowrap items-center gap-3 overflow-x-auto pb-0.5">
           {regions.length > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-sky-500" aria-hidden />
               <select
                 value={regionCode}
@@ -105,9 +105,9 @@ export default function DesignerHeaderBar({
           {active?.climate && <ClimateDataStrip climate={active.climate} className="mt-1" />}
         </div>
 
-        {/* 설계 관리 — 2행 */}
+        {/* 설계 관리 */}
         <div
-          className="flex w-[15.5rem] shrink-0 flex-col justify-center gap-1.5 border-l border-slate-100 bg-slate-50/80 px-3 py-2.5 lg:w-[17rem]"
+          className="flex w-full shrink-0 flex-col justify-center gap-1.5 border-t border-slate-100 bg-slate-50/80 px-3 py-2.5 lg:w-[17rem] lg:border-l lg:border-t-0"
           data-tutorial="save"
         >
           <div className="flex items-center gap-2">

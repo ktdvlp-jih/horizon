@@ -44,13 +44,11 @@ export default function AnimationControls({
 
   if (!timeline) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
-        <div className="text-xs text-slate-500">
-          선택한 날짜의 도시 기후 변화를 재생해 보세요.
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-xs text-slate-500">선택한 날짜의 기후 변화를 재생해 보세요.</div>
+        <div className="flex shrink-0 items-center gap-2">
           {datePicker}
-          <Button size="sm" onClick={anim.load} disabled={isLoading}>
+          <Button size="sm" onClick={anim.load} disabled={isLoading} className="whitespace-nowrap">
             <Play className="h-4 w-4" />
             {isLoading ? '불러오는 중…' : '하루 재생'}
           </Button>
@@ -88,28 +86,28 @@ export default function AnimationControls({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-1.5">
           <span
-            className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+            className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold whitespace-nowrap ${
               timeline.source === 'observed'
                 ? 'bg-emerald-50 text-emerald-600'
                 : 'bg-slate-100 text-slate-500'
             }`}
           >
-            {timeline.source === 'observed' ? '실측 데이터' : '모델 추정'}
+            {timeline.source === 'observed' ? '실측' : '모델'}
           </span>
-          <span className="text-[10px] text-slate-400">
+          <span className="hidden truncate text-[10px] text-slate-400 sm:inline">
             {timeline.source === 'observed'
-              ? `${timeline.date} 시간별 관측(기온·일사) 기반`
-              : `${timeline.date} 관측 불완전 · 일주기 모델 기반`}
+              ? `${timeline.date} 관측 기반`
+              : `${timeline.date} · 모델 추정`}
           </span>
         </div>
-        {datePicker}
+        <div className="shrink-0">{datePicker}</div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-1">
           {SPEEDS.map((s) => (
             <button
               key={s}
