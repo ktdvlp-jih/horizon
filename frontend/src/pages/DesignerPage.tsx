@@ -704,21 +704,22 @@ export default function DesignerPage() {
     </Card>
   )
 
-  const insightPanel = (
-    <>
-      <MetricsPanel
-        result={result}
-        baselineResult={baselineResult}
-        frame={anim.snapshot}
-        onSetBaseline={onSetBaseline}
-      />
-      <ResiliencePanel
-        regionCode={regionCode}
-        grid={grid}
-        onOverlayChange={setLensOverlay}
-        onLoadGrid={replaceWithHistory}
-      />
-    </>
+  const metricsPanel = (
+    <MetricsPanel
+      result={result}
+      baselineResult={baselineResult}
+      frame={anim.snapshot}
+      onSetBaseline={onSetBaseline}
+    />
+  )
+
+  const resiliencePanel = (
+    <ResiliencePanel
+      regionCode={regionCode}
+      grid={grid}
+      onOverlayChange={setLensOverlay}
+      onLoadGrid={replaceWithHistory}
+    />
   )
 
   const coachPanel = (
@@ -729,6 +730,14 @@ export default function DesignerPage() {
       onRequest={() => coachMutation.mutate()}
       locked={!isAuthenticated}
     />
+  )
+
+  /** 시뮬레이션 결과 → AI 코치 순서 (우측 / 코치 탭) */
+  const coachStack = (
+    <div className="space-y-3">
+      {metricsPanel}
+      {coachPanel}
+    </div>
   )
 
   return (
@@ -742,9 +751,9 @@ export default function DesignerPage() {
             1: 'tiles',
             2: 'grid',
             3: 'grid',
-            4: 'insight',
+            4: 'coach',
             5: 'insight',
-            6: 'coach',
+            6: 'insight',
           }
           const tab = tabByStep[step]
           if (tab) setMobileTab(tab)
@@ -808,21 +817,23 @@ export default function DesignerPage() {
       <div className="space-y-4 lg:hidden">
         {mobileTab === 'grid' && gridPanel}
         {mobileTab === 'tiles' && palettePanel}
-        {mobileTab === 'insight' && <div className="space-y-4">{insightPanel}</div>}
-        {mobileTab === 'coach' && coachPanel}
+        {mobileTab === 'insight' && resiliencePanel}
+        {mobileTab === 'coach' && coachStack}
       </div>
 
-      {/* 데스크톱: 격자 중앙 · 분석·코치 우측 스택 (열 높이 맞춤 없음) */}
+      {/* 데스크톱: 격자 중앙(+회복탄력성) · 시뮬+코치 우측 */}
       <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(220px,240px)_minmax(0,1fr)_minmax(280px,300px)] lg:items-start">
         <aside className="space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
           {palettePanel}
         </aside>
 
-        <section>{gridPanel}</section>
+        <section className="space-y-4">
+          {gridPanel}
+          {resiliencePanel}
+        </section>
 
-        <aside className="space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-          {insightPanel}
-          {coachPanel}
+        <aside className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+          {coachStack}
         </aside>
       </div>
 

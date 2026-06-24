@@ -6,7 +6,7 @@ const TABS: { id: DesignerMobileTab; label: string; emoji: string }[] = [
   { id: 'grid', label: '격자', emoji: '🗺️' },
   { id: 'tiles', label: '타일', emoji: '🎨' },
   { id: 'insight', label: '분석', emoji: '📊' },
-  { id: 'coach', label: '코치', emoji: '🤖' },
+  { id: 'coach', label: '결과·코치', emoji: '🤖' },
 ]
 
 interface Props {

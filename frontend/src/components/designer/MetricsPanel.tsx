@@ -35,8 +35,13 @@ export default function MetricsPanel({
   if (!result) {
     return (
       <Card className="h-fit" data-tutorial="metrics">
-        <CardContent className="py-8 text-center text-sm text-slate-400">
-          타일을 칠하면 실시간으로 온도가 계산됩니다.
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">시뮬레이션 결과</CardTitle>
+        </CardHeader>
+        <CardContent className="pb-4 pt-0">
+          <p className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3 text-center text-sm text-slate-500">
+            타일을 칠하면 실시간으로 온도가 계산됩니다.
+          </p>
         </CardContent>
       </Card>
     )
