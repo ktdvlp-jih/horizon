@@ -99,7 +99,8 @@ IP·체크리스트 + **Agent 이어하기 맥락** 유지. 변경 시 commit.
 ## 현재 작업 맥락 (Agent 이어하기)
 
 > **마지막 동기화:** 2026-06-24 · 집 PC 새벽 커밋 `4eb116a`~`38ac9cc` 반영  
-> **주의:** 4축 회복탄력성 작업은 **SpecStory 채팅 파일 없이 코드만 commit**됨. 아래 + `RESILIENCE_*.md`를 @ 로 넘기면 Agent가 맥락을 잡을 수 있음.
+> **구현 상태:** [RESILIENCE_DESIGN.md](../RESILIENCE_DESIGN.md) · [RESILIENCE_TEST_GUIDE.md](../RESILIENCE_TEST_GUIDE.md) 기준 **P1~P9 코드 반영 완료** — **수동 체험 테스트는 아직 미실시** (체크리스트 `[ ]` 전부 미확인)  
+> **주의:** 4축 작업 SpecStory 채팅 파일 없음. 아래 + `RESILIENCE_*.md`를 @ 로 넘기면 Agent가 맥락을 잡을 수 있음.
 
 ### 완료 — 도시 기후 설계자 4축 통합 (M1~M5)
 
@@ -134,9 +135,10 @@ IP·체크리스트 + **Agent 이어하기 맥락** 유지. 변경 시 commit.
 
 개발 환경·Tailscale·배포 맥락은 `@.specstory/history/2026-06-23_07-16-07Z-project-tech-stack-integration.md` 참고.
 
-### 다음 후보 (미착수·검증 필요)
+### 다음 후보 (우선순위)
 
-- [ ] `RESILIENCE_TEST_GUIDE.md` 체크리스트 로컬 검증 (개발 PC: 터널 + bootRun + npm dev)
+- [ ] **`RESILIENCE_TEST_GUIDE.md` §1~5 수동 체험** — 구현은 됐으나 아직 아무도 화면/API 확인 안 함 (개발 PC: 터널 → bootRun → npm dev → `/designer`)
+- [ ] §7 빌드 스모크: `compileJava` · `npm run build` · AI `py_compile`
 - [ ] 지진 30초 대피 UX, 쓰나미 프로필 UX (기존 백로그)
 - [ ] Gemini LLM · KMA API 실연동 (현재 폴백/목 데이터)
 - [ ] P1 격자·설계 스키마 단일화 아키텍처 (DESIGN §11)
