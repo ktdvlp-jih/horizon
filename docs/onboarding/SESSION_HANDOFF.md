@@ -67,20 +67,32 @@
 
 ## Cursor 대화 동기화
 
-### Export Transcript
+### SpecStory + Git (확정 — PC 간 채팅 이력)
+
+1. 양쪽 PC에 **SpecStory** 확장 설치
+2. 채팅은 `.specstory/history/*.md`에 **자동 저장**
+3. PC 바꾸기 전:
+
+```powershell
+git add .specstory
+git commit -m "SpecStory 채팅 이력 동기화"
+git push
+```
+
+4. 다른 PC: `git pull`
+5. SpecStory 패널 또는 `@.specstory/history/...` 로 이전 대화 참조
+
+> `.specstory/statistics.json`만 `.gitignore`. **history는 commit 대상.**
+
+### Export Transcript (보조)
 
 1. Cursor → Export Transcript
 2. `docs/chat-exports/YYYY-MM-DD-주제.md`
 3. `git commit` + `push`
-4. 다른 PC: `@docs/onboarding/SESSION_HANDOFF.md` 또는 `@docs/chat-exports/...` + 「이어서 작업해줘」
 
 ### 이 문서 (SESSION_HANDOFF)
 
 IP·체크리스트만 짧게 유지. 변경 시 commit.
-
-### SpecStory (선택)
-
-`.specstory/` 자동 저장 → Git sync
 
 ---
 

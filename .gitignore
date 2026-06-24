@@ -63,3 +63,9 @@ logs/
 .deploy-status.json
 .deploy-last.log
 .docker-deploy-ci/
+
+# SpecStory statistics — 자주 바뀌는 메타만 제외 (history/*.md 는 Git 동기화)
+.specstory/statistics.json
+
+# Cursor indexing (워크스페이스별)
+.cursorindexingignore
