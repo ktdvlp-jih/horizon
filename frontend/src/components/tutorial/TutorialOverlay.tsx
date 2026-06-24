@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -22,18 +22,18 @@ const STEPS = [
   },
   {
     title: '온도 변화 확인',
-    body: '왼쪽 패널에서 평균 온도와 기준 대비 ΔT를 확인하세요. Before/After로 변화량도 볼 수 있습니다.',
+    body: '왼쪽 「시뮬레이션 결과」에서 평균 온도와 기준 대비 변화를 확인하세요. 「현재 상태를 기준으로 잡기」로 Before/After도 볼 수 있습니다.',
     anchor: '[data-tutorial="metrics"]',
   },
   {
-    title: '회복탄력성 4축 평가',
-    body: '하나의 설계를 열섬·미세먼지·재난·농어업 4축으로 동시에 평가합니다. 렌즈 탭을 바꾸면 격자 위 위험도 색이 축에 맞게 바뀌고, 종합 회복탄력성 점수와 축별 점수를 볼 수 있어요. 한 축만 잘하면 균형 패널티가 붙습니다.',
-    anchor: '[data-tutorial="resilience"]',
+    title: '회복탄력성 — 렌즈·점수',
+    body: '좌측 하단 「회복탄력성 평가」에서 타일을 칠하면 종합 점수가 자동으로 나옵니다. 🌡️열섬·🌫️미세먼지 등 렌즈 탭을 누르면 격자 색이 축에 맞게 바뀝니다. 한 축만 잘하면 균형 패널티가 붙을 수 있어요.',
+    anchor: '[data-tutorial="resilience-lens"]',
   },
   {
-    title: '레벨·스트레스·AI 코치',
-    body: '시나리오 트랙의 레벨을 차례로 깨며 단계별로 학습하고(이전 설계 이어받기), 재난 시나리오 선택 후 ▶ 스트레스 테스트로 폭염→태풍→미세먼지→수확기 충격을 점검하세요. 🤖 통합 AI 코치는 4축을 함께 보고 조언합니다.',
-    anchor: '[data-tutorial="resilience"]',
+    title: '회복탄력성 — 재난·스트레스·코치',
+    body: '재난 시나리오를 고르면 🛡️재난 렌즈가 켜집니다. ▶ 스트레스 테스트로 폭염→태풍→미세먼지→수확기를 순서대로 점검하고, 🤖 통합 AI 코치로 4축 개선 힌트를 받으세요.',
+    anchor: '[data-tutorial="resilience-stress"]',
   },
   {
     title: '저장·코치 (로그인)',
@@ -47,9 +47,33 @@ interface Props {
   onDone?: () => void
 }
 
+function measureAnchor(selector: string): DOMRect | null {
+  const el = document.querySelector(selector)
+  return el ? el.getBoundingClientRect() : null
+}
+
 export default function TutorialOverlay({ force = false, onDone }: Props) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
+  const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null)
+
+  const scrollToStep = useCallback((index: number) => {
+    const anchor = STEPS[index]?.anchor
+    if (!anchor) {
+      setHighlightRect(null)
+      return
+    }
+    const el = document.querySelector(anchor)
+    if (!el) {
+      setHighlightRect(null)
+      return
+    }
+    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
+    const update = () => setHighlightRect(measureAnchor(anchor))
+    update()
+    const t = window.setTimeout(update, 450)
+    return () => window.clearTimeout(t)
+  }, [])
 
   useEffect(() => {
     if (force) {
@@ -61,30 +85,47 @@ export default function TutorialOverlay({ force = false, onDone }: Props) {
     setOpen(true)
   }, [force])
 
+  useEffect(() => {
+    if (!open) return
+    const clearScrollTimer = scrollToStep(step)
+    const onLayout = () => {
+      const anchor = STEPS[step]?.anchor
+      if (anchor) setHighlightRect(measureAnchor(anchor))
+    }
+    window.addEventListener('scroll', onLayout, true)
+    window.addEventListener('resize', onLayout)
+    return () => {
+      clearScrollTimer?.()
+      window.removeEventListener('scroll', onLayout, true)
+      window.removeEventListener('resize', onLayout)
+    }
+  }, [open, step, scrollToStep])
+
   const close = (persist: boolean) => {
     if (persist) localStorage.setItem(STORAGE_KEY, '1')
     setOpen(false)
     onDone?.()
   }
 
+  const goToStep = (next: number) => {
+    setStep(next)
+  }
+
   if (!open) return null
 
   const current = STEPS[step]
-  const rect = current.anchor
-    ? document.querySelector(current.anchor)?.getBoundingClientRect()
-    : null
 
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-slate-900/60" aria-hidden />
-      {rect && (
+      {highlightRect && (
         <div
-          className="pointer-events-none absolute rounded-xl ring-4 ring-sky-400 ring-offset-2 ring-offset-transparent"
+          className="pointer-events-none absolute rounded-xl ring-4 ring-sky-400 ring-offset-2 ring-offset-transparent transition-all duration-300"
           style={{
-            top: rect.top - 4,
-            left: rect.left - 4,
-            width: rect.width + 8,
-            height: rect.height + 8,
+            top: highlightRect.top - 4,
+            left: highlightRect.left - 4,
+            width: highlightRect.width + 8,
+            height: highlightRect.height + 8,
           }}
         />
       )}
@@ -110,12 +151,12 @@ export default function TutorialOverlay({ force = false, onDone }: Props) {
           </Button>
           <div className="flex gap-2">
             {step > 0 && (
-              <Button size="sm" variant="outline" onClick={() => setStep((s) => s - 1)}>
+              <Button size="sm" variant="outline" onClick={() => goToStep(step - 1)}>
                 이전
               </Button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button size="sm" onClick={() => setStep((s) => s + 1)}>
+              <Button size="sm" onClick={() => goToStep(step + 1)}>
                 다음
               </Button>
             ) : (

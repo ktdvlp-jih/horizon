@@ -4,8 +4,10 @@ import com.horizon.common.exception.BusinessException;
 import com.horizon.common.exception.ErrorCode;
 import com.horizon.settings.entity.RegionConfig;
 import com.horizon.settings.repository.RegionConfigRepository;
+import com.horizon.weather.AsosStationIds;
 import com.horizon.weather.crawler.KmaWeatherClient;
-import com.horizon.weather.dto.DaySolar;
+import com.horizon.weather.dto.AsosObservation;
+import com.horizon.weather.dto.ClimateContext;
 import com.horizon.weather.dto.HourlyObservation;
 import com.horizon.weather.dto.RegionWeather;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,22 +30,27 @@ public class WeatherDataService {
     private static final int[] TIMELINE_HOURS = {6, 8, 10, 12, 14, 16, 18, 20};
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final DateTimeFormatter HOUR_TM = DateTimeFormatter.ofPattern("yyyyMMddHH'00'");
     private static final long BASELINE_TTL_MS = 10 * 60 * 1000L;
-    private static final double SOLAR_DAY_REF = 27.0;
+    /** Reference hourly insolation (MJ/m²) for normalizing {@code icsr} → solarLoad. */
     private static final double SOLAR_HOUR_REF = 3.0;
 
     private final KmaWeatherClient kmaWeatherClient;
     private final RegionConfigRepository regionConfigRepository;
+    private final ClimateDataService climateDataService;
     private final Map<String, CachedRegion> baselineCache = new ConcurrentHashMap<>();
     private final Map<String, List<HourlyObservation>> timelineCache = new ConcurrentHashMap<>();
 
     private record CachedRegion(RegionWeather region, long expiresAt) {
     }
 
-    public WeatherDataService(KmaWeatherClient kmaWeatherClient, RegionConfigRepository regionConfigRepository) {
+    public WeatherDataService(
+            KmaWeatherClient kmaWeatherClient,
+            RegionConfigRepository regionConfigRepository,
+            ClimateDataService climateDataService
+    ) {
         this.kmaWeatherClient = kmaWeatherClient;
         this.regionConfigRepository = regionConfigRepository;
+        this.climateDataService = climateDataService;
     }
 
     public List<RegionWeather> listRegions() {
@@ -83,37 +91,35 @@ public class WeatherDataService {
     public void invalidateCache() {
         baselineCache.clear();
         timelineCache.clear();
+        climateDataService.invalidateCache();
         log.info("Weather baseline/timeline cache cleared");
     }
 
     private List<HourlyObservation> buildSeries(RegionConfig seed, String date) {
-        Map<Integer, Double> temps = new ConcurrentHashMap<>();
-        Map<Integer, Double> solars = new ConcurrentHashMap<>();
-        java.util.Arrays.stream(TIMELINE_HOURS).parallel().forEach(hour -> {
-            String tm = String.format("%s%02d00", date, hour);
-            kmaWeatherClient.fetchAirTemperature(seed.getKmaStation(), tm)
-                    .ifPresent(ta -> temps.put(hour, ta));
-            kmaWeatherClient.fetchSolar(seed.getKmaStation(), tm)
-                    .map(s -> s.hourlySi().get(hour))
-                    .ifPresent(si -> solars.put(hour, si));
-        });
+        String stationId = stationId(seed);
+        List<AsosObservation> rows = kmaWeatherClient.fetchTimelineHours(stationId, date, TIMELINE_HOURS);
+        Map<Integer, AsosObservation> byHour = new ConcurrentHashMap<>();
+        for (AsosObservation row : rows) {
+            byHour.put(row.hour(), row);
+        }
 
         for (int hour : TIMELINE_HOURS) {
-            if (!temps.containsKey(hour)) {
+            if (!byHour.containsKey(hour)) {
                 log.info("Hourly series incomplete for {} {} (missing {}h); using modeled timeline.",
                         seed.getCode(), date, hour);
                 return List.of();
             }
         }
 
-        List<HourlyObservation> series = new java.util.ArrayList<>(TIMELINE_HOURS.length);
+        List<HourlyObservation> series = new ArrayList<>(TIMELINE_HOURS.length);
         for (int hour : TIMELINE_HOURS) {
-            double ta = round(temps.get(hour));
-            double siHr = solars.getOrDefault(hour, 0.0);
+            AsosObservation obs = byHour.get(hour);
+            double ta = round(obs.airTemp());
+            double siHr = round(obs.insolationMj());
             double solarLoad = clamp(siHr / SOLAR_HOUR_REF, 0.0, 1.3);
-            series.add(new HourlyObservation(hour, ta, round(siHr), round(solarLoad)));
+            series.add(new HourlyObservation(hour, ta, siHr, round(solarLoad)));
         }
-        log.info("Built observed hourly series for {} {} ({} frames).", seed.getCode(), date, series.size());
+        log.info("Built observed hourly series for {} {} ({} frames, ASOS).", seed.getCode(), date, series.size());
         return series;
     }
 
@@ -132,26 +138,33 @@ public class WeatherDataService {
     }
 
     private RegionWeather fetchBaseline(RegionConfig seed) {
-        LocalDateTime base = LocalDateTime.now(KST).withMinute(0).withSecond(0).withNano(0);
-        Optional<Double> ta = Optional.empty();
-        for (int back = 1; back <= 4 && ta.isEmpty(); back++) {
-            ta = kmaWeatherClient.fetchAirTemperature(seed.getKmaStation(), base.minusHours(back).format(HOUR_TM));
-        }
-        if (ta.isEmpty()) {
+        LocalDateTime now = LocalDateTime.now(KST).withMinute(0).withSecond(0).withNano(0);
+        String date = now.format(DATE);
+        int currentHour = now.getHour();
+
+        Optional<AsosObservation> obs = kmaWeatherClient.fetchBaselineObservation(stationId(seed), date, currentHour);
+        if (obs.isEmpty()) {
             return sample(seed);
         }
 
-        double solarLoad = seed.getSampleSolar();
-        String yesterdayNoon = LocalDate.now(KST).minusDays(1).format(DATE) + "1200";
-        Optional<DaySolar> solar = kmaWeatherClient.fetchSolar(seed.getKmaStation(), yesterdayNoon);
-        if (solar.isPresent() && solar.get().dayTotal() >= 0) {
-            solarLoad = round(clamp(solar.get().dayTotal() / SOLAR_DAY_REF, 0.3, 1.1));
+        double ta = round(obs.get().airTemp());
+        double solarLoad = round(clamp(obs.get().insolationMj() / SOLAR_HOUR_REF, 0.3, 1.1));
+        log.info("ASOS baseline for {}: ta={}°C icsr={} → solarLoad={} (provider={})",
+                seed.getCode(), ta, obs.get().insolationMj(), solarLoad, kmaWeatherClient.provider());
+        ClimateContext climate = climateDataService.resolve(seed.getCode(), stationId(seed));
+        return new RegionWeather(seed.getCode(), seed.getName(), ta, solarLoad, "kma", climate);
+    }
+
+    private static String stationId(RegionConfig seed) {
+        if (seed.getKmaStation() != null && !seed.getKmaStation().isBlank()) {
+            return seed.getKmaStation();
         }
-        return new RegionWeather(seed.getCode(), seed.getName(), round(ta.get()), solarLoad, "kma");
+        return AsosStationIds.forRegion(seed.getCode()).orElse(seed.getCode());
     }
 
     private RegionWeather sample(RegionConfig seed) {
-        return new RegionWeather(seed.getCode(), seed.getName(), seed.getSampleTemp(), seed.getSampleSolar(), "sample");
+        ClimateContext climate = climateDataService.resolve(seed.getCode(), stationId(seed));
+        return new RegionWeather(seed.getCode(), seed.getName(), seed.getSampleTemp(), seed.getSampleSolar(), "sample", climate);
     }
 
     private double clamp(double v, double lo, double hi) {
@@ -163,6 +176,9 @@ public class WeatherDataService {
     }
 
     public Map<String, String> sourceInfo() {
-        return Map.of("kmaConfigured", String.valueOf(kmaWeatherClient.isConfigured()));
+        return Map.of(
+                "kmaConfigured", String.valueOf(kmaWeatherClient.isConfigured()),
+                "asosProvider", kmaWeatherClient.provider()
+        );
     }
 }

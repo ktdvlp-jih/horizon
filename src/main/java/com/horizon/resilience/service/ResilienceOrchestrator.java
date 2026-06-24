@@ -62,7 +62,7 @@ public class ResilienceOrchestrator {
         SimulationResult heat = addHeatLens(region, request, lenses, axisScores);
         AirQualityEvaluator.Result air = addAirLens(request, grid, lenses, axisScores);
         DisasterMode disasterMode = addDisasterLens(request, lenses, axisScores);
-        addAgricultureLens(request, heat, air, lenses, axisScores);
+        addAgricultureLens(request, region, heat, air, lenses, axisScores);
 
         int gridSize = heat.gridSize();
         ScenarioWeights weights = weightsResolver.resolve(request.scenarioId(), disasterMode);
@@ -101,7 +101,7 @@ public class ResilienceOrchestrator {
         return air;
     }
 
-    private void addAgricultureLens(EvaluateRequest request, SimulationResult heat,
+    private void addAgricultureLens(EvaluateRequest request, RegionWeather region, SimulationResult heat,
                                     AirQualityEvaluator.Result air,
                                     Map<String, LensResult> lenses, Map<String, Double> axisScores) {
         AgricultureLayerEvaluator.CityAggregate aggregate = new AgricultureLayerEvaluator.CityAggregate(
@@ -111,7 +111,8 @@ public class ResilienceOrchestrator {
                 air.metrics().avgPm(),
                 heat.metrics().deltaT()
         );
-        AgricultureMetrics metrics = agricultureLayerEvaluator.evaluate(request.zones(), aggregate);
+        AgricultureMetrics metrics = agricultureLayerEvaluator.evaluate(
+                request.zones(), aggregate, region.baseAirTemp(), region.climate());
         double score = scoring.agricultureScore(metrics);
         // Wide-area lens: no per-cell heatmap overlay.
         lenses.put("agriculture", new LensResult(
@@ -160,6 +161,9 @@ public class ResilienceOrchestrator {
 
         Map<String, Object> lensMetrics = new LinkedHashMap<>();
         ev.lenses().forEach((kind, lens) -> lensMetrics.put(kind, lens.metrics()));
+        if (ev.region().climate() != null) {
+            lensMetrics.put("climate", ev.region().climate());
+        }
 
         ResilienceCoachRequest coachRequest = new ResilienceCoachRequest(
                 ev.region().name(),

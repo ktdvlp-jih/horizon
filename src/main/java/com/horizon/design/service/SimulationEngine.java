@@ -68,7 +68,8 @@ public class SimulationEngine {
                     region.name(),
                     airTemp,
                     region.solarLoad() * solarIntensity,
-                    region.source()
+                    region.source(),
+                    region.climate()
             );
 
             double[][] temps = cellTempGrid(grid, hourly);
@@ -121,7 +122,8 @@ public class SimulationEngine {
                     region.name(),
                     obs.airTemp(),
                     obs.solarLoad(),
-                    region.source()
+                    region.source(),
+                    region.climate()
             );
             double[][] temps = cellTempGrid(grid, hourly);
             Stats stats = stats(temps);

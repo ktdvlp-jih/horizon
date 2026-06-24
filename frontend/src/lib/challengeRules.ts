@@ -1,10 +1,11 @@
 import type { ChallengeConfig, DesignMetrics } from '@/types'
+import { HEAT_ISLAND_LABEL } from '@/lib/heatMetrics'
 import { TILE_BY_TYPE } from '@/lib/tiles'
 import type { TileType } from '@/types'
 
 export const CHALLENGE_RULE_LABELS: Record<string, string> = {
   GREEN_RATIO_MIN: '녹지율 ≥ (threshold)',
-  DELTA_T_MAX: 'ΔT ≤ (threshold)',
+  DELTA_T_MAX: `${HEAT_ISLAND_LABEL} ≤ (threshold)`,
   WATER_RATIO_MIN: '수면·습지율 ≥ (threshold)',
   IMPERVIOUS_RATIO_MAX: '불투수면율 ≤ (threshold)',
   TILE_COUNT_MIN: '타일 개수 ≥ (JSON: tileType, minCount)',
@@ -58,7 +59,7 @@ function revealFromRule(
     case 'DELTA_T_MAX':
       return threshold === 0
         ? '목표: 기준 기온보다 평균 표면온도가 낮아짐'
-        : `목표: 기준 대비 ${formatDelta(threshold ?? 0)} 이하`
+        : `목표: ${HEAT_ISLAND_LABEL} ${formatDelta(threshold ?? 0)} 이하`
     case 'WATER_RATIO_MIN':
       return `목표: 수면·습지 ${pct(threshold ?? 0)} 이상`
     case 'IMPERVIOUS_RATIO_MAX':
@@ -86,7 +87,7 @@ function actualFromMetrics(challenge: ChallengeConfig, metrics: DesignMetrics): 
     case 'GREEN_RATIO_MIN':
       return `녹지율 ${pct(metrics.greenRatio)}`
     case 'DELTA_T_MAX':
-      return `기준 대비 ${formatDelta(metrics.deltaT)}`
+      return `${HEAT_ISLAND_LABEL} ${formatDelta(metrics.deltaT)}`
     case 'WATER_RATIO_MIN':
       return `수면·습지 ${pct(metrics.waterRatio)}`
     case 'IMPERVIOUS_RATIO_MAX':
@@ -99,7 +100,7 @@ function actualFromMetrics(challenge: ChallengeConfig, metrics: DesignMetrics): 
       return `${label} ${count}칸`
     }
     case 'ALL_OF':
-      return `녹지 ${pct(metrics.greenRatio)}, 기준 대비 ${formatDelta(metrics.deltaT)}`
+      return `녹지 ${pct(metrics.greenRatio)}, ${HEAT_ISLAND_LABEL} ${formatDelta(metrics.deltaT)}`
     default:
       return null
   }

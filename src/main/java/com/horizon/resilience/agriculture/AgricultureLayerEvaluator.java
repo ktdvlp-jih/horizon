@@ -2,6 +2,7 @@ package com.horizon.resilience.agriculture;
 
 import com.horizon.resilience.dto.AgricultureMetrics;
 import com.horizon.resilience.dto.AgricultureZones;
+import com.horizon.weather.dto.ClimateContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,7 +22,7 @@ public class AgricultureLayerEvaluator {
     private static final AgricultureZones DEFAULT_ZONES =
             new AgricultureZones(0.4, 0.2, 0.25, 0.15);
 
-    public AgricultureMetrics evaluate(AgricultureZones rawZones, CityAggregate city) {
+    public AgricultureMetrics evaluate(AgricultureZones rawZones, CityAggregate city, double baseAirTemp, ClimateContext climate) {
         AgricultureZones zones = (rawZones == null || rawZones.total() <= 0) ? DEFAULT_ZONES : rawZones;
         double total = zones.total();
         double farmland = zones.farmland() / total;
@@ -29,8 +30,11 @@ public class AgricultureLayerEvaluator {
         double forest = zones.forest() / total;
         double solar = zones.solar() / total;
 
-        // Combined warming stress: long-term baseline + local heat-island excess.
-        double warming = LONG_TERM_WARMING_C + Math.max(0, city.heatDeltaT() - 2.0) * 0.4;
+        double warming = LONG_TERM_WARMING_C;
+        if (climate != null && climate.normalTempC() != null) {
+            warming = Math.max(1.0, baseAirTemp - climate.normalTempC() + 1.2);
+        }
+        warming += Math.max(0, city.heatDeltaT() - 2.0) * 0.4;
         double heatStress = clamp01(warming / 6.0);
         double pmStress = clamp01((city.avgPm() - 15.0) / 80.0);
 

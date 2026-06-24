@@ -2,6 +2,7 @@ import { apiClient, unwrap } from '@/api/client'
 import type {
   ApiResponse,
   CoachResponse,
+  DisasterLiveFeed,
   DisasterMode,
   DisasterMetrics,
   DisasterSimulationResult,
@@ -15,6 +16,11 @@ export async function fetchScenarios(mode: DisasterMode): Promise<ScenarioSummar
   const res = await apiClient.get<ApiResponse<ScenarioSummary[]>>('/disaster/scenarios', {
     params: { mode },
   })
+  return unwrap(res)
+}
+
+export async function fetchDisasterLive(): Promise<DisasterLiveFeed> {
+  const res = await apiClient.get<ApiResponse<DisasterLiveFeed>>('/disaster/live')
   return unwrap(res)
 }
 

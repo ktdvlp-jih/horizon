@@ -4,6 +4,7 @@ import { FolderInput, FolderOpen, Thermometer, Trash2 } from 'lucide-react'
 import { deleteDesign, fetchMyDesigns } from '@/api/designApi'
 import { useRegions } from '@/hooks/useRegions'
 import { regionNameByCode } from '@/lib/regions'
+import { formatHeatIslandDelta, HEAT_ISLAND_LABEL } from '@/lib/heatMetrics'
 import DesignThumbnail from '@/components/designer/DesignThumbnail'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -85,7 +86,7 @@ export default function MyDesignsPage() {
                   <p>지역: {regionNameByCode(regions, d.regionCode)}</p>
                   <p className="flex items-center gap-1">
                     <Thermometer className="h-3.5 w-3.5 text-rose-500" />
-                    ΔT {d.deltaT.toFixed(1)}°C · 녹지 {Math.round(d.greenRatio * 100)}%
+                    {HEAT_ISLAND_LABEL} {formatHeatIslandDelta(d.deltaT)} · 녹지 {Math.round(d.greenRatio * 100)}%
                   </p>
                   <p className="text-xs text-slate-400">
                     {new Date(d.createdAt).toLocaleString('ko-KR')}

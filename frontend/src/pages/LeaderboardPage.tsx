@@ -5,6 +5,7 @@ import { FolderInput, Trophy } from 'lucide-react'
 import { fetchLeaderboard } from '@/api/designApi'
 import { useRegions } from '@/hooks/useRegions'
 import { regionNameByCode } from '@/lib/regions'
+import { HEAT_ISLAND_LABEL } from '@/lib/heatMetrics'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -91,7 +92,7 @@ export default function LeaderboardPage() {
                   <th className="px-4 py-2 font-medium">#</th>
                   <th className="px-4 py-2 font-medium">이름</th>
                   <th className="px-4 py-2 font-medium">지역</th>
-                  <th className="px-4 py-2 font-medium">ΔT</th>
+                  <th className="px-4 py-2 font-medium">{HEAT_ISLAND_LABEL}</th>
                   <th className="px-4 py-2 font-medium">녹지율</th>
                   <th className="px-4 py-2 font-medium" />
                 </tr>

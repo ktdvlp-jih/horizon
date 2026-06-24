@@ -1,5 +1,6 @@
 import type { SimulationResult } from '@/types'
 import type { AnimatedSnapshot } from '@/hooks/useClimateAnimation'
+import { HEAT_ISLAND_HINT, HEAT_ISLAND_LABEL, formatHeatIslandDelta } from '@/lib/heatMetrics'
 import { summarizeTileCounts } from '@/lib/tiles'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -60,7 +61,7 @@ export default function MetricsPanel({
     <Card data-tutorial="metrics">
       <CardHeader className="space-y-2">
         <CardTitle className="flex items-center justify-between">
-          <span>시뫤레이션 결과</span>
+          <span>시뮬레이션 결과</span>
           {frame && (
             <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-600">
               {frame.label}
@@ -80,7 +81,9 @@ export default function MetricsPanel({
             <div className="grid grid-cols-[auto_1fr_1fr] gap-x-3 gap-y-1 tabular-nums">
               <span />
               <span className="text-slate-400">평균</span>
-              <span className="text-slate-400">ΔT</span>
+              <span className="text-slate-400" title={HEAT_ISLAND_HINT}>
+                {HEAT_ISLAND_LABEL}
+              </span>
               <span className="font-medium text-slate-500">기준</span>
               <span>{baseAvg.toFixed(1)}°C</span>
               <span className={baseDelta < 0 ? 'text-sky-700' : 'text-rose-700'}>
@@ -121,9 +124,9 @@ export default function MetricsPanel({
             className={`inline-flex w-fit rounded-lg px-3 py-1.5 text-sm font-bold tabular-nums ${
               cooled ? 'bg-sky-50 text-sky-700' : 'bg-rose-50 text-rose-700'
             }`}
+            title={HEAT_ISLAND_HINT}
           >
-            기준 대비 {deltaT > 0 ? '+' : ''}
-            {deltaT.toFixed(1)}°C
+            {HEAT_ISLAND_LABEL} {formatHeatIslandDelta(deltaT)}
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">

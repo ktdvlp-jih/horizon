@@ -24,7 +24,7 @@ export const EXPERIENCES: Experience[] = [
     slug: 'urban-climate',
     title: '도시 기후 설계자',
     description:
-      '하나의 도시를 열섬·미세먼지·재난·농어업 4축으로 동시에 설계하고, 시나리오 레벨로 회복탄력성을 키웁니다.',
+      '기상청 데이터로 도시를 설계하고, 열섬·대기·재난을 검증하는 AI 웹 체험. 시나리오 레벨로 균형 잡힌 도시 설계를 학습합니다.',
     route: '/designer',
     status: 'active',
     emoji: '🌍',

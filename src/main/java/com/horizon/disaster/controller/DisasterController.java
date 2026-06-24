@@ -2,6 +2,7 @@ package com.horizon.disaster.controller;
 
 import com.horizon.ai.dto.CoachResponse;
 import com.horizon.common.response.ApiResponse;
+import com.horizon.disaster.dto.DisasterLiveFeed;
 import com.horizon.disaster.dto.DisasterMode;
 import com.horizon.disaster.dto.DisasterSaveRequest;
 import com.horizon.disaster.dto.DisasterSimulateRequest;
@@ -11,6 +12,7 @@ import com.horizon.disaster.dto.DisasterTimeline;
 import com.horizon.disaster.dto.ScenarioSummary;
 import com.horizon.disaster.service.DisasterScenarioService;
 import com.horizon.disaster.service.DisasterSimulationService;
+import com.horizon.weather.service.ClimateDataService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +31,19 @@ public class DisasterController {
 
     private final DisasterScenarioService scenarioService;
     private final DisasterSimulationService simulationService;
+    private final ClimateDataService climateDataService;
+
+    @GetMapping("/live")
+    public ApiResponse<DisasterLiveFeed> live() {
+        int year = java.time.Year.now(java.time.ZoneId.of("Asia/Seoul")).getValue();
+        String source = climateDataService.isDisasterApiConfigured() ? "kma" : "seed";
+        return ApiResponse.ok(new DisasterLiveFeed(
+                year,
+                climateDataService.typhoonsForYear(year),
+                climateDataService.earthquakeAlerts(),
+                source
+        ));
+    }
 
     @GetMapping("/scenarios")
     public ApiResponse<List<ScenarioSummary>> scenarios(@RequestParam DisasterMode mode) {

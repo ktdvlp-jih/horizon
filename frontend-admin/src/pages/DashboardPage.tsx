@@ -36,7 +36,7 @@ export function DashboardPage() {
           <ul className="mt-3 space-y-1 text-sm">
             {(s?.leaderboardTop5 ?? []).map((d) => (
               <li key={d.id} className="text-slate-600">
-                {d.name} · ΔT {d.deltaT.toFixed(1)}°C
+                {d.name} · 기준 대비 {d.deltaT > 0 ? '+' : ''}{d.deltaT.toFixed(1)}°C
               </li>
             ))}
           </ul>

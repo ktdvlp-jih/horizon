@@ -120,7 +120,7 @@ Invoke-RestMethod -Uri http://localhost:8080/api/designs/coach/resilience -Metho
 
 ## 6. 알려진 제약 / 참고
 
-- **에어코리아 PM**: 실시간 연동 대신 지역별 폴백 상수 사용(`AirQualityBaselineProvider`). 실연동 시 이 클래스만 교체하면 됨.
+- **미세먼지(기상청 황사 PM10)**: 현재 실시간 연동 대신 지역별 baseline 폴백 상수 사용(`AirQualityBaselineProvider`). 라이브 연동 시 이 클래스만 교체. (에어코리아가 아닌 기상청 데이터로 인용)
 - **농어업·레벨 영속화**: 우선 localStorage 기반. DB 영속화는 후순위.
 - **태풍 구역 플래너(`TyphoonDisasterView`)**: 격자 통합 대상이 아니라 보존만 함(라우트는 `/designer`로 흡수).
 - **레거시 API**: `/api/designs/simulate`, `/api/disaster/*` 는 전환기 동안 유지(기존 기능 보존).

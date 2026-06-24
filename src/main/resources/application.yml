@@ -41,10 +41,19 @@ horizon:
     read-timeout: 120s
   weather:
     kma:
-      base-url: ${HORIZON_KMA_BASE_URL:https://apihub.kma.go.kr}
       api-key: ${HORIZON_KMA_API_KEY:}
-      temp-path: ${HORIZON_KMA_TEMP_PATH:/api/typ01/url/kma_sfctm2.php}
-      solar-path: ${HORIZON_KMA_SOLAR_PATH:/api/typ01/cgi-bin/url/nph-sun_sfc_sts_pkg}
+      apihub-base-url: ${HORIZON_KMA_APIHUB_BASE_URL:https://apihub.kma.go.kr}
+      pm10-path: ${HORIZON_KMA_PM10_PATH:/api/typ01/url/dst_pm10_hr.php}
+      normals-path: ${HORIZON_KMA_NORMALS_PATH:/api/typ01/url/sun_sfc_norm.php}
+      normals-tmst: ${HORIZON_KMA_NORMALS_TMST:2021}
+      living-base-path: ${HORIZON_KMA_LIVING_BASE_PATH:/api/typ02/openApi/LivingWthrIdxServiceV3}
+    asos:
+      # apihub = 기상청 API허브 authKey (기본) | portal = 공공데이터포털 serviceKey
+      provider: ${HORIZON_ASOS_PROVIDER:apihub}
+      temp-path: ${HORIZON_ASOS_TEMP_PATH:/api/typ01/url/kma_sfctm2.php}
+      solar-path: ${HORIZON_ASOS_SOLAR_PATH:/api/typ01/cgi-bin/url/nph-sun_sfc_sts_pkg}
+      base-url: ${HORIZON_ASOS_BASE_URL:http://apis.data.go.kr/1360000/AsosHourlyInfoService}
+      data-path: ${HORIZON_ASOS_DATA_PATH:/getWthrDataList}
 
 logging:
   level:

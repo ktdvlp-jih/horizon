@@ -35,6 +35,50 @@ export interface RegionWeather {
   baseAirTemp: number
   solarLoad: number
   source: 'kma' | 'sample'
+  climate?: ClimateContext
+}
+
+export interface LiveTyphoon {
+  year: number
+  seq: number
+  nameKo: string
+  nameEn: string
+  startUtc: string
+  endUtc: string
+}
+
+export interface LiveEarthquakeAlert {
+  type: number
+  issuedAt: string
+  magnitude: number
+  latitude: number
+  longitude: number
+  location: string
+}
+
+/** Live KMA readings from 기상자료개방포털 / API허브 */
+export interface ClimateContext {
+  pm10: number | null
+  pm10Source: 'kma' | 'fallback' | null
+  rainfallMm: number | null
+  rainfallSource: 'kma' | null
+  normalTempC: number | null
+  normalSource: 'kma' | null
+  uvIndex: number | null
+  uvSource: 'kma' | null
+  airStagnationIndex: number | null
+  airStagnationSource: 'kma' | null
+  sensibleTempC: number | null
+  sensibleTempSource: 'kma' | null
+  typhoons: LiveTyphoon[]
+  earthquakeAlerts: LiveEarthquakeAlert[]
+}
+
+export interface DisasterLiveFeed {
+  typhoonYear: number
+  typhoons: LiveTyphoon[]
+  earthquakeAlerts: LiveEarthquakeAlert[]
+  source: 'kma' | 'seed'
 }
 
 export interface DesignMetrics {

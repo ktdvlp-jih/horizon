@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { LogIn, MapPin, Save, Thermometer } from 'lucide-react'
 import type { RegionWeather } from '@/types'
+import ClimateDataStrip from '@/components/designer/ClimateDataStrip'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -101,6 +102,7 @@ export default function DesignerHeaderBar({
             </div>
           )}
           </div>
+          {active?.climate && <ClimateDataStrip climate={active.climate} className="mt-1" />}
         </div>
 
         {/* 설계 관리 — 2행 */}

@@ -212,9 +212,30 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
     <Card data-tutorial="resilience">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">회복탄력성 평가</CardTitle>
+        <p className="text-[11px] leading-relaxed text-slate-500">
+          타일을 칠하면 자동으로 4축(열섬·미세먼지·재난·농어업)을 함께 평가합니다.
+        </p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="space-y-2 rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+        <details className="rounded-lg border border-sky-100 bg-sky-50/40 px-3 py-2 text-[11px] text-slate-600">
+          <summary className="cursor-pointer font-semibold text-sky-800">사용 순서</summary>
+          <ol className="mt-2 list-decimal space-y-1 pl-4">
+            <li>격자에 타일을 배치합니다 (0.5초 후 점수가 갱신됩니다).</li>
+            <li>
+              <strong>렌즈 탭</strong>(🌡️열섬·🌫️미세먼지 등)을 눌러 격자 위 위험도 색을 바꿔 봅니다.
+            </li>
+            <li>
+              (선택) <strong>재난 시나리오</strong>를 고르면 🛡️재난 렌즈가 켜집니다.
+            </li>
+            <li>
+              <strong>종합 회복탄력성</strong>·축별 막대를 보고, 🤖 통합 AI 코치로 개선 힌트를 받습니다.
+            </li>
+            <li>
+              <strong>▶ 스트레스 테스트</strong>로 폭염→태풍→미세먼지→수확기를 순서대로 점검합니다.
+            </li>
+          </ol>
+        </details>
+        <div className="space-y-2 rounded-lg border border-slate-100 bg-slate-50/60 p-3" data-tutorial="resilience-levels">
           <div className="flex flex-wrap gap-1">
             {TRACKS.map((t) => (
               <button
@@ -274,7 +295,7 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
           {levelMessage && <p className="text-[11px] font-medium text-emerald-600">{levelMessage}</p>}
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5" data-tutorial="resilience-lens">
           {LENS_ORDER.map((kind) => {
             const meta = LENS_META[kind]
             const available = kind === 'heat' || !meta.needsScenario || !!scenarioId
@@ -319,7 +340,7 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
           </select>
         </div>
 
-        <div className="space-y-1.5 rounded-lg border border-orange-100 bg-orange-50/50 p-2.5">
+        <div className="space-y-1.5 rounded-lg border border-orange-100 bg-orange-50/50 p-2.5" data-tutorial="resilience-stress">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-orange-700">스트레스 테스트</span>
             <button
@@ -394,7 +415,7 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
         )}
 
         {evalResult && (
-          <div className="space-y-2">
+          <div className="space-y-2" data-tutorial="resilience-scores">
             <div className="flex items-baseline justify-between rounded-lg bg-slate-50 px-3 py-2">
               <span className="text-sm text-slate-600">종합 회복탄력성</span>
               <span className={`text-2xl font-bold ${scoreColor(evalResult.resilienceScore)}`}>

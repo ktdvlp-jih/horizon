@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { deleteDesign, fetchDesigns, patchDesign } from '@/api/adminApi'
 
+const HEAT_ISLAND_LABEL = '기준 대비'
+
 export function DesignsPage() {
   const qc = useQueryClient()
   const [page, setPage] = useState(0)
@@ -31,7 +33,7 @@ export function DesignsPage() {
               <th className="px-4 py-2">ID</th>
               <th className="px-4 py-2">이름</th>
               <th className="px-4 py-2">지역</th>
-              <th className="px-4 py-2">ΔT</th>
+              <th className="px-4 py-2">{HEAT_ISLAND_LABEL}</th>
               <th className="px-4 py-2">소유자</th>
               <th className="px-4 py-2">리더보드</th>
               <th className="px-4 py-2">작업</th>
