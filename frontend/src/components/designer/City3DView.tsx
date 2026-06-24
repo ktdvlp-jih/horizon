@@ -67,6 +67,16 @@ interface Block {
   color: Color
 }
 
+interface Column {
+  key: string
+  x: number
+  y: number
+  z: number
+  scaleY: number
+  color: Color
+  hot: boolean
+}
+
 /** Deterministic tiny brightness variation so blocks don't look flat. */
 function jitter(r: number, c: number, h: number): number {
   const n = Math.sin(r * 12.9898 + c * 78.233 + h * 37.719) * 43758.5453
@@ -79,14 +89,8 @@ function makeColor(hex: string, r: number, c: number, h: number): Color {
   return col
 }
 
-function buildBlocks(
-  grid: Grid,
-  values: number[][] | null,
-  min: number,
-  max: number,
-  kind: HeatmapKind,
-  heat: boolean,
-): { solid: Block[]; water: Block[] } {
+/** City blocks — always natural tile colors (climate is shown via columns). */
+function buildBlocks(grid: Grid): { solid: Block[]; water: Block[] } {
   const size = grid.length
   const offset = (size - 1) / 2
   const solid: Block[] = []
@@ -98,12 +102,8 @@ function buildBlocks(
       const meta = TILE_BY_TYPE[tile]
       const baseColor = meta?.swatch ?? '#cccccc'
       const height = TILE_HEIGHT[tile] ?? 1
-      const heatColor =
-        heat && values && values[r]?.[c] != null
-          ? lensColor(kind, values[r][c], min, max)
-          : null
 
-      if (WATER_TILES.has(tile) && !heatColor) {
+      if (WATER_TILES.has(tile)) {
         water.push({
           key: `${r}-${c}-w`,
           x: c - offset,
@@ -117,21 +117,15 @@ function buildBlocks(
       for (let h = 0; h < height; h++) {
         const isTop = h === height - 1
         let hex: string
-        if (heatColor) {
-          hex = heatColor
-        } else if (tile === 'TREE') {
-          hex = isTop ? TILE_TOP.TREE! : TREE_TRUNK
-        } else if (isTop) {
-          hex = TILE_TOP[tile] ?? baseColor
-        } else {
-          hex = baseColor
-        }
+        if (tile === 'TREE') hex = isTop ? TILE_TOP.TREE! : TREE_TRUNK
+        else if (isTop) hex = TILE_TOP[tile] ?? baseColor
+        else hex = baseColor
         solid.push({
           key: `${r}-${c}-${h}`,
           x: c - offset,
           y: h + 0.5,
           z: r - offset,
-          color: heatColor ? new Color(hex) : makeColor(hex, r, c, h),
+          color: makeColor(hex, r, c, h),
         })
       }
     }
@@ -139,10 +133,50 @@ function buildBlocks(
   return { solid, water }
 }
 
+/**
+ * Climate columns rising from each tile (option B): a translucent glow whose
+ * COLOR encodes the lens value and HEIGHT encodes intensity. Blocks keep their
+ * own colors underneath, so the city stays readable while heat/PM/risk "rises".
+ */
+function buildColumns(
+  grid: Grid,
+  values: number[][] | null,
+  min: number,
+  max: number,
+  kind: HeatmapKind,
+): Column[] {
+  if (!values) return []
+  const size = grid.length
+  const offset = (size - 1) / 2
+  const span = max - min
+  const cols: Column[] = []
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const v = values[r]?.[c]
+      if (v == null) continue
+      const t = span >= 0.001 ? Math.min(1, Math.max(0, (v - min) / span)) : 0.5
+      const tileTop = TILE_HEIGHT[grid[r][c]] ?? 1
+      const colH = 0.25 + t * 2.8
+      cols.push({
+        key: `${r}-${c}-col`,
+        x: c - offset,
+        y: tileTop + 0.1 + colH / 2,
+        z: r - offset,
+        scaleY: colH,
+        color: new Color(lensColor(kind, v, min, max)),
+        hot: t >= 0.55,
+      })
+    }
+  }
+  return cols
+}
+
 function Scene({
   grid,
   solid,
   water,
+  columns,
   size,
   editing,
   dragRef,
@@ -151,6 +185,7 @@ function Scene({
   grid: Grid
   solid: Block[]
   water: Block[]
+  columns: Column[]
   size: number
   editing: boolean
   dragRef: React.MutableRefObject<{ x: number; y: number; moved: boolean }>
@@ -195,6 +230,22 @@ function Scene({
           <meshStandardMaterial transparent opacity={0.66} roughness={0.2} metalness={0.1} />
           {water.map((b) => (
             <Instance key={b.key} position={[b.x, b.y, b.z]} color={b.color} />
+          ))}
+        </Instances>
+      )}
+
+      {/* Climate glow columns (option B) — color = value, height = intensity */}
+      {columns.length > 0 && (
+        <Instances limit={size * size}>
+          <boxGeometry args={[0.5, 1, 0.5]} />
+          <meshBasicMaterial transparent opacity={0.42} depthWrite={false} toneMapped={false} />
+          {columns.map((col) => (
+            <Instance
+              key={col.key}
+              position={[col.x, col.y, col.z]}
+              scale={[1, col.scaleY, 1]}
+              color={col.color}
+            />
           ))}
         </Instances>
       )}
@@ -267,9 +318,10 @@ export default function City3DView({
   }, [open, onClose])
 
   const size = grid.length
-  const { solid, water } = useMemo(
-    () => buildBlocks(grid, values, valueMin, valueMax, heatmapKind, heat),
-    [grid, values, valueMin, valueMax, heatmapKind, heat],
+  const { solid, water } = useMemo(() => buildBlocks(grid), [grid])
+  const columns = useMemo(
+    () => (heat ? buildColumns(grid, values, valueMin, valueMax, heatmapKind) : []),
+    [heat, grid, values, valueMin, valueMax, heatmapKind],
   )
 
   if (!open) return null
@@ -310,11 +362,12 @@ export default function City3DView({
             <button
               type="button"
               onClick={() => setHeat((v) => !v)}
+              title="블록 위로 솟는 기후 효과(열·미세먼지·위험)를 켜고 끕니다"
               className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                 heat ? 'bg-amber-500 text-white' : 'bg-white/10 text-slate-200 hover:bg-white/20'
               }`}
             >
-              {heat ? '히트맵 켜짐' : '히트맵 끔'}
+              {heat ? '기후 효과 켜짐' : '기후 효과 끔'}
             </button>
             <button
               type="button"
@@ -366,6 +419,7 @@ export default function City3DView({
               grid={grid}
               solid={solid}
               water={water}
+              columns={columns}
               size={size}
               editing={editing}
               dragRef={dragRef}
@@ -382,7 +436,9 @@ export default function City3DView({
           <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/40 px-3 py-1 text-center text-[11px] text-white/80">
             {editing
               ? '팔레트에서 타일을 고르고, 도시 블록을 클릭해 칠하세요.'
-              : '건물·공장은 높게, 공원·물은 낮게 — 타일 높이로 입체감을 표현합니다.'}
+              : heat
+                ? '솟아오른 빛기둥 = 기후 강도. 빨갛고 높을수록 뜨겁고(위험), 낮고 푸를수록 시원합니다.'
+                : '건물·공장은 높게, 공원·물은 낮게 — 타일 높이로 입체감을 표현합니다.'}
           </p>
         </div>
       </div>
