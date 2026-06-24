@@ -78,11 +78,15 @@ docker compose up -d --build
 | 파일 | 내용 |
 |------|------|
 | `.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md` | **메인 장기 세션** (KMA·4축·UI 대화 대부분) |
+| `.specstory/history/2026-06-24_11-36-41Z-chemical-management-system-development.md` | **최근 세션** (파일명은 SpecStory 자동 생성 — Horizon KMA·UI 작업 포함) |
 | `.specstory/history/2026-06-23_07-16-07Z-project-tech-stack-integration.md` | 기술 스택·온보딩 |
 | `.specstory/history/2026-06-23_06-37-44Z-work-history-retrieval-from-another-pc.md` | PC 간 작업 이어하기 |
 | `.specstory/history/2026-06-20_18-03-54Z-프로젝트-심사-기준-적합성.md` | 심사 기준 |
 
-Cursor SpecStory 확장 설치 시 위 파일이 자동 동기화됩니다.  
+Cursor SpecStory 확장 설치 시 `.specstory/history/` 아래 파일이 **대화 이력**입니다. `git pull`로 PC 간 동기화.
+
+**Cursor 룰:** `.cursor/rules/contest-constraints.mdc` — 해커톤 공고 제약 (항상 적용). 레포에 포함되어 있어 clone/pull 시 다른 PC에서도 동일.
+
 수동 Export: `docs/chat-exports/README.md`
 
 ---
