@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useSearchParams } from 'react-router-dom'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { Eraser, Redo2, Trees, Undo2 } from 'lucide-react'
+import { Boxes, Eraser, Redo2, Trees, Undo2 } from 'lucide-react'
 
 import type { CoachResponse, SimulationResult, TileType } from '@/types'
 
@@ -60,6 +60,8 @@ import CoachPanel from '@/components/designer/CoachPanel'
 import ResiliencePanel, { type LensOverlay } from '@/components/designer/ResiliencePanel'
 
 import GridViewToggle, { gridViewHint } from '@/components/designer/GridViewToggle'
+
+const City3DView = lazy(() => import('@/components/designer/City3DView'))
 
 import HeatmapGuideButton from '@/components/designer/HeatmapGuideButton'
 
@@ -136,6 +138,8 @@ export default function DesignerPage() {
   const [showHeatmap, setShowHeatmap] = useState(false)
 
   const [lensOverlay, setLensOverlay] = useState<LensOverlay | null>(null)
+
+  const [show3D, setShow3D] = useState(false)
 
   const [result, setResult] = useState<SimulationResult | null>(null)
 
@@ -501,6 +505,15 @@ export default function DesignerPage() {
 
 
 
+  const onPaint3D = useCallback(
+    (r: number, c: number) => {
+      beginStroke()
+      paintCell(r, c, brush)
+      endStroke()
+    },
+    [beginStroke, paintCell, endStroke, brush],
+  )
+
   const onStrokeStart = useCallback(() => {
     beginStroke()
   }, [beginStroke])
@@ -740,6 +753,16 @@ export default function DesignerPage() {
 
             <div className="flex items-center gap-1" data-tutorial="heatmap">
 
+              <Button
+                size="sm"
+                variant="outline"
+                type="button"
+                className="whitespace-nowrap px-2 text-xs"
+                onClick={() => setShow3D(true)}
+              >
+                <Boxes className="h-4 w-4" /> 3D로 보기
+              </Button>
+
               <GridViewToggle
 
                 mode={showHeatmap ? 'heatmap' : 'tile'}
@@ -841,6 +864,32 @@ export default function DesignerPage() {
         />
 
       </div>
+
+      {show3D && (
+        <Suspense fallback={null}>
+          <City3DView
+            open={show3D}
+            onClose={() => setShow3D(false)}
+            grid={grid}
+            values={
+              lensOverlay
+                ? lensOverlay.values
+                : anim.snapshot?.temps ?? result?.surfaceTemps ?? null
+            }
+            valueMin={lensOverlay ? lensOverlay.min : anim.timeline?.globalMin ?? result?.metrics.minSurfaceTemp}
+            valueMax={lensOverlay ? lensOverlay.max : anim.timeline?.globalMax ?? result?.metrics.maxSurfaceTemp}
+            heatmapKind={lensOverlay?.kind ?? 'temp'}
+            showHeatmap={lensOverlay ? true : showHeatmap}
+            brush={brush}
+            onBrushChange={setBrush}
+            onPaintCell={onPaint3D}
+            playing={anim.isPlaying}
+            loading={anim.isLoading}
+            onPlay={anim.load}
+            onStop={anim.stop}
+          />
+        </Suspense>
+      )}
 
     </div>
 
