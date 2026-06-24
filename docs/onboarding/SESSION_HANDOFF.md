@@ -137,7 +137,9 @@ IP·체크리스트 + **Agent 이어하기 맥락** 유지. 변경 시 commit.
 
 ### 다음 후보 (우선순위)
 
-- [ ] **`RESILIENCE_TEST_GUIDE.md` §1~5 수동 체험** — 구현은 됐으나 아직 아무도 화면/API 확인 안 함 (개발 PC: 터널 → bootRun → npm dev → `/designer`)
+- [x] **KMA API 앱 연동** (PM10·평년·재난·생활기상) — `2a3b521` · 상세는 [AI_SESSION_HANDOFF.md](../AI_SESSION_HANDOFF.md)
+- [x] **Designer UI/UX** (모바일 탭·시뮬+코치 스택) — `d3c5850`, `53cc5a2`
+- [ ] **`RESILIENCE_TEST_GUIDE.md` §1~5 수동 체험** — 다른 PC에서 pull 후 Docker `:9080` 확인
 - [ ] §7 빌드 스모크: `compileJava` · `npm run build` · AI `py_compile`
 - [ ] 지진 30초 대피 UX, 쓰나미 프로필 UX (기존 백로그)
 - [ ] Gemini LLM · KMA API 실연동 (현재 폴백/목 데이터)
@@ -171,6 +173,7 @@ IP·체크리스트 + **Agent 이어하기 맥락** 유지. 변경 시 commit.
 
 ## 관련 문서
 
+- **[AI_SESSION_HANDOFF.md](../AI_SESSION_HANDOFF.md)** — Cursor AI 대화·KMA/UI 작업 맥락 (SpecStory와 함께 사용)
 - [SETUP.md](SETUP.md)
 - [DEV_SETUP.md](DEV_SETUP.md)
 - [DEPLOY.md](DEPLOY.md)

@@ -24,6 +24,7 @@
 | [onboarding/DEPLOY.md](onboarding/DEPLOY.md) | GitHub Actions 자동 배포 |
 | [onboarding/CLOUDFLARE_TUNNEL.md](onboarding/CLOUDFLARE_TUNNEL.md) | 외부 데모 URL |
 | [onboarding/SESSION_HANDOFF.md](onboarding/SESSION_HANDOFF.md) | 다른 PC에서 이어하기 |
+| **[AI_SESSION_HANDOFF.md](AI_SESSION_HANDOFF.md)** | **Cursor AI 대화 맥락·SpecStory 이어하기** |
 
 온보딩 문서 전체 목록: [onboarding/README.md](onboarding/README.md)
 
