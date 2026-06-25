@@ -86,11 +86,14 @@
 
 | 데이터 | 용도 | 현재 상태 |
 |--------|------|-----------|
-| ASOS 시간자료 | **기상청 API허브** `kma_sfctm2` + 일사 묶음형 (`authKey`) — 기본. 공공데이터포털 `getWthrDataList`는 `HORIZON_ASOS_PROVIDER=portal` 시 | 키 설정 시 라이브, 미설정 시 샘플 폴백 |
-| 황사 PM10 (기상자료개방포털) | 대기(미세먼지) 렌즈 baseline | baseline 폴백 → 라이브 연동 예정 |
-| 태풍·지진 (API허브) | 재난 시나리오·스트레스 테스트 | 시드 프리셋 → 라이브 연동 예정 |
+| ASOS 시간자료 (기상청 API허브) | 기온·일사·**강수** `kma_sfctm2` + 일사 묶음형 | **라이브** — 열섬·냉각·태풍·농어업 |
+| 기후평년값 `sun_sfc_norm` | 열섬 ΔT 기준·농어업 warming | **라이브** |
+| 생활기상지수 V3 | **자외선·대기정체·체감온도** | **라이브** — 열섬·미세먼지·3D VFX |
+| 황사 PM10 (기상청 API허브) | 대기(미세먼지) 렌즈 baseline | **라이브** + 정체지수 보정 |
+| 태풍·지진 (기상청 API허브) | 재난 시나리오 강도·3D 재난 애니메이션 | **시드 + 라이브 블렌드** (`liveSource: kma`) |
 
-- 환경 변수: `HORIZON_KMA_API_KEY` = 공공데이터포털 **serviceKey**
+- 모든 기상·재난 데이터는 **기상청 API허브** 단일 출처(`authKey`)로 통일.
+- 환경 변수: `HORIZON_KMA_API_KEY` = 기상청 API허브 **authKey**
 - 키 미설정·API 오류 시: 내장 샘플 지역 데이터로 graceful fallback (데모 보장)
 
 ### AI 활용 방식
@@ -101,7 +104,7 @@
 1. 지역 선택 (서울/부산 등) → ASOS baseline 기온·일사 로드 (`/designer`).
 2. 팔레트에서 타일 배치 → 열섬 히트맵·지표 즉시 갱신.
 3. 렌즈 전환(대기·재난·농어업) → **같은 설계**를 다른 환경 시험으로 재평가.
-4. 시나리오 레벨(Lv1 열섬 → …) · 스트레스 테스트 · AI 코치 → 재설계.
+4. **캠페인 Lv.1–10** (타일 %·구역 배분·점수) · 스트레스 테스트 · 3D 재난 VFX · AI 코치 → 재설계.
 
 ### 학습되는 기상·환경 원리
 - **열섬**: 알베도, 녹지·수면 증발냉각, 불투수면·건물 열 저장
@@ -116,10 +119,10 @@
 | 1 | 인터랙티브 격자 설계 + 렌즈 히트맵 | 열섬·대기·재난·농어업 |
 | 2 | 기상청 ASOS 기온·일사 baseline | `WeatherDataService` + 폴백 |
 | 3 | 다축 평가 + 균형 점수 | `POST /api/designs/evaluate` |
-| 4 | 시나리오 레벨 + 설계 이어받기 | `lib/levels.ts` |
+| 4 | **캠페인 Lv.1–10** + 타일 %·구역 제약 | `lib/campaignLevels.ts` · `levelValidation.ts` |
 | 5 | 스트레스 테스트 타임라인 | 폭염→태풍→대기→수확기 |
 | 6 | 통합 AI 코치 | 4축 metrics 프롬프트 |
-| 7 | 3D 도시 뷰 | `City3DView` |
+| 7 | 3D 도시 뷰 + 재난·기후 VFX | `City3DView` · `DisasterVfx` (태풍·지진·해일·UV·강수) |
 
 메인 진입: **`/designer`** (레거시 `/disaster` → 리다이렉트)
 
@@ -134,7 +137,7 @@
 [TECH_STACK.md](../template/TECH_STACK.md): React 19/Vite → Spring Boot 3.5 → Python FastAPI, PostgreSQL, Docker Compose.
 
 ### 운영·관리
-관리자 콘솔: [admin_PROMPT.md](admin_PROMPT.md).  
+관리자 콘솔: `frontend-admin/` 별도 Vite 앱 (`ROLE_ADMIN`, `/api/admin/**`, dev `:5174`).  
 체험 테스트: [RESILIENCE_TEST_GUIDE.md](RESILIENCE_TEST_GUIDE.md).
 
 ### 기존 서비스 대비 차별성
@@ -147,7 +150,7 @@
 | 항목 | Phase 0 (원 MVP) | 현행 |
 |------|------------------|------|
 | 주제 | 열섬 중심 | 열섬 **입문** → 대기·재난·농어업 확장 |
-| 데이터 | 기온·일사 (개념) | ASOS Open API `getWthrDataList` 연동 |
+| 데이터 | 기온·일사 (개념) | 기상청 API허브 ASOS 시간자료(`kma_sfctm2`) 연동 |
 | 코치 | 열섬 단일 축 | 통합 4축 코치 |
 | 진입 | 설계자 단일 화면 | `/designer` + 레벨·스트레스 |
 

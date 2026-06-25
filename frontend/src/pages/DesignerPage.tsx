@@ -4,13 +4,15 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { Boxes, Eraser, Redo2, Trees, Undo2 } from 'lucide-react'
+import { Boxes, Eraser, Redo2, Sparkles, Trees, Undo2 } from 'lucide-react'
 
 import type { CoachResponse, SimulationResult, TileType } from '@/types'
 
 import { useRegions } from '@/hooks/useRegions'
 
 import { useClimateAnimation } from '@/hooks/useClimateAnimation'
+import { useDisasterAnimation } from '@/hooks/useDisasterAnimation'
+import { scenarioToMode } from '@/lib/scenarioUtils'
 
 import { useGridHistory } from '@/hooks/useGridHistory'
 
@@ -32,7 +34,7 @@ import {
 
 } from '@/api/designApi'
 
-import { createInitialGrid, fillGrid, GRID_SIZE, normalizeLoadedGrid } from '@/lib/grid'
+import { createGreenCityGrid, createInitialGrid, fillGrid, GRID_SIZE, normalizeLoadedGrid } from '@/lib/grid'
 
 import { fetchChallenges } from '@/api/challengeApi'
 import { commitChallengeProgress, loadCompletedChallengeIds, loadCompletedChallengeMetrics, saveCompletedChallengeIds, saveCompletedChallengeMetrics } from '@/lib/challengeRules'
@@ -57,7 +59,11 @@ import MetricsPanel from '@/components/designer/MetricsPanel'
 
 import CoachPanel from '@/components/designer/CoachPanel'
 
-import ResiliencePanel, { type LensOverlay } from '@/components/designer/ResiliencePanel'
+import ResiliencePanel, {
+  type LensOverlay,
+  type ResilienceDemoCommand,
+  type ResilienceCampaignState,
+} from '@/components/designer/ResiliencePanel'
 
 import GridViewToggle, { gridViewHint } from '@/components/designer/GridViewToggle'
 
@@ -69,7 +75,45 @@ import TutorialOverlay from '@/components/tutorial/TutorialOverlay'
 
 import DesignerMobileTabs, { type DesignerMobileTab } from '@/components/designer/DesignerMobileTabs'
 
+import GuidedDemo, { type DemoStepMeta } from '@/components/designer/GuidedDemo'
 
+
+
+/** Guided tour: narrates region data → concrete city → green redesign → 4축 검증 → 코치. */
+const DEMO_STEPS: DemoStepMeta[] = [
+  {
+    title: '1. 기상청 실시간 데이터 로드',
+    narration:
+      '선택한 지역의 기온·일사·미세먼지(PM10)를 기상청 API허브에서 불러옵니다. 상단 칩의 녹색=실시간, 회색=근사(폴백)입니다.',
+    api: 'GET /api/regions · GET /api/weather/climate/{code}',
+  },
+  {
+    title: '2. 콘크리트 도시 (Before)',
+    narration:
+      '건물·도로로 가득한 기본 도시입니다. 열섬 히트맵이 빨갛게 달아오릅니다 — 이 상태를 기준(baseline)으로 잡습니다.',
+    api: 'POST /api/designs/simulate',
+  },
+  {
+    title: '3. 녹지·수변 재설계 (After)',
+    narration:
+      '공원·가로수·수변으로 바꾸자 같은 지역인데도 표면온도가 내려갑니다. 우측 결과 패널에서 기준 대비 변화를 확인하세요.',
+    api: 'POST /api/designs/simulate',
+  },
+  {
+    title: '4. 4축 검증 — 스트레스 테스트',
+    narration:
+      '같은 설계 하나를 폭염→태풍→미세먼지→수확기 순으로 통과시킵니다. 렌즈/히트맵이 자동 전환되며 4축 점수가 갱신됩니다.',
+    api: 'POST /api/designs/evaluate · GET /api/disaster/live',
+  },
+  {
+    title: '5. 통합 AI 코치',
+    narration:
+      '4축 결과를 바탕으로 강점·약점·개선 제안을 받습니다. AI 키가 없으면 규칙 기반으로 자동 폴백합니다.',
+    api: 'POST /api/designs/coach/resilience',
+  },
+]
+
+const DEMO_DURATIONS = [3800, 4200, 4800, 11800, 6000]
 
 function isoDaysAgo(n: number): string {
 
@@ -170,6 +214,18 @@ export default function DesignerPage() {
 
   const [mobileTab, setMobileTab] = useState<DesignerMobileTab>('grid')
 
+  const [demoActive, setDemoActive] = useState(false)
+  const [demoStep, setDemoStep] = useState(0)
+  const [demoPlaying, setDemoPlaying] = useState(false)
+  const [demoCommand, setDemoCommand] = useState<ResilienceDemoCommand | null>(null)
+  const demoCmdId = useRef(0)
+  const [campaignState, setCampaignState] = useState<ResilienceCampaignState>({
+    scenarioId: '',
+    activeLens: 'heat',
+    zones: { farmland: 0.4, fishery: 0.2, forest: 0.25, solar: 0.15 },
+    disasterMode: null,
+  })
+
   const simToken = useRef(0)
   const guestRestored = useRef(false)
 
@@ -247,6 +303,26 @@ export default function DesignerPage() {
   }, [result, challenges, completedChallengeIds])
 
   const anim = useClimateAnimation(regionCode, grid, timelineDate, commitChallenges)
+
+  const disasterMode = campaignState.disasterMode ?? scenarioToMode(campaignState.scenarioId)
+  const disasterScenarioActive = !!(disasterMode && campaignState.scenarioId)
+  const disasterAnim = useDisasterAnimation(
+    disasterMode ?? 'typhoon',
+    regionCode,
+    campaignState.scenarioId,
+    grid,
+  )
+
+  const regionClimate = useMemo(
+    () => regions?.find((r) => r.code === regionCode)?.climate ?? null,
+    [regions, regionCode],
+  )
+
+  useEffect(() => {
+    if (!show3D || !disasterScenarioActive) return
+    disasterAnim.setPlaying(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show3D, disasterScenarioActive])
 
   const animStop = anim.stop
 
@@ -552,6 +628,97 @@ export default function DesignerPage() {
 
   }, [replaceWithHistory])
 
+  const runDemoStep = useCallback(
+    (s: number) => {
+      switch (s) {
+        case 0:
+          setShow3D(false)
+          setLensOverlay(null)
+          setShowHeatmap(false)
+          setMobileTab('grid')
+          break
+        case 1: {
+          const concrete = createInitialGrid()
+          replaceWithHistory(concrete)
+          setLensOverlay(null)
+          setShowHeatmap(true)
+          setMobileTab('grid')
+          if (regionCode) {
+            simulateApi(regionCode, concrete).then(setBaselineResult).catch(() => undefined)
+          }
+          break
+        }
+        case 2:
+          replaceWithHistory(createGreenCityGrid())
+          setLensOverlay(null)
+          setShowHeatmap(true)
+          setMobileTab('grid')
+          break
+        case 3:
+          setMobileTab('insight')
+          demoCmdId.current += 1
+          setDemoCommand({ id: demoCmdId.current, type: 'stress' })
+          break
+        case 4:
+          setMobileTab('insight')
+          demoCmdId.current += 1
+          setDemoCommand({ id: demoCmdId.current, type: 'coach' })
+          break
+      }
+    },
+    [replaceWithHistory, regionCode],
+  )
+
+  const startDemo = useCallback(() => {
+    setDemoActive(true)
+    setDemoStep(0)
+    setDemoPlaying(true)
+  }, [])
+
+  const stopDemo = useCallback(() => {
+    setDemoActive(false)
+    setDemoPlaying(false)
+    setDemoCommand(null)
+  }, [])
+
+  const onDemoPlayToggle = useCallback(() => {
+    setDemoPlaying((p) => {
+      if (!p && demoStep >= DEMO_STEPS.length - 1) {
+        setDemoStep(0)
+        return true
+      }
+      return !p
+    })
+  }, [demoStep])
+
+  const onDemoPrev = useCallback(() => {
+    setDemoPlaying(false)
+    setDemoStep((s) => Math.max(0, s - 1))
+  }, [])
+
+  const onDemoNext = useCallback(() => {
+    setDemoPlaying(false)
+    setDemoStep((s) => Math.min(DEMO_STEPS.length - 1, s + 1))
+  }, [])
+
+  // Perform each step's action when the tour enters that step.
+  useEffect(() => {
+    if (!demoActive) return
+    runDemoStep(demoStep)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoActive, demoStep])
+
+  // Auto-advance while playing.
+  useEffect(() => {
+    if (!demoActive || !demoPlaying) return
+    if (demoStep >= DEMO_STEPS.length - 1) {
+      setDemoPlaying(false)
+      return
+    }
+    const t = window.setTimeout(() => setDemoStep((s) => s + 1), DEMO_DURATIONS[demoStep])
+    return () => window.clearTimeout(t)
+  }, [demoActive, demoPlaying, demoStep])
+
 
 
   const regionList = useMemo(() => regions ?? [], [regions])
@@ -658,6 +825,16 @@ export default function DesignerPage() {
           >
             <Boxes className="h-4 w-4" /> 3D
           </Button>
+          <Button
+            size="sm"
+            type="button"
+            className="shrink-0 whitespace-nowrap px-2 text-xs"
+            onClick={startDemo}
+            disabled={demoActive || !regionCode}
+            title="기상청 데이터 로드부터 AI 코치까지 자동으로 시연합니다"
+          >
+            <Sparkles className="h-4 w-4" /> 가이드 투어
+          </Button>
           <GridViewToggle
             mode={showHeatmap ? 'heatmap' : 'tile'}
             onChange={(m) => setShowHeatmap(m === 'heatmap')}
@@ -719,6 +896,8 @@ export default function DesignerPage() {
       grid={grid}
       onOverlayChange={setLensOverlay}
       onLoadGrid={replaceWithHistory}
+      demoCommand={demoCommand}
+      onCampaignStateChange={setCampaignState}
     />
   )
 
@@ -846,21 +1025,67 @@ export default function DesignerPage() {
             values={
               lensOverlay
                 ? lensOverlay.values
-                : anim.snapshot?.temps ?? result?.surfaceTemps ?? null
+                : disasterScenarioActive && disasterAnim.animatedRisk
+                  ? disasterAnim.animatedRisk
+                  : anim.snapshot?.temps ?? result?.surfaceTemps ?? null
             }
-            valueMin={lensOverlay ? lensOverlay.min : anim.timeline?.globalMin ?? result?.metrics.minSurfaceTemp}
-            valueMax={lensOverlay ? lensOverlay.max : anim.timeline?.globalMax ?? result?.metrics.maxSurfaceTemp}
-            heatmapKind={lensOverlay?.kind ?? 'temp'}
-            showHeatmap={lensOverlay ? true : showHeatmap}
+            valueMin={
+              lensOverlay
+                ? lensOverlay.min
+                : disasterScenarioActive && disasterAnim.animatedRisk
+                  ? disasterAnim.globalMin
+                  : anim.timeline?.globalMin ?? result?.metrics.minSurfaceTemp
+            }
+            valueMax={
+              lensOverlay
+                ? lensOverlay.max
+                : disasterScenarioActive && disasterAnim.animatedRisk
+                  ? disasterAnim.globalMax
+                  : anim.timeline?.globalMax ?? result?.metrics.maxSurfaceTemp
+            }
+            heatmapKind={lensOverlay?.kind ?? (disasterScenarioActive ? 'risk' : 'temp')}
+            showHeatmap={lensOverlay ? true : showHeatmap || disasterScenarioActive}
             brush={brush}
             onBrushChange={setBrush}
             onPaintCell={onPaint3D}
-            playing={anim.isPlaying}
-            loading={anim.isLoading}
-            onPlay={anim.load}
-            onStop={anim.stop}
+            playing={
+              disasterScenarioActive ? disasterAnim.playing : anim.isPlaying
+            }
+            loading={disasterScenarioActive ? disasterAnim.loading : anim.isLoading}
+            onPlay={() => {
+              if (disasterScenarioActive) {
+                disasterAnim.setPlaying(true)
+              } else {
+                anim.load()
+              }
+            }}
+            onStop={() => {
+              if (disasterScenarioActive) {
+                disasterAnim.setPlaying(false)
+              } else {
+                anim.stop()
+              }
+            }}
+            disasterMode={disasterMode}
+            riskValues={disasterScenarioActive ? disasterAnim.animatedRisk : null}
+            riskMin={disasterAnim.globalMin}
+            riskMax={disasterAnim.globalMax}
+            disasterPlaying={disasterScenarioActive && (disasterAnim.playing || disasterAnim.hasFrames)}
+            climate={regionClimate}
           />
         </Suspense>
+      )}
+
+      {demoActive && (
+        <GuidedDemo
+          steps={DEMO_STEPS}
+          step={demoStep}
+          playing={demoPlaying}
+          onPlayToggle={onDemoPlayToggle}
+          onPrev={onDemoPrev}
+          onNext={onDemoNext}
+          onClose={stopDemo}
+        />
       )}
 
     </div>

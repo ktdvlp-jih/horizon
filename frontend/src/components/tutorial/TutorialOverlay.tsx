@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const STORAGE_KEY = 'horizon.tutorial.urban-climate.v2'
+const STORAGE_KEY = 'horizon.tutorial.urban-climate.v3'
 
 const STEPS = [
   {
     title: '지역 선택',
-    body: '상단에서 기상 데이터가 적용될 지역을 고르세요. 기준 기온·일사량이 이 지역 값으로 설정됩니다.',
+    body: '상단에서 기상 데이터가 적용될 지역을 고르세요. 기상청 API허브 10종(기온·일사·강수·PM10·평년·자외선·정체·체감·태풍·지진)이 이 지역 값으로 연결됩니다.',
     anchor: '[data-tutorial="region"]',
   },
   {
@@ -16,23 +16,28 @@ const STEPS = [
     anchor: '[data-tutorial="palette"]',
   },
   {
-    title: '히트맵 보기',
-    body: '격자 위 토글로 타일/히트맵을 전환하면 표면 온도 분포를 확인할 수 있습니다.',
+    title: '캠페인 Lv.1–10',
+    body: '회복탄력성 패널의 「캠페인」에서 레벨을 고르세요. 타일 % 상한·녹지/방재 최소·외곽 구역 배분·점수를 모두 만족해야 클리어합니다. 레벨마다 다른 KMA 데이터가 점수에 반영됩니다.',
+    anchor: '[data-tutorial="resilience-levels"]',
+  },
+  {
+    title: '3D 재난·기후 뷰',
+    body: '격자 위 「3D」 버튼을 누르세요. 재난 시나리오(태풍·지진·해일)를 고른 뒤 재생하면 건물 비산·붕괴·침수 애니메이션이 나옵니다. 자외선·체감온도·강수는 배경 효과로 표시됩니다.',
     anchor: '[data-tutorial="heatmap"]',
   },
   {
-    title: '온도 변화 확인',
-    body: '왼쪽 「시뮬레이션 결과」에서 평균 온도와 기준 대비 변화를 확인하세요. 「현재 상태를 기준으로 잡기」로 Before/After도 볼 수 있습니다.',
-    anchor: '[data-tutorial="metrics"]',
-  },
-  {
     title: '회복탄력성 — 렌즈·점수',
-    body: '좌측 하단 「회복탄력성 평가」에서 타일을 칠하면 종합 점수가 자동으로 나옵니다. 🌡️열섬·🌫️미세먼지 등 렌즈 탭을 누르면 격자 색이 축에 맞게 바뀝니다. 한 축만 잘하면 균형 패널티가 붙을 수 있어요.',
+    body: '「회복탄력성 평가」에서 타일을 칠하면 종합 점수가 자동으로 나옵니다. 🌡️열섬·🌫️미세먼지 등 렌즈 탭을 누르면 격자 색이 축에 맞게 바뀝니다.',
     anchor: '[data-tutorial="resilience-lens"]',
   },
   {
-    title: '회복탄력성 — 재난·스트레스·코치',
-    body: '재난 시나리오를 고르면 🛡️재난 렌즈가 켜집니다. ▶ 스트레스 테스트로 폭염→태풍→미세먼지→수확기를 순서대로 점검하고, 🤖 통합 AI 코치로 4축 개선 힌트를 받으세요.',
+    title: '외곽 구역 배분',
+    body: '🌾농어업 렌즈를 켜면 외곽·광역·구역 배분 슬라이더가 나타납니다. 농지·어장·보존림·태양광 비율도 캠페인 클리어 조건에 포함됩니다.',
+    anchor: '[data-tutorial="resilience-zones"]',
+  },
+  {
+    title: '스트레스 테스트·AI 코치',
+    body: '▶ 스트레스 테스트로 폭염→태풍→미세먼지→수확기를 순서대로 점검하고, 🤖 통합 AI 코치로 4축 개선 힌트를 받으세요.',
     anchor: '[data-tutorial="resilience-stress"]',
   },
   {

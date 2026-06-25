@@ -57,8 +57,9 @@ public class DisasterSimulationService {
         RegionWeather region = weatherDataService.getRegion(request.regionCode());
         RegionContext ctx = loadRegionContext(request.regionCode());
         TileType[][] grid = parseGrid(request.grid());
+        var climate = region.climate();
 
-        TyphoonSimulationEngine.SimulationOutput output = dispatch(scenario, ctx, grid);
+        TyphoonSimulationEngine.SimulationOutput output = dispatch(scenario, ctx, grid, climate);
         double[][] values = output.cellValues();
 
         return new DisasterSimulationResult(
@@ -78,11 +79,12 @@ public class DisasterSimulationService {
         RegionWeather region = weatherDataService.getRegion(request.regionCode());
         RegionContext ctx = loadRegionContext(request.regionCode());
         TileType[][] grid = parseGrid(request.grid());
+        var climate = region.climate();
 
         DisasterTimeline timeline = switch (request.mode()) {
-            case TYPHOON -> typhoonEngine.timeline(scenario, ctx, grid);
-            case EARTHQUAKE -> earthquakeEngine.timeline(scenario, ctx, grid);
-            case TSUNAMI -> tsunamiEngine.timeline(scenario, ctx, grid);
+            case TYPHOON -> typhoonEngine.timeline(scenario, ctx, grid, climate);
+            case EARTHQUAKE -> earthquakeEngine.timeline(scenario, ctx, grid, climate);
+            case TSUNAMI -> tsunamiEngine.timeline(scenario, ctx, grid, climate);
         };
 
         return new DisasterTimeline(
@@ -188,11 +190,12 @@ public class DisasterSimulationService {
     }
 
     private TyphoonSimulationEngine.SimulationOutput dispatch(DisasterScenario scenario,
-                                                              RegionContext ctx, TileType[][] grid) {
+                                                              RegionContext ctx, TileType[][] grid,
+                                                              com.horizon.weather.dto.ClimateContext climate) {
         return switch (scenario.getMode()) {
-            case TYPHOON -> typhoonEngine.simulate(scenario, ctx, grid);
-            case EARTHQUAKE -> earthquakeEngine.simulate(scenario, ctx, grid);
-            case TSUNAMI -> tsunamiEngine.simulate(scenario, ctx, grid);
+            case TYPHOON -> typhoonEngine.simulate(scenario, ctx, grid, climate);
+            case EARTHQUAKE -> earthquakeEngine.simulate(scenario, ctx, grid, climate);
+            case TSUNAMI -> tsunamiEngine.simulate(scenario, ctx, grid, climate);
         };
     }
 

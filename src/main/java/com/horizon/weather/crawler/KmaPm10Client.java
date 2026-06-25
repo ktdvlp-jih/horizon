@@ -16,16 +16,19 @@ public class KmaPm10Client {
     private final RestClient client;
     private final String apiKey;
     private final String pm10Path;
+    private final String pm10Org;
 
     public KmaPm10Client(
             RestClient.Builder restClientBuilder,
             @Value("${horizon.weather.kma.apihub-base-url}") String baseUrl,
             @Value("${horizon.weather.kma.api-key:}") String apiKey,
-            @Value("${horizon.weather.kma.pm10-path:/api/typ01/url/dst_pm10_hr.php}") String pm10Path
+            @Value("${horizon.weather.kma.pm10-path:/api/typ01/url/dst_pm10_hr.php}") String pm10Path,
+            @Value("${horizon.weather.kma.pm10-org:}") String pm10Org
     ) {
         this.client = restClientBuilder.baseUrl(baseUrl).build();
         this.apiKey = apiKey;
         this.pm10Path = pm10Path;
+        this.pm10Org = pm10Org;
     }
 
     public boolean isConfigured() {
@@ -40,7 +43,7 @@ public class KmaPm10Client {
             String body = client.get()
                     .uri(uri -> uri.path(pm10Path)
                             .queryParam("tm", tmYYYYMMDDHH)
-                            .queryParam("org", "")
+                            .queryParam("org", pm10Org)
                             .queryParam("stn", stationId)
                             .queryParam("mode", 1)
                             .queryParam("help", 0)

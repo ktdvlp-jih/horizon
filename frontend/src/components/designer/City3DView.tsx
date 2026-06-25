@@ -18,8 +18,20 @@ import {
   type MeshStandardMaterial,
 } from 'three'
 import { Lock, Pause, Play, Unlock, X } from 'lucide-react'
-import type { Grid, TileType } from '@/types'
+import type { ClimateContext, DisasterMode, Grid, TileType } from '@/types'
 import { TILES, lensColor, type HeatmapKind } from '@/lib/tiles'
+import {
+  AnimatedTileShell,
+  CameraShake,
+  DebrisField,
+  FloodPlane,
+  HeatShimmer,
+  RainParticles,
+  UvGlow,
+  climateFloodLevel,
+  climateRainIntensity,
+  climateShakeIntensity,
+} from '@/components/designer/DisasterVfx'
 
 interface Props {
   open: boolean
@@ -37,6 +49,12 @@ interface Props {
   loading?: boolean
   onPlay?: () => void
   onStop?: () => void
+  disasterMode?: DisasterMode | null
+  riskValues?: number[][] | null
+  riskMin?: number
+  riskMax?: number
+  disasterPlaying?: boolean
+  climate?: ClimateContext | null
 }
 
 /** Architectural massing-model palette: light structures, green nature, blue water. */
@@ -789,6 +807,12 @@ function Scene({
   editing,
   dragRef,
   onPaintCell,
+  disasterMode,
+  riskValues,
+  riskMin,
+  riskMax,
+  disasterPlaying,
+  climate,
 }: {
   grid: Grid
   columns: ColumnData[]
@@ -796,6 +820,12 @@ function Scene({
   editing: boolean
   dragRef: React.MutableRefObject<{ x: number; y: number }>
   onPaintCell?: (r: number, c: number) => void
+  disasterMode?: DisasterMode | null
+  riskValues?: number[][] | null
+  riskMin: number
+  riskMax: number
+  disasterPlaying: boolean
+  climate?: ClimateContext | null
 }) {
   const offset = (size - 1) / 2
   const [hover, setHover] = useState<[number, number] | null>(null)
@@ -808,8 +838,26 @@ function Scene({
     onPaintCell?.(r, c)
   }
 
+  const shake = climateShakeIntensity(disasterMode ?? null, riskValues ?? null, riskMin, riskMax, disasterPlaying)
+  const flood = climateFloodLevel(disasterMode ?? null, riskValues ?? null, riskMin, riskMax)
+  const rain = climateRainIntensity(climate) + (disasterMode === 'typhoon' && disasterPlaying ? 0.5 : 0)
+
   return (
     <>
+      <CameraShake intensity={shake} />
+      <UvGlow uvIndex={climate?.uvIndex ?? 0} />
+      <HeatShimmer sensibleC={climate?.sensibleTempC} baseC={climate?.normalTempC ?? 25} />
+      <RainParticles intensity={disasterPlaying ? Math.max(rain, disasterMode ? 0.35 : 0) : rain * 0.4} />
+      <FloodPlane level={disasterPlaying ? flood : flood * 0.3} />
+      <DebrisField
+        grid={grid}
+        risk={riskValues ?? null}
+        min={riskMin}
+        max={riskMax}
+        mode={disasterMode ?? null}
+        playing={disasterPlaying}
+      />
+
       <hemisphereLight args={['#ffffff', '#c8d2de', 0.75]} />
       <ambientLight intensity={0.35} />
       <directionalLight
@@ -829,17 +877,30 @@ function Scene({
 
       {grid.map((row, r) =>
         row.map((tile, c) => (
-          <Tile
+          <AnimatedTileShell
             key={`${r}-${c}`}
             tile={tile}
             r={r}
             c={c}
-            x={c - offset}
-            z={r - offset}
-            editing={editing}
-            onPick={handlePick}
-            onHover={setHover}
-          />
+            posX={c - offset}
+            posZ={r - offset}
+            mode={disasterMode ?? null}
+            risk={riskValues?.[r]?.[c] ?? null}
+            riskMin={riskMin}
+            riskMax={riskMax}
+            playing={disasterPlaying}
+          >
+            <Tile
+              tile={tile}
+              r={r}
+              c={c}
+              x={0}
+              z={0}
+              editing={editing}
+              onPick={handlePick}
+              onHover={setHover}
+            />
+          </AnimatedTileShell>
         )),
       )}
 
@@ -871,6 +932,12 @@ export default function City3DView({
   loading = false,
   onPlay,
   onStop,
+  disasterMode = null,
+  riskValues = null,
+  riskMin = 0,
+  riskMax = 1,
+  disasterPlaying = false,
+  climate = null,
 }: Props) {
   const [heat, setHeat] = useState(showHeatmap)
   const [editing, setEditing] = useState(false)
@@ -896,6 +963,17 @@ export default function City3DView({
     [heat, grid, values, valueMin, valueMax, heatmapKind],
   )
 
+  const vfxHint =
+    disasterMode === 'typhoon'
+      ? '🌀 태풍 재생 중 — 건물이 흔들리고 잔해가 날립니다. ▶ 재생이 꺼져 있으면 상단 버튼을 누르세요.'
+      : disasterMode === 'earthquake'
+        ? '🫨 지진 재생 중 — 건물이 기울고 붕괴합니다. 대피소·내진 타일을 배치해 보세요.'
+        : disasterMode === 'tsunami'
+          ? '🌊 해일 재생 중 — 물이 차오르며 건물·나무가 휩쓸립니다.'
+          : open && !disasterMode
+            ? '재난 VFX: 회복탄력성 패널에서 재난 시나리오(태풍·지진 등)를 고른 뒤 ▶ 재생하세요.'
+            : null
+
   if (!open) return null
 
   const camDist = size * 1.7
@@ -905,7 +983,7 @@ export default function City3DView({
       <div className="relative flex h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-gradient-to-b from-sky-100 to-slate-200 shadow-2xl">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/10 bg-white/70 px-4 py-3 backdrop-blur">
           <h2 className="text-sm font-semibold text-slate-700">
-            3D 도시 뷰 · 드래그 회전 / 휠 줌 / 우클릭 이동
+            3D 도시 뷰 · 기상청 데이터 + 재난 애니메이션
           </h2>
           <div className="flex items-center gap-2">
             {canEdit && (
@@ -993,9 +1071,17 @@ export default function City3DView({
               editing={editing}
               dragRef={dragRef}
               onPaintCell={onPaintCell}
+              disasterMode={disasterMode}
+              riskValues={riskValues}
+              riskMin={riskMin}
+              riskMax={riskMax}
+              disasterPlaying={disasterPlaying || playing}
+              climate={climate}
             />
             <OrbitControls
               enableDamping
+              dampingFactor={0.08}
+              makeDefault
               maxPolarAngle={Math.PI / 2.05}
               minDistance={size * 0.6}
               maxDistance={size * 4}
@@ -1003,11 +1089,12 @@ export default function City3DView({
           </Canvas>
 
           <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/40 px-3 py-1 text-center text-[11px] text-white/90">
-            {editing
-              ? '팔레트에서 타일을 고르고, 도시 블록을 클릭해 칠하세요.'
-              : heat
-                ? '솟아오른 빛기둥 = 기후 강도. 빨갛고 높을수록 뜨겁고(위험), 낮고 푸를수록 시원합니다.'
-                : '건물 높이·나무·물로 도시를 입체로 표현합니다. 상단 「기후 효과」로 열·미세먼지를 확인하세요.'}
+            {vfxHint ??
+              (editing
+                ? '팔레트에서 타일을 고르고, 도시 블록을 클릭해 칠하세요.'
+                : heat
+                  ? '솟아오른 빛기둥 = 기후 강도. 자외선·체감온도·강수는 3D 배경 효과로 반영됩니다.'
+                  : '재생 버튼으로 열·재난 타임라인을 돌려 보세요. 재난 렌즈+시나리오 선택 시 3D 재난 VFX가 켜집니다.')}
           </p>
         </div>
       </div>

@@ -32,10 +32,13 @@ frontend-admin/ (Vite :5174, 관리자) ──/api──┼──▶  Spring Boo
 - **Spring**: 시뮬레이션 엔진, 인증/CORS, DB 영속화, 기상 API 수집, AI 오케스트레이션.
 - **Python**: AI 도시 코치(LLM), pandas 기반 시계열 분석. LLM 키 미설정 시 규칙 기반으로 자동 폴백.
 
-### 핵심 기능 3개 (MVP)
-1. 인터랙티브 격자 설계 + 실시간 열섬 히트맵 (`/api/designs/simulate`)
-2. 실제 기상 데이터 기반 시뮬레이션 (지역 baseline, 기상청 API + 샘플 폴백)
-3. AI 도시 코치 (`/api/designs/coach` → FastAPI `/internal/v1/coach`)
+### 핵심 기능 (현행)
+1. 인터랙티브 격자 설계 + **4축 렌즈 히트맵** (열섬·미세먼지·재난·농어업)
+2. 실제 기상 데이터 기반 시뮬레이션 (지역 baseline, 기상청 API허브 + 샘플 폴백)
+3. **4축 회복탄력성 평가 + 균형 점수** (`/api/designs/evaluate`) — **기상청 API허브 10종 전부** 점수·시나리오에 반영
+4. **캠페인 Lv.1–10** — 타일 %·외곽 구역 배분·4축 점수 클리어 조건 (초·중·고 교육용)
+5. **3D 도시 뷰** — 태풍·지진·해일 재난 VFX + 자외선·체감·강수 배경 효과
+6. **통합 AI 도시 코치** (`/api/designs/coach/resilience` → FastAPI, 키 없으면 규칙 기반 폴백)
 
 ### 도시 기후 설계자 — 체험 순서 (`/designer`)
 
@@ -45,9 +48,10 @@ frontend-admin/ (Vite :5174, 관리자) ──/api──┼──▶  Spring Boo
 | 2 | **타일 팔레트** + 격자 | 공원·가로수·수변은 식히고, 도로·건물·공장은 열·미세먼지↑ |
 | 3 | 격자 **히트맵 토글** | 표면 온도 분포 확인 |
 | 4 | **시뮬레이션 결과** | 평균 온도·기준 대비 변화, Before/After |
-| 5 | **회복탄력성 평가** | 타일 칠하면 4축(열섬·미세먼지·재난·농어업) 자동 점수. 렌즈 탭으로 격자 색 전환 |
-| 6 | 재난 시나리오·**스트레스 테스트** | (선택) 재난 렌즈 → ▶ 폭염→태풍→미세먼지→수확기 순 점검 |
-| 7 | **🤖 통합 AI 코치** | 4축 균형 개선 힌트 (AI 없으면 규칙 기반) |
+| 5 | **회복탄력성 평가** · **캠페인 Lv.1–10** | 4축 점수 + 타일 %·구역 배분 제약. KMA 데이터가 축별로 연결됨 |
+| 6 | **3D 뷰** + 재난 시나리오 | 태풍(건물 비산)·지진(붕괴)·해일(침수) 애니메이션 |
+| 7 | **스트레스 테스트** | ▶ 폭염→태풍→미세먼지→수확기 순 점검 |
+| 8 | **🤖 통합 AI 코치** | 4축 균형 개선 힌트 (AI 없으면 규칙 기반) |
 
 튜토리얼: `/designer?tutorial=1` — **다음**을 누를 때마다 해당 패널로 자동 스크롤됩니다.  
 상세 검증: [docs/RESILIENCE_TEST_GUIDE.md](docs/RESILIENCE_TEST_GUIDE.md)
@@ -140,7 +144,7 @@ cloudflared tunnel --url http://localhost:9080
 | 변수 | 설명 |
 |------|------|
 | `HORIZON_AI_SERVICE_URL` | Spring → AI 서비스 URL (로컬 `http://localhost:8000`, Docker `http://ai:8000`) |
-| `HORIZON_KMA_API_KEY` | 기상자료개방포털 키. **미설정 시 내장 샘플 기상 데이터로 동작** |
+| `HORIZON_KMA_API_KEY` | 기상청 API허브 authKey (기온·일사·강수·PM10·평년·자외선·정체·체감·태풍·지진). **미설정 시 내장 샘플 기상 데이터로 동작** |
 | `OPENAI_API_KEY` | LLM 키. **미설정 시 규칙 기반 코치로 동작** |
 | `OPENAI_MODEL` | 기본 모델 (예: `gpt-4o-mini`) |
 
@@ -153,9 +157,10 @@ cloudflared tunnel --url http://localhost:9080
 | 메서드 | 경로 | 설명 |
 |--------|------|------|
 | GET | `/api/health` | 백엔드 + AI 헬스 |
-| GET | `/api/regions` | 지역별 baseline 기상 |
-| POST | `/api/designs/simulate` | 격자 → 표면온도 히트맵 + 지표 |
-| POST | `/api/designs/coach` | AI 도시 코치 평가 |
+| GET | `/api/regions` | 지역별 baseline 기상 (기온·일사·PM10 등) |
+| POST | `/api/designs/evaluate` | 격자 → **4축 회복탄력성 점수 + 렌즈 지표** |
+| POST | `/api/designs/coach/resilience` | **통합 AI 코치** (4축, 규칙 폴백) |
+| POST | `/api/designs/simulate` | (레거시) 격자 → 열섬 표면온도 히트맵 |
 | POST | `/api/designs` | 설계 저장 |
 | GET | `/api/designs/leaderboard` | 가장 시원한 설계 순위 |
 

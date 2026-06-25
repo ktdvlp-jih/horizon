@@ -140,7 +140,7 @@ public record ApiResponse<T>(
 ### 3.9 인증 / CORS
 
 - **JWT (현재):** Spring Security 6 + Access/Refresh Token — [login_PROMPT.md](login_PROMPT.md) 기준 구현됨
-- **역할:** `USER`, `ADMIN` (`app_user.role`). 관리 API는 `/api/admin/**` + `hasRole('ADMIN')` — [admin_PROMPT.md](admin_PROMPT.md)
+- **역할:** `USER`, `ADMIN` (`app_user.role`). 관리 API는 `/api/admin/**` + `hasRole('ADMIN')` (관리자 앱 `frontend-admin/`)
 - **CORS:** `HORIZON_CORS_ORIGINS` (쉼표 구분, 예: `http://localhost:5173,http://localhost:5174`) + `https://*.trycloudflare.com` 패턴 허용
 
 ### 3.10 스케줄러
@@ -153,6 +153,18 @@ public record ApiResponse<T>(
 
 - 이미지: `storage/images` → `/files/images/**` 로 서빙
 - 프로덕션 SPA: `HORIZON_SERVE_FRONTEND=true` 시 `frontend/dist`를 Spring Boot에서 서빙 (단일 포트 배포용)
+
+### 3.12 외부 데이터 출처 (Horizon)
+
+| 축/용도 | 출처 | 엔드포인트 | 인증 |
+|---------|------|-----------|------|
+| 기온·강수 | 기상청 API허브 ASOS 시간자료 | `kma_sfctm2.php` (TA·RN) | `authKey` |
+| 일사량 | 기상청 API허브 일사 묶음형 | `nph-sun_sfc_sts_pkg` (SI) | `authKey` |
+| 황사 PM10 | 기상청 API허브 | `dst_pm10_hr.php` | `authKey` |
+| 태풍·지진 | 기상청 API허브 | 재난·태풍 엔드포인트 | `authKey` |
+
+- **모든 기상·재난 데이터는 [기상청 API허브](https://apihub.kma.go.kr)(`authKey`) 단일 출처로 통일.** 공공데이터포털(`data.go.kr`, `serviceKey`)·기상자료개방포털 경로는 사용하지 않음.
+- 키(`HORIZON_KMA_API_KEY`) 미설정·호출 실패 시 → 지역별 baseline 샘플로 graceful fallback.
 
 ---
 
@@ -198,7 +210,7 @@ frontend/src/
 └── main.tsx
 ```
 
-**관리자 앱** (`frontend-admin/`, dev 포트 **5174** — [admin_PROMPT.md](admin_PROMPT.md)로 구현)
+**관리자 앱** (`frontend-admin/`, dev 포트 **5174**)
 
 ```
 frontend-admin/src/

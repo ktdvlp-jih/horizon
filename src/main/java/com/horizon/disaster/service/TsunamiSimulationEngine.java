@@ -8,6 +8,8 @@ import com.horizon.disaster.dto.DisasterTimelineFrame;
 import com.horizon.disaster.dto.TsunamiScenarioParams;
 import com.horizon.disaster.entity.DisasterScenario;
 import com.horizon.design.dto.TileType;
+import com.horizon.weather.dto.ClimateContext;
+import com.horizon.weather.service.ClimateInfluenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,17 +24,21 @@ import static com.horizon.disaster.service.TyphoonSimulationEngine.*;
 public class TsunamiSimulationEngine {
 
     private final ObjectMapper objectMapper;
+    private final ClimateInfluenceService climateInfluence;
 
     public TyphoonSimulationEngine.SimulationOutput simulate(DisasterScenario scenario,
-                                                             RegionContext region, TileType[][] grid) {
-        TsunamiScenarioParams params = parseParams(scenario.getParamsJson());
+                                                             RegionContext region, TileType[][] grid,
+                                                             ClimateContext climate) {
+        TsunamiScenarioParams params = climateInfluence.blendTsunami(parseParams(scenario.getParamsJson()), climate);
+        String liveSource = climateInfluence.hasLiveTsunamiBlend(climate) ? "kma" : null;
         GridStats stats = gridStats(grid);
         double[][] values = computeInundation(region, grid, params, 1.0);
-        return buildTsunamiOutput(scenario, region, grid, values, stats);
+        return buildTsunamiOutput(scenario, region, grid, values, stats, liveSource);
     }
 
-    public DisasterTimeline timeline(DisasterScenario scenario, RegionContext region, TileType[][] grid) {
-        TsunamiScenarioParams params = parseParams(scenario.getParamsJson());
+    public DisasterTimeline timeline(DisasterScenario scenario, RegionContext region, TileType[][] grid,
+                                     ClimateContext climate) {
+        TsunamiScenarioParams params = climateInfluence.blendTsunami(parseParams(scenario.getParamsJson()), climate);
         int steps = 8;
         List<DisasterTimelineFrame> frames = new ArrayList<>();
         double globalMin = Double.POSITIVE_INFINITY;
@@ -105,7 +111,7 @@ public class TsunamiSimulationEngine {
 
     private TyphoonSimulationEngine.SimulationOutput buildTsunamiOutput(
             DisasterScenario scenario, RegionContext region, TileType[][] grid,
-            double[][] values, GridStats stats) {
+            double[][] values, GridStats stats, String liveSource) {
         int inundated = 0;
         int highGround = 0;
         for (int r = 0; r < grid.length; r++) {
@@ -133,7 +139,8 @@ public class TsunamiSimulationEngine {
                 null,
                 null,
                 (double) inundated,
-                highGroundCoverage
+                highGroundCoverage,
+                liveSource
         );
         return new TyphoonSimulationEngine.SimulationOutput(toSummary(scenario), metrics, values);
     }

@@ -2,6 +2,10 @@ package com.horizon.resilience.air;
 
 import com.horizon.design.dto.TileType;
 import com.horizon.resilience.dto.AirQualityMetrics;
+import com.horizon.weather.AsosStationIds;
+import com.horizon.weather.dto.ClimateContext;
+import com.horizon.weather.service.ClimateDataService;
+import com.horizon.weather.service.ClimateInfluenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +24,20 @@ import java.util.List;
 public class AirQualityEvaluator {
 
     private final AirQualityBaselineProvider baselineProvider;
+    private final ClimateDataService climateDataService;
+    private final ClimateInfluenceService climateInfluence;
 
-    private static final double DIFFUSION = 0.45;
+    private static final double BASE_DIFFUSION = 0.45;
 
     public Result evaluate(String regionCode, TileType[][] grid) {
         int rows = grid.length;
         int cols = grid[0].length;
         AirQualityBaselineProvider.Baseline baseline = baselineProvider.baseline(regionCode);
-        double base = baseline.pm();
+        String code = regionCode == null ? "" : regionCode.toLowerCase();
+        String stn = AsosStationIds.forRegion(code).orElse("108");
+        ClimateContext climate = climateDataService.resolve(code, stn);
+        double base = baseline.pm() + climateInfluence.pmStagnationBonus(climate);
+        double diffusion = BASE_DIFFUSION * climateInfluence.airDiffusionFactor(climate);
 
         double[][] raw = new double[rows][cols];
         int sources = 0;
@@ -63,7 +73,7 @@ public class AirQualityEvaluator {
                     n++;
                 }
                 double neighborAvg = n == 0 ? raw[r][c] : neighborSum / n;
-                double diffused = (1 - DIFFUSION) * raw[r][c] + DIFFUSION * neighborAvg;
+                double diffused = (1 - diffusion) * raw[r][c] + diffusion * neighborAvg;
                 double absorbed = absorption(grid[r][c]) + 0.3 * neighborAbsorb;
                 double value = Math.max(base * 0.35, diffused - absorbed);
                 value = round(value);

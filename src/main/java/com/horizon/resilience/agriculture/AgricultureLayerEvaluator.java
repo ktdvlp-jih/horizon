@@ -35,6 +35,10 @@ public class AgricultureLayerEvaluator {
             warming = Math.max(1.0, baseAirTemp - climate.normalTempC() + 1.2);
         }
         warming += Math.max(0, city.heatDeltaT() - 2.0) * 0.4;
+        double rainBonus = 0.0;
+        if (climate != null && "kma".equals(climate.rainfallSource()) && climate.rainfallMm() != null) {
+            rainBonus = Math.min(18.0, climate.rainfallMm() * 2.5);
+        }
         double heatStress = clamp01(warming / 6.0);
         double pmStress = clamp01((city.avgPm() - 15.0) / 80.0);
 
@@ -43,6 +47,7 @@ public class AgricultureLayerEvaluator {
                 + farmland * 35
                 + city.greenRatio() * 25
                 + city.waterRatio() * 20
+                + rainBonus * 0.55
                 - heatStress * 45
                 - pmStress * 18
                 - solar * 8; // agrivoltaics trades some arable land
@@ -62,6 +67,7 @@ public class AgricultureLayerEvaluator {
                 + forest * 35
                 + city.greenRatio() * 25
                 + city.waterRatio() * 25
+                + rainBonus
                 - city.imperviousRatio() * 35
                 - heatStress * 15;
         double waterSecurity = clamp100(water);

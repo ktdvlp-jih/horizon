@@ -37,7 +37,6 @@
 | [MVP.md](MVP.md) | 기획 · 데모 시나리오 |
 | [RESILIENCE_DESIGN.md](RESILIENCE_DESIGN.md) | **통합 컨셉 기획서** (도시 회복탄력성 설계자) |
 | [개발계획서_도시기후설계자.md](개발계획서_도시기후설계자.md) | **해커톤 예선 제출용 개발계획서 (양식2, 붙여넣기용 MD)** |
-| [개발계획서_도시기후설계자.hwpx](개발계획서_도시기후설계자.hwpx) | 동일 내용 한글 파일(자동 생성) |
 | [RESILIENCE_TEST_GUIDE.md](RESILIENCE_TEST_GUIDE.md) | **4축 통합 테스트·확인 체크리스트** (P1~P9) |
 | [DISASTER_SIM.md](DISASTER_SIM.md) | 3대 재난 시뮬레이션 |
 
@@ -48,6 +47,7 @@
 | 문서 | 용도 |
 |------|------|
 | [horizon_PROMPT.md](horizon_PROMPT.md) | 메인 앱 개발 프롬프트 |
-| [admin_PROMPT.md](admin_PROMPT.md) | 관리자 UI 프롬프트 |
 | [login_PROMPT.md](login_PROMPT.md) | 로그인 프롬프트 |
 | [chat-exports/README.md](chat-exports/README.md) | Cursor 대화 export 동기화 |
+
+> 관리자 콘솔(`ROLE_ADMIN`, `/api/admin/**`)은 별도 Vite 앱 `frontend-admin/`(dev `:5174`)으로 구현되어 있습니다.

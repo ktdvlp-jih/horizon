@@ -48,12 +48,10 @@ horizon:
       normals-tmst: ${HORIZON_KMA_NORMALS_TMST:2021}
       living-base-path: ${HORIZON_KMA_LIVING_BASE_PATH:/api/typ02/openApi/LivingWthrIdxServiceV3}
     asos:
-      # apihub = 기상청 API허브 authKey (기본) | portal = 공공데이터포털 serviceKey
-      provider: ${HORIZON_ASOS_PROVIDER:apihub}
+      # 모든 KMA 데이터는 기상청 API허브(apihub-base-url + authKey) 사용.
+      # 기온(TA)·강수(RN) = ASOS 시간자료, 일사(SI) = 일사 묶음형.
       temp-path: ${HORIZON_ASOS_TEMP_PATH:/api/typ01/url/kma_sfctm2.php}
       solar-path: ${HORIZON_ASOS_SOLAR_PATH:/api/typ01/cgi-bin/url/nph-sun_sfc_sts_pkg}
-      base-url: ${HORIZON_ASOS_BASE_URL:http://apis.data.go.kr/1360000/AsosHourlyInfoService}
-      data-path: ${HORIZON_ASOS_DATA_PATH:/getWthrDataList}
 
 logging:
   level:

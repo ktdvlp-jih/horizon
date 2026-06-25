@@ -2,17 +2,20 @@ import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { coachResilience, evaluate } from '@/api/designApi'
 import { fetchScenarios } from '@/api/disasterApi'
-import type { CoachResponse, DisasterMode, EvaluateResponse, Grid, LensKind } from '@/types'
+import type { CoachResponse, DisasterMode, DisasterMetrics, EvaluateResponse, Grid, LensKind } from '@/types'
 import type { HeatmapKind } from '@/lib/tiles'
 import {
-  TRACKS,
-  TRACK_BY_ID,
-  LEVEL_BY_ID,
-  loadProgress,
-  isLevelUnlocked,
-  carryOverGrid,
-  completeLevel,
-} from '@/lib/levels'
+  CAMPAIGN_LEVELS,
+  CAMPAIGN_BY_ID,
+  KMA_API_USAGE,
+  loadCampaignProgress,
+  isCampaignLevelUnlocked,
+  carryOverCampaignGrid,
+  completeCampaignLevel,
+  type AgricultureZonesState,
+} from '@/lib/campaignLevels'
+import { validateCampaignLevel } from '@/lib/levelValidation'
+import { scenarioToMode } from '@/lib/scenarioUtils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export interface LensOverlay {
@@ -22,11 +25,26 @@ export interface LensOverlay {
   max: number
 }
 
+/** Imperative command from the guided demo (id changes to re-trigger). */
+export interface ResilienceDemoCommand {
+  id: number
+  type: 'stress' | 'coach'
+}
+
+export interface ResilienceCampaignState {
+  scenarioId: string
+  activeLens: LensKind
+  zones: AgricultureZonesState
+  disasterMode: DisasterMode | null
+}
+
 interface Props {
   regionCode: string
   grid: Grid
   onOverlayChange: (overlay: LensOverlay | null) => void
   onLoadGrid?: (grid: Grid) => void
+  demoCommand?: ResilienceDemoCommand | null
+  onCampaignStateChange?: (state: ResilienceCampaignState) => void
 }
 
 const LENS_META: Record<LensKind, { label: string; emoji: string; needsScenario?: boolean }> = {
@@ -38,13 +56,6 @@ const LENS_META: Record<LensKind, { label: string; emoji: string; needsScenario?
 
 const LENS_ORDER: LensKind[] = ['heat', 'air', 'disaster', 'agriculture']
 const MODES: DisasterMode[] = ['typhoon', 'earthquake', 'tsunami']
-
-interface AgricultureZonesState {
-  farmland: number
-  fishery: number
-  forest: number
-  solar: number
-}
 
 const DEFAULT_ZONES: AgricultureZonesState = { farmland: 0.4, fishery: 0.2, forest: 0.25, solar: 0.15 }
 
@@ -90,15 +101,22 @@ function barColor(score: number): string {
   return 'bg-rose-500'
 }
 
-export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onLoadGrid }: Props) {
+export default function ResiliencePanel({
+  regionCode,
+  grid,
+  onOverlayChange,
+  onLoadGrid,
+  demoCommand,
+  onCampaignStateChange,
+}: Props) {
   const [activeLens, setActiveLens] = useState<LensKind>('heat')
   const [scenarioId, setScenarioId] = useState<string>('')
   const [zones, setZones] = useState<AgricultureZonesState>(DEFAULT_ZONES)
   const [debouncedGrid, setDebouncedGrid] = useState<Grid>(grid)
-  const [activeTrackId, setActiveTrackId] = useState<string>(TRACKS[0].id)
   const [activeLevelId, setActiveLevelId] = useState<string | null>(null)
-  const [completed, setCompleted] = useState<string[]>(() => loadProgress().completed)
+  const [completed, setCompleted] = useState<string[]>(() => loadCampaignProgress().completed)
   const [levelMessage, setLevelMessage] = useState<string | null>(null)
+  const [constraintHint, setConstraintHint] = useState<string | null>(null)
   const [stressPhase, setStressPhase] = useState<number | null>(null)
 
   useEffect(() => {
@@ -134,19 +152,29 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
     onSuccess: setCoach,
   })
 
-  const activeLevel = activeLevelId ? LEVEL_BY_ID[activeLevelId] : null
+  const activeLevel = activeLevelId ? CAMPAIGN_BY_ID[activeLevelId] : null
+
+  useEffect(() => {
+    onCampaignStateChange?.({
+      scenarioId,
+      activeLens,
+      zones,
+      disasterMode: scenarioToMode(scenarioId),
+    })
+  }, [scenarioId, activeLens, zones, onCampaignStateChange])
 
   const startLevel = (levelId: string) => {
-    const level = LEVEL_BY_ID[levelId]
-    if (!level) return
-    const track = TRACKS.find((t) => t.levels.some((l) => l.id === levelId))
-    if (!track || !isLevelUnlocked(track, level, completed)) return
+    const level = CAMPAIGN_BY_ID[levelId]
+    if (!level || !isCampaignLevelUnlocked(level, completed)) return
     setActiveLevelId(levelId)
     setActiveLens(level.lens)
     setScenarioId(level.scenarioId ?? '')
     setLevelMessage(null)
-    const carry = carryOverGrid(track, level)
-    if (carry && onLoadGrid) onLoadGrid(carry)
+    setConstraintHint(null)
+    if (level.defaultZones) setZones(level.defaultZones)
+    const carry = carryOverCampaignGrid(level)
+    const initial = level.initialGrid?.() ?? carry
+    if (initial && onLoadGrid) onLoadGrid(initial)
   }
 
   const levelMetricValue = (metric: 'resilience' | LensKind): number | null => {
@@ -158,18 +186,23 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
   useEffect(() => {
     if (!activeLevel || !evalResult) return
     if (completed.includes(activeLevel.id)) return
-    const value = levelMetricValue(activeLevel.goal.metric)
-    if (value != null && value >= activeLevel.goal.min) {
-      const next = completeLevel(activeLevel.id, grid)
+    const axisScores: Partial<Record<LensKind | 'resilience', number>> = {
+      resilience: evalResult.resilienceScore,
+      ...evalResult.axisScores,
+    }
+    const validation = validateCampaignLevel(activeLevel, grid, zones, axisScores)
+    setConstraintHint(validation.violations.length > 0 ? validation.violations.join(' · ') : null)
+    if (validation.ok) {
+      const next = completeCampaignLevel(activeLevel.id, grid)
       setCompleted((prev) => (prev.includes(activeLevel.id) ? prev : [...prev, activeLevel.id]))
       setLevelMessage(
         next
-          ? `🎉 「${activeLevel.title}」 클리어! 다음 레벨이 해금되었습니다.`
-          : `🎉 「${activeLevel.title}」 클리어!`,
+          ? `🎉 「${activeLevel.title}」 클리어! Lv.${activeLevel.order + 1}이 해금되었습니다.`
+          : `🎉 「${activeLevel.title}」 클리어! 10레벨 마스터 달성!`,
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [evalResult, activeLevel, completed, grid])
+  }, [evalResult, activeLevel, completed, grid, zones])
 
   useEffect(() => {
     if (!evalResult) {
@@ -206,7 +239,21 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
     setStressPhase((prev) => (prev == null ? 0 : null))
   }
 
+  // Guided demo hook: run the stress timeline or request the coach on command.
+  useEffect(() => {
+    if (!demoCommand) return
+    if (demoCommand.type === 'stress') {
+      setActiveLevelId(null)
+      setStressPhase(0)
+    } else if (demoCommand.type === 'coach') {
+      coachMutation.mutate()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoCommand?.id])
+
   const axisScores = evalResult?.axisScores ?? {}
+  const disasterMetrics = evalResult?.lenses.disaster?.metrics as DisasterMetrics | undefined
+  const disasterLiveKma = disasterMetrics?.liveSource === 'kma'
 
   return (
     <Card className="h-fit" data-tutorial="resilience">
@@ -235,28 +282,19 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
             </li>
           </ol>
         </details>
-        <div className="space-y-2 rounded-lg border border-slate-100 bg-slate-50/60 p-3" data-tutorial="resilience-levels">
-          <div className="flex flex-wrap gap-1">
-            {TRACKS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setActiveTrackId(t.id)}
-                className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition ${
-                  activeTrackId === t.id
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-white text-slate-500 hover:bg-slate-100'
-                }`}
-              >
-                {t.emoji} {t.title}
-              </button>
-            ))}
+        <div className="space-y-2 rounded-lg border border-violet-100 bg-violet-50/40 p-3" data-tutorial="resilience-levels">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-violet-800">🎮 캠페인 Lv.1–10</span>
+            <span className="text-[10px] text-violet-600">
+              {completed.length}/{CAMPAIGN_LEVELS.length} 클리어
+            </span>
           </div>
-          <p className="text-[11px] text-slate-500">{TRACK_BY_ID[activeTrackId].intro}</p>
-          <div className="space-y-1">
-            {TRACK_BY_ID[activeTrackId].levels.map((level) => {
-              const track = TRACK_BY_ID[activeTrackId]
-              const unlocked = isLevelUnlocked(track, level, completed)
+          <p className="text-[11px] text-slate-600">
+            타일 %·외곽 구역 배분·점수를 모두 만족해야 클리어합니다. 레벨이 올라갈수록 제약이 엄격해집니다.
+          </p>
+          <div className="max-h-48 space-y-1 overflow-y-auto pr-1">
+            {CAMPAIGN_LEVELS.map((level) => {
+              const unlocked = isCampaignLevelUnlocked(level, completed)
               const done = completed.includes(level.id)
               const active = activeLevelId === level.id
               const value = active ? levelMetricValue(level.goal.metric) : null
@@ -268,7 +306,7 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
                   onClick={() => startLevel(level.id)}
                   className={`w-full rounded-md border px-2.5 py-1.5 text-left transition ${
                     active
-                      ? 'border-sky-400 bg-sky-50'
+                      ? 'border-violet-400 bg-white'
                       : unlocked
                         ? 'border-slate-200 bg-white hover:border-slate-300'
                         : 'cursor-not-allowed border-slate-100 bg-slate-50 opacity-60'
@@ -277,23 +315,46 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-slate-700">
                       {done ? '✅ ' : unlocked ? '' : '🔒 '}
-                      Lv.{level.order} {level.title}
+                      {level.title}
                     </span>
                     {active && value != null && (
                       <span
-                        className={value >= level.goal.min ? 'text-[11px] text-emerald-600' : 'text-[11px] text-slate-400'}
+                        className={
+                          value >= level.goal.min ? 'text-[11px] text-emerald-600' : 'text-[11px] text-slate-400'
+                        }
                       >
                         {value.toFixed(0)} / {level.goal.min}
                       </span>
                     )}
                   </div>
-                  {active && <p className="mt-0.5 text-[11px] text-slate-500">{level.brief}</p>}
+                  {active && (
+                    <>
+                      <p className="mt-0.5 text-[11px] text-slate-500">{level.brief}</p>
+                      <p className="mt-0.5 text-[10px] text-sky-700">
+                        KMA: {level.apis.join(' · ')}
+                      </p>
+                    </>
+                  )}
                 </button>
               )
             })}
           </div>
+          {constraintHint && (
+            <p className="text-[11px] text-amber-700">⚠️ 클리어 조건: {constraintHint}</p>
+          )}
           {levelMessage && <p className="text-[11px] font-medium text-emerald-600">{levelMessage}</p>}
         </div>
+
+        <details className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2 text-[10px] text-slate-600">
+          <summary className="cursor-pointer font-semibold text-slate-700">기상청 API → 시뮬레이션 연결</summary>
+          <ul className="mt-2 space-y-1">
+            {KMA_API_USAGE.map((row) => (
+              <li key={row.api}>
+                <strong>{row.api}</strong> → {row.drives}
+              </li>
+            ))}
+          </ul>
+        </details>
 
         <div className="flex flex-wrap gap-1.5" data-tutorial="resilience-lens">
           {LENS_ORDER.map((kind) => {
@@ -377,7 +438,7 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
         </div>
 
         {activeLens === 'agriculture' && (
-          <div className="space-y-2 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
+          <div className="space-y-2 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3" data-tutorial="resilience-zones">
             <p className="text-xs font-medium text-emerald-700">외곽 광역 구역 배분</p>
             {ZONE_META.map(({ key, label, emoji }) => (
               <div key={key} className="space-y-0.5">
@@ -416,6 +477,11 @@ export default function ResiliencePanel({ regionCode, grid, onOverlayChange, onL
 
         {evalResult && (
           <div className="space-y-2" data-tutorial="resilience-scores">
+            {disasterLiveKma && (
+                <p className="rounded-md border border-sky-100 bg-sky-50 px-2.5 py-1.5 text-[11px] text-sky-800">
+                  기상청 라이브 태풍·지진·강수 데이터가 재난 시나리오 강도에 반영됐습니다.
+                </p>
+              )}
             <div className="flex items-baseline justify-between rounded-lg bg-slate-50 px-3 py-2">
               <span className="text-sm text-slate-600">종합 회복탄력성</span>
               <span className={`text-2xl font-bold ${scoreColor(evalResult.resilienceScore)}`}>

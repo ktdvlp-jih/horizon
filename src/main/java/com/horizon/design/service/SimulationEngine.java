@@ -8,7 +8,9 @@ import com.horizon.design.dto.SimulationTimeline;
 import com.horizon.design.dto.TileType;
 import com.horizon.design.dto.TimelineFrame;
 import com.horizon.weather.dto.HourlyObservation;
+import com.horizon.weather.dto.ClimateContext;
 import com.horizon.weather.dto.RegionWeather;
+import com.horizon.weather.service.ClimateInfluenceService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,6 +27,12 @@ import java.util.Map;
 @Component
 public class SimulationEngine {
 
+    private final ClimateInfluenceService climateInfluence;
+
+    public SimulationEngine(ClimateInfluenceService climateInfluence) {
+        this.climateInfluence = climateInfluence;
+    }
+
     private static final double SOLAR_FACTOR = 14.0;
     private static final double NEIGHBOR_HEAT_FACTOR = 0.35;
     private static final double NEIGHBOR_COOLING_FACTOR = 0.35;
@@ -36,14 +44,15 @@ public class SimulationEngine {
     private static final double DIURNAL_AIR_AMPLITUDE = 4.0;
 
     public SimulationResult simulate(RegionWeather region, List<List<String>> rawGrid) {
+        RegionWeather adjusted = climateInfluence.applyHeatInfluence(region);
         TileType[][] grid = parseGrid(rawGrid);
         int rows = grid.length;
 
-        double[][] temps = cellTempGrid(grid, region);
+        double[][] temps = cellTempGrid(grid, adjusted);
         Stats stats = stats(temps);
 
-        DesignMetrics metrics = buildMetrics(grid, region, stats.avg(), stats.max(), stats.min());
-        return new SimulationResult(region, rows, toList(temps), metrics);
+        DesignMetrics metrics = buildMetrics(grid, adjusted, stats.avg(), stats.max(), stats.min());
+        return new SimulationResult(adjusted, rows, toList(temps), metrics);
     }
 
     /**
@@ -194,6 +203,10 @@ public class SimulationEngine {
     private double cellTemperature(TileType[][] grid, int r, int c, RegionWeather region) {
         TileType tile = grid[r][c];
         double base = region.baseAirTemp();
+        ClimateContext climate = region.climate();
+        if (climate != null) {
+            base -= climateInfluence.rainfallCoolingC(climate);
+        }
         double solar = SOLAR_FACTOR * (1.0 - tile.albedo()) * region.solarLoad();
         double cooling = tile.selfCooling();
 
@@ -247,7 +260,7 @@ public class SimulationEngine {
                 avg,
                 max,
                 min,
-                round(avg - region.baseAirTemp())
+                round(avg - climateInfluence.heatReferenceTempC(region))
         );
     }
 

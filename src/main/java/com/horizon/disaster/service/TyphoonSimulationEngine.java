@@ -9,6 +9,8 @@ import com.horizon.disaster.dto.ScenarioSummary;
 import com.horizon.disaster.dto.TyphoonScenarioParams;
 import com.horizon.disaster.entity.DisasterScenario;
 import com.horizon.design.dto.TileType;
+import com.horizon.weather.dto.ClimateContext;
+import com.horizon.weather.service.ClimateInfluenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,9 +25,12 @@ import static com.horizon.disaster.service.DisasterGridHelper.*;
 public class TyphoonSimulationEngine {
 
     private final ObjectMapper objectMapper;
+    private final ClimateInfluenceService climateInfluence;
 
-    public SimulationOutput simulate(DisasterScenario scenario, RegionContext region, TileType[][] grid) {
-        TyphoonScenarioParams params = parseParams(scenario.getParamsJson());
+    public SimulationOutput simulate(DisasterScenario scenario, RegionContext region,
+                                       TileType[][] grid, ClimateContext climate) {
+        TyphoonScenarioParams params = climateInfluence.blendTyphoon(parseParams(scenario.getParamsJson()), climate);
+        String liveSource = climateInfluence.hasLiveTyphoonBlend(climate) ? "kma" : null;
         int rows = grid.length;
         int cols = grid[0].length;
         GridStats stats = gridStats(grid);
@@ -35,11 +40,12 @@ public class TyphoonSimulationEngine {
                 : new TyphoonScenarioParams.TrackPoint(0, 0, 0, params.maxWindMs());
 
         double[][] values = computeRisk(region, grid, params, point, stats);
-        return buildOutput(DisasterMode.TYPHOON, scenario, region, grid, values, stats);
+        return buildOutput(DisasterMode.TYPHOON, scenario, region, grid, values, stats, liveSource);
     }
 
-    public DisasterTimeline timeline(DisasterScenario scenario, RegionContext region, TileType[][] grid) {
-        TyphoonScenarioParams params = parseParams(scenario.getParamsJson());
+    public DisasterTimeline timeline(DisasterScenario scenario, RegionContext region,
+                                       TileType[][] grid, ClimateContext climate) {
+        TyphoonScenarioParams params = climateInfluence.blendTyphoon(parseParams(scenario.getParamsJson()), climate);
         GridStats stats = gridStats(grid);
         List<TyphoonScenarioParams.TrackPoint> track = params.track();
         if (track == null || track.isEmpty()) {
@@ -127,7 +133,7 @@ public class TyphoonSimulationEngine {
     }
 
     static SimulationOutput buildOutput(DisasterMode mode, DisasterScenario scenario, RegionContext region,
-                                        TileType[][] grid, double[][] values, GridStats stats) {
+                                        TileType[][] grid, double[][] values, GridStats stats, String liveSource) {
         int floodCells = 0;
         int windHigh = 0;
         int protectedCells = 0;
@@ -163,7 +169,8 @@ public class TyphoonSimulationEngine {
                 null,
                 null,
                 null,
-                null
+                null,
+                liveSource
         );
         return new SimulationOutput(toSummary(scenario), metrics, values);
     }

@@ -36,6 +36,26 @@ export function fillGrid(size: number, tile: TileType): Grid {
   return Array.from({ length: size }, () => Array.from({ length: size }, () => tile))
 }
 
+/** Balanced green/blue city used by the guided demo for a clear before/after. */
+export function createGreenCityGrid(size = GRID_SIZE): Grid {
+  const grid: Grid = []
+  for (let r = 0; r < size; r++) {
+    const row: TileType[] = []
+    for (let c = 0; c < size; c++) {
+      let tile: TileType
+      if (c === 4 || c === 5) tile = 'WATER' // central river
+      else if (r % 3 === 0) tile = 'TREE'
+      else if ((r + c) % 2 === 0) tile = 'PARK'
+      else tile = 'TREE'
+      // keep a small built core so it stays a "city", not a forest
+      if (r >= 4 && r <= 5 && c <= 1) tile = 'BUILDING'
+      row.push(tile)
+    }
+    grid.push(row)
+  }
+  return grid
+}
+
 export function setCell(grid: Grid, r: number, c: number, tile: TileType): Grid {
   if (grid[r][c] === tile) return grid
   const next = grid.slice()

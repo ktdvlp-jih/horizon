@@ -191,6 +191,8 @@ export interface DisasterMetrics {
   evacWithin3MinRatio?: number | null
   inundatedCells?: number | null
   highGroundCoverage?: number | null
+  /** kma when live feeds adjusted scenario intensity */
+  liveSource?: string | null
 }
 
 export interface DisasterSimulationResult {

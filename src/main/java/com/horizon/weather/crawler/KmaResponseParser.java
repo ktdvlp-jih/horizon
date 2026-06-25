@@ -17,8 +17,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses KMA weather API responses: ASOS Open API JSON ({@code getWthrDataList}) and
- * legacy API Hub text endpoints (kept for reference / tests).
+ * Parses KMA 기상청 API허브 응답: ASOS 시간자료·일사·PM10 텍스트 엔드포인트.
+ * {@code parseAsosHourlyJson}은 옛 JSON 포맷용으로 테스트/참고 목적만 유지.
  */
 @Slf4j
 public final class KmaResponseParser {

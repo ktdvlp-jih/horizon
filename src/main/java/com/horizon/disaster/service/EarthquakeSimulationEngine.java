@@ -8,6 +8,9 @@ import com.horizon.disaster.dto.DisasterTimelineFrame;
 import com.horizon.disaster.dto.EarthquakeScenarioParams;
 import com.horizon.disaster.entity.DisasterScenario;
 import com.horizon.design.dto.TileType;
+import com.horizon.disaster.crawler.SafetyDataClient;
+import com.horizon.weather.dto.ClimateContext;
+import com.horizon.weather.service.ClimateInfluenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,17 +27,22 @@ public class EarthquakeSimulationEngine {
     private static final int[] TIMELINE_SECONDS = {0, 5, 10, 15, 20, 25, 30};
 
     private final ObjectMapper objectMapper;
+    private final ClimateInfluenceService climateInfluence;
+    private final SafetyDataClient safetyDataClient;
 
     public TyphoonSimulationEngine.SimulationOutput simulate(DisasterScenario scenario,
-                                                             RegionContext region, TileType[][] grid) {
-        EarthquakeScenarioParams params = parseParams(scenario.getParamsJson());
+                                                             RegionContext region, TileType[][] grid,
+                                                             ClimateContext climate) {
+        EarthquakeScenarioParams params = climateInfluence.blendEarthquake(parseParams(scenario.getParamsJson()), climate);
+        String liveSource = climateInfluence.hasLiveEarthquakeBlend(climate) ? "kma" : null;
         GridStats stats = gridStats(grid);
         double[][] values = computeRisk(region, grid, params, 1.0, stats);
-        return buildEarthquakeOutput(scenario, region, grid, values, stats, params);
+        return buildEarthquakeOutput(scenario, region, grid, values, stats, params, liveSource);
     }
 
-    public DisasterTimeline timeline(DisasterScenario scenario, RegionContext region, TileType[][] grid) {
-        EarthquakeScenarioParams params = parseParams(scenario.getParamsJson());
+    public DisasterTimeline timeline(DisasterScenario scenario, RegionContext region, TileType[][] grid,
+                                     ClimateContext climate) {
+        EarthquakeScenarioParams params = climateInfluence.blendEarthquake(parseParams(scenario.getParamsJson()), climate);
         GridStats stats = gridStats(grid);
 
         List<DisasterTimelineFrame> frames = new ArrayList<>();
@@ -105,7 +113,7 @@ public class EarthquakeSimulationEngine {
 
     private TyphoonSimulationEngine.SimulationOutput buildEarthquakeOutput(
             DisasterScenario scenario, RegionContext region, TileType[][] grid,
-            double[][] values, GridStats stats, EarthquakeScenarioParams params) {
+            double[][] values, GridStats stats, EarthquakeScenarioParams params, String liveSource) {
         int collapseCells = 0;
         int evacOk = 0;
         int totalNonShelter = 0;
@@ -129,6 +137,7 @@ public class EarthquakeSimulationEngine {
         }
 
         double evacRatio = totalNonShelter == 0 ? 1.0 : (double) evacOk / totalNonShelter;
+        evacRatio = Math.min(1.0, evacRatio + safetyDataClient.evacCapacityBonus(region.code()));
         DisasterMetrics metrics = new DisasterMetrics(
                 DisasterMode.EARTHQUAKE.name().toLowerCase(),
                 rows,
@@ -143,7 +152,8 @@ public class EarthquakeSimulationEngine {
                 (double) collapseCells,
                 evacRatio,
                 null,
-                null
+                null,
+                liveSource
         );
         return new TyphoonSimulationEngine.SimulationOutput(toSummary(scenario), metrics, values);
     }

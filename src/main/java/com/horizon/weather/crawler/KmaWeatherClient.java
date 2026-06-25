@@ -16,12 +16,9 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * ASOS 시간자료 클라이언트.
+ * ASOS 시간자료 클라이언트 — 기상청 API허브({@code authKey}) 전용.
  *
- * <p><b>기본(provider=apihub):</b> [기상청 API허브](https://apihub.kma.go.kr/) — {@code authKey}
- * · {@code kma_sfctm2.php}(기온 TA) + 일사 묶음형 {@code nph-sun_sfc_sts_pkg}(SI_HR)</p>
- *
- * <p><b>provider=portal:</b> 공공데이터포털 {@code getWthrDataList} JSON ({@code serviceKey})</p>
+ * <p>{@code kma_sfctm2.php}(기온 TA·강수 RN) + 일사 묶음형 {@code nph-sun_sfc_sts_pkg}(SI_HR).</p>
  *
  * <p>키 미설정·오류 시 빈 결과 → {@link com.horizon.weather.service.WeatherDataService} 샘플 폴백.</p>
  */
@@ -30,27 +27,18 @@ import java.util.Set;
 public class KmaWeatherClient {
 
     private final RestClient apihubClient;
-    private final RestClient portalClient;
     private final String apiKey;
-    private final String provider;
     private final String tempPath;
     private final String solarPath;
-    private final String portalDataPath;
 
     public KmaWeatherClient(
             RestClient.Builder restClientBuilder,
             @Value("${horizon.weather.kma.apihub-base-url}") String apihubBaseUrl,
-            @Value("${horizon.weather.asos.base-url}") String portalBaseUrl,
-            @Value("${horizon.weather.asos.data-path:/getWthrDataList}") String portalDataPath,
-            @Value("${horizon.weather.asos.provider:apihub}") String provider,
             @Value("${horizon.weather.asos.temp-path:/api/typ01/url/kma_sfctm2.php}") String tempPath,
             @Value("${horizon.weather.asos.solar-path:/api/typ01/cgi-bin/url/nph-sun_sfc_sts_pkg}") String solarPath,
             @Value("${horizon.weather.kma.api-key:}") String apiKey
     ) {
         this.apihubClient = restClientBuilder.baseUrl(apihubBaseUrl).build();
-        this.portalClient = restClientBuilder.baseUrl(portalBaseUrl).build();
-        this.portalDataPath = portalDataPath;
-        this.provider = provider == null ? "apihub" : provider.trim().toLowerCase();
         this.tempPath = tempPath;
         this.solarPath = solarPath;
         this.apiKey = apiKey;
@@ -61,7 +49,7 @@ public class KmaWeatherClient {
     }
 
     public String provider() {
-        return provider;
+        return "apihub";
     }
 
     /**
@@ -70,9 +58,6 @@ public class KmaWeatherClient {
     public List<AsosObservation> fetchHourly(String stationId, String date, int startHour, int endHour) {
         if (!isConfigured()) {
             return List.of();
-        }
-        if ("portal".equals(provider)) {
-            return fetchHourlyPortal(stationId, date, startHour, endHour);
         }
         return fetchHourlyApihub(stationId, date, startHour, endHour);
     }
@@ -207,32 +192,4 @@ public class KmaWeatherClient {
         }
     }
 
-    // --- 공공데이터포털 (serviceKey) ---
-
-    private List<AsosObservation> fetchHourlyPortal(String stationId, String date, int startHour, int endHour) {
-        try {
-            String body = portalClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path(portalDataPath)
-                            .queryParam("serviceKey", apiKey)
-                            .queryParam("pageNo", 1)
-                            .queryParam("numOfRows", Math.max(1, endHour - startHour + 1))
-                            .queryParam("dataType", "JSON")
-                            .queryParam("dataCd", "ASOS")
-                            .queryParam("dateCd", "HR")
-                            .queryParam("stnIds", stationId)
-                            .queryParam("startDt", date)
-                            .queryParam("endDt", date)
-                            .queryParam("startHh", String.format("%02d", startHour))
-                            .queryParam("endHh", String.format("%02d", endHour))
-                            .build())
-                    .retrieve()
-                    .body(String.class);
-            return KmaResponseParser.parseAsosHourlyJson(body);
-        } catch (RestClientException ex) {
-            log.warn("공공데이터 ASOS 실패 (stn={}, date={} {}-{}h): {}",
-                    stationId, date, startHour, endHour, ex.getMessage());
-            return List.of();
-        }
-    }
 }

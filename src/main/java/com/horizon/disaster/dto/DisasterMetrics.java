@@ -16,6 +16,8 @@ public record DisasterMetrics(
         Double collapseRiskCells,
         Double evacWithin3MinRatio,
         Double inundatedCells,
-        Double highGroundCoverage
+        Double highGroundCoverage,
+        /** {@code kma} when live feeds adjusted scenario intensity; otherwise null. */
+        String liveSource
 ) {
 }

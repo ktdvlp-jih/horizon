@@ -90,6 +90,19 @@ class KmaResponseParserTest {
         assertEquals(42.5, pm.get(), 0.01);
     }
 
+    /** Real 기상청 API허브 {@code dst_pm10_hr.php} format: TM ORG STN AVG(CNT) MIN MAX. */
+    @Test
+    void parsePm10Hourly_apiHubFormatWithCount() {
+        String body = """
+                #YYYY.MM.DD.HH:MI ORG STN AVG(CNT) MIN MAX
+                # KST ID ug/m3 ug/m3 ug/m3
+                2010.12.31.09:00 kma 90 32(12) 24 37
+                """;
+        Optional<Double> pm = KmaResponseParser.parsePm10Hourly(body);
+        assertTrue(pm.isPresent());
+        assertEquals(32.0, pm.get(), 0.01);
+    }
+
     @Test
     void parseDaySolar_skipsMissingSiHr() {
         String body = """

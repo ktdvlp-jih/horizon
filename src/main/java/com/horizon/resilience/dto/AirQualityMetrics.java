@@ -13,7 +13,7 @@ package com.horizon.resilience.dto;
  * @param sinkCells   number of absorption cells (trees/green buffer/...)
  * @param sourceRatio source cells / total
  * @param sinkRatio   sink cells / total
- * @param source      baseline data source: "airkorea" (live) or "fallback"
+ * @param source      baseline data source: "kma" (live) or "fallback"
  */
 public record AirQualityMetrics(
         int gridSize,
