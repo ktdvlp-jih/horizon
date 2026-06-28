@@ -475,7 +475,7 @@ Stage 2: python:3.12-slim  → uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 1. **로컬 개발 + 원격 DB (권장):** Tailscale + `ssh-db-tunnel-tailscale.bat` → `bootRun` + 로컬 `uvicorn` + `npm run dev` — [SETUP.md](../onboarding/SETUP.md) · [DEV_SETUP.md](../onboarding/DEV_SETUP.md)
 2. **로컬 개발 (이 PC DB):** `docker compose up db -d` 또는 로컬 PG + `.env.dev.example`
-3. **Docker 전체 (집 PC):** `docker compose up -d --build` — [SETUP.md](../onboarding/SETUP.md) · [DEPLOY.md](../onboarding/DEPLOY.md)
+3. **Docker 전체 (Ubuntu):** `docker compose up -d --build` — [UBUNTU_SERVER_SETUP.md](../onboarding/UBUNTU_SERVER_SETUP.md)
 4. **외부 데모:** Cloudflare Quick Tunnel + `HORIZON_SERVE_FRONTEND=true`
 
 ### 6.4.1 Tailscale DB 터널
@@ -522,7 +522,7 @@ http://localhost:9080/api/health
 
 **Self-hosted Runner 사용 안 함** — SSH로 트리거만 하고 Docker는 interactive session 예약 작업에서 실행 (credential 오류 방지).
 
-상세: [SETUP.md](../onboarding/SETUP.md) · [DEPLOY.md](../onboarding/DEPLOY.md)
+상세: [SETUP.md](../onboarding/SETUP.md) · [UBUNTU_SERVER_SETUP.md](../onboarding/UBUNTU_SERVER_SETUP.md)
 
 ### 6.7 Cursor 대화 동기화 (선택)
 
@@ -686,7 +686,7 @@ cd ai && python -m pytest
 cd frontend && npm run lint
 ```
 
-상세: [SETUP.md](../onboarding/SETUP.md) · [DEV_SETUP.md](../onboarding/DEV_SETUP.md) · [DEPLOY.md](../onboarding/DEPLOY.md) · [SESSION_HANDOFF.md](../onboarding/SESSION_HANDOFF.md)
+상세: [SETUP.md](../onboarding/SETUP.md) · [DEV_SETUP.md](../onboarding/DEV_SETUP.md) · [UBUNTU_SERVER_SETUP.md](../onboarding/UBUNTU_SERVER_SETUP.md) · [SESSION_HANDOFF.md](../onboarding/SESSION_HANDOFF.md)
 
 ---
 

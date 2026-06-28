@@ -4,7 +4,7 @@
 > **SSH 계정:** `jeon`  
 > **상태 (2026-06-28):** A~D **완료** · **E-1 Quick Tunnel (systemd)** 운영 중  
 > **다음:** **E-2** 도메인 구매 → [Named Tunnel §7-2](#7-2-named-tunnel-예정--고정-도메인)
-> **관련:** Windows 집 PC — [SETUP.md](SETUP.md) · [DEPLOY.md](DEPLOY.md) · [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md)
+> **관련:** 개발 PC — [DEV_SETUP.md](DEV_SETUP.md) · [SETUP.md](SETUP.md) (진입점)
 
 ### ⚠️ 공통 주의
 
@@ -71,7 +71,7 @@ sudo journalctl -u cloudflared-quick -n 100 --no-pager \
 
 **기록 (2026-06-28):** `https://opt-birds-built-streets.trycloudflare.com` (터널 재시작 시 변경 → 위 명령 재실행)
 
-상세: [§7-1](#7-1-quick-tunnel-현행--ubuntu) · [CLOUDFLARE_TUNNEL.md §1](CLOUDFLARE_TUNNEL.md#1-quick-tunnel-현행--ubuntu)
+상세: [§7-1](#7-1-quick-tunnel-현행--ubuntu)
 
 ### E-2. 외부 URL — Named Tunnel — ☐ **다음 (도메인 구매 후)**
 
@@ -611,8 +611,7 @@ ssh jeon@192.168.219.100 "curl -s http://localhost:9080/api/health"
 
 ## 7. 외부 접속
 
-내부 IP `192.168.219.100`만으로는 **외부( LTE·심사 ) 접속 불가**.  
-Cloudflare Tunnel 방식은 **두 가지** — 상세: [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md)
+내부 IP `192.168.219.100`만으로는 **외부( LTE·심사 ) 접속 불가**.
 
 | | **Quick Tunnel** (현행) | **Named Tunnel** (다음 · 포폴) |
 |--|-------------------------|--------------------------------|
@@ -623,7 +622,7 @@ Cloudflare Tunnel 방식은 **두 가지** — 상세: [CLOUDFLARE_TUNNEL.md](CL
 
 ### 7-1. Quick Tunnel (현행 · Ubuntu)
 
-**systemd `cloudflared-quick`** — SSH 끊어도 유지. 상세: [CLOUDFLARE_TUNNEL.md §1](CLOUDFLARE_TUNNEL.md#1-quick-tunnel-현행--ubuntu)
+**systemd `cloudflared-quick`** — SSH 끊어도 유지.
 
 **체크리스트**
 
@@ -693,7 +692,29 @@ curl -sI https://opt-birds-built-streets.trycloudflare.com/api/health
 | `sudo systemctl disable --now cloudflared-quick` | 중지 (Named 전환 전) |
 
 **URL과 무관 (유지):** `git push` 배포 · `docker compose up --build`  
-**URL 변경 가능:** `systemctl restart cloudflared-quick` · **Ubuntu 재부팅**
+**URL 재시작·재부팅 후:** §7-1 journal URL 추출 명령 재실행.
+
+**foreground 테스트만 (SSH 끊으면 종료):**
+
+```bash
+cloudflared tunnel --url http://localhost:9080 --no-autoupdate
+```
+
+**URL · Docker · 재시작**
+
+| 이벤트 | Quick URL | Docker |
+|--------|-----------|--------|
+| `git push` 배포 · `docker compose up --build` | ✅ 유지 | 재빌드 |
+| `systemctl restart cloudflared-quick` · Ubuntu 재부팅 | ⚠️ 변경 가능 | — |
+| SSH만 끊음 (systemd) | ✅ 유지 | — |
+
+**문제 해결**
+
+| 증상 | 확인 |
+|------|------|
+| 502 | `docker compose ps` · `curl localhost:9080/api/health` |
+| URL 모름 | `sudo journalctl -u cloudflared-quick -n 100 \| grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' \| tail -1` |
+| Named CORS | `.env` `HORIZON_CORS_ORIGINS`에 `https://도메인` |
 
 ### 7-2. Named Tunnel (예정 · 고정 도메인)
 
@@ -707,7 +728,7 @@ curl -sI https://opt-birds-built-streets.trycloudflare.com/api/health
 | ☐ | `.env` `HORIZON_CORS_ORIGINS`에 `https://도메인` |
 | ☐ | Quick systemd 중지: `sudo systemctl disable --now cloudflared-quick` |
 
-Ubuntu 명령 전체: [CLOUDFLARE_TUNNEL.md §2](CLOUDFLARE_TUNNEL.md#2-named-tunnel-다음--고정-도메인) · 아래 §8 요약.
+Ubuntu Named Tunnel 명령 전체: 아래 §8 요약.
 
 ### 7-3. DB — 회사·외부 개발 PC (Tailscale + SSH 터널)
 
@@ -872,8 +893,8 @@ ssh -L 55432:localhost:55432 jeon@192.168.219.100
 
 ## 8. Cloudflare Named Tunnel (Ubuntu 명령 요약)
 
-**Quick Tunnel** → §7-1 · [CLOUDFLARE_TUNNEL.md §1](CLOUDFLARE_TUNNEL.md#1-quick-tunnel-현행--ubuntu)  
-**Named Tunnel** → §7-2 · 아래 · [CLOUDFLARE_TUNNEL.md §2](CLOUDFLARE_TUNNEL.md#2-named-tunnel-다음--고정-도메인)
+**Quick Tunnel** → §7-1  
+**Named Tunnel** → §7-2 · 아래
 
 ```bash
 curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb

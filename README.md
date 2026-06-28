@@ -5,15 +5,14 @@
 
 기획 배경과 아이디어 선정 근거는 [docs/MVP.md](docs/MVP.md), 기술 스택·템플릿은 [docs/template/TECH_STACK.md](docs/template/TECH_STACK.md) 참고.
 
-**온보딩 (집 PC · 개발 PC · 배포 파이프라인):** **[docs/onboarding/SETUP.md](docs/onboarding/SETUP.md)** ← **여기서 시작**
+**온보딩:** **[docs/onboarding/SETUP.md](docs/onboarding/SETUP.md)** ← **여기서 시작**
 
 | 문서 | 용도 |
 |------|------|
-| [docs/onboarding/SETUP.md](docs/onboarding/SETUP.md) | 전체 1회 설정 + 매일 워크플로 |
-| [docs/onboarding/DEV_SETUP.md](docs/onboarding/DEV_SETUP.md) | 개발 PC 로컬 실행 |
-| [docs/onboarding/DEPLOY.md](docs/onboarding/DEPLOY.md) | GitHub Actions 자동 배포 |
-| [docs/onboarding/CLOUDFLARE_TUNNEL.md](docs/onboarding/CLOUDFLARE_TUNNEL.md) | 외부 데모 URL |
-| [docs/onboarding/SESSION_HANDOFF.md](docs/onboarding/SESSION_HANDOFF.md) | 다른 PC에서 이어하기 |
+| [docs/onboarding/SETUP.md](docs/onboarding/SETUP.md) | 진입점 (역할별 링크) |
+| [docs/onboarding/UBUNTU_SERVER_SETUP.md](docs/onboarding/UBUNTU_SERVER_SETUP.md) | Ubuntu 서버 · 배포 · 외부 URL |
+| [docs/onboarding/DEV_SETUP.md](docs/onboarding/DEV_SETUP.md) | Windows·macOS 개발 PC |
+| [docs/onboarding/SESSION_HANDOFF.md](docs/onboarding/SESSION_HANDOFF.md) | PC 전환 · SpecStory |
 
 ---
 
@@ -114,7 +113,7 @@ docker compose up -d --build
 # 앱: http://localhost:9080
 ```
 
-자동 재빌드: **[docs/onboarding/DEPLOY.md](docs/onboarding/DEPLOY.md)** (`master` merge → GitHub Actions + Tailscale SSH)
+자동 재빌드: **[docs/onboarding/UBUNTU_SERVER_SETUP.md §3](docs/onboarding/UBUNTU_SERVER_SETUP.md#3-자동-배포--self-hosted-runner-tailscale-없이)** (`master` push → Self-hosted Runner)
 
 ### 4) 외부 데모 (Cloudflare Tunnel · Ubuntu)
 
@@ -130,7 +129,7 @@ sudo journalctl -u cloudflared-quick -n 100 --no-pager \
 
 **예정:** 도메인 구매 후 Named Tunnel → `https://horizon-app.com`
 
-[docs/onboarding/CLOUDFLARE_TUNNEL.md](docs/onboarding/CLOUDFLARE_TUNNEL.md) · [UBUNTU_SERVER_SETUP.md §7](docs/onboarding/UBUNTU_SERVER_SETUP.md#7-외부-접속)
+[docs/onboarding/UBUNTU_SERVER_SETUP.md §7](docs/onboarding/UBUNTU_SERVER_SETUP.md#7-외부-접속)
 
 ---
 

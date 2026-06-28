@@ -7,7 +7,7 @@
 
 ## 0. 실행
 
-로컬 개발 모드 (3개 서비스). 자세한 내용은 [onboarding/SETUP.md](onboarding/SETUP.md) 참고.
+로컬 개발 모드 (3개 서비스). [onboarding/DEV_SETUP.md](onboarding/DEV_SETUP.md) · [onboarding/UBUNTU_SERVER_SETUP.md](onboarding/UBUNTU_SERVER_SETUP.md)
 
 | # | 서비스 | 명령 | 주소 |
 |---|--------|------|------|
