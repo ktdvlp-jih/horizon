@@ -377,6 +377,10 @@ sudo ./svc.sh start
 sudo ./svc.sh status
 ```
 
+> **주의:** `~/apps/horizon/actions-runner` 처럼 **레포 안**에 두지 말 것.  
+> Download 후 **`./config.sh` 필수** — `Not configured` = config.sh 생략.  
+> Registration token은 채팅·캡처 금지 → `.cursor/rules/secrets-handling.mdc`
+
 **확인:** GitHub Runners 탭에 **Idle** (녹색) runner 1대.
 
 > `jeon`이 `docker` 그룹에 있어야 `deploy-docker.sh`의 `docker compose` 동작.

@@ -11,7 +11,8 @@
 |------|------|------|
 | **[SETUP.md](SETUP.md)** | 전원 | **전체 온보딩** (1회 설정 + 매일 워크플로) |
 | [DEV_SETUP.md](DEV_SETUP.md) | 개발 PC | 로컬 실행 (Spring/Vite/AI + Tailscale DB 터널) |
-| [DEPLOY.md](DEPLOY.md) | 집 PC · GitHub | Actions 자동 배포 · Secrets · 트러블슈팅 |
+| [DEPLOY.md](DEPLOY.md) | Windows 집 PC · GitHub | Actions 자동 배포 (PowerShell · 예약 작업) |
+| **[UBUNTU_SERVER_SETUP.md](UBUNTU_SERVER_SETUP.md)** | **Ubuntu 서버** | **Docker · GitHub Actions · Tailscale 파이프라인 (권장)** |
 | [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md) | 집 PC | 외부 데모 URL (trycloudflare) |
 | [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | PC 전환 | IP·체크리스트·대화 동기화 |
 
