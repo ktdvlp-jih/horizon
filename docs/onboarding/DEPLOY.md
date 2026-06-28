@@ -123,4 +123,7 @@ cd e:\workspace\horizon
 
 ## 외부 데모
 
-[CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md) — `start_trycloudflare.bat`
+**Ubuntu (현행):** [CLOUDFLARE_TUNNEL.md](CLOUDFLARE_TUNNEL.md) · Quick Tunnel · `systemctl status cloudflared-quick`  
+**예정:** Named Tunnel + `horizon-app.com` (도메인 구매 후)
+
+Windows 레거시: `cloudflared tunnel --url http://localhost:9080`

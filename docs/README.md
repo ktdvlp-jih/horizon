@@ -22,7 +22,7 @@
 | **[onboarding/SETUP.md](onboarding/SETUP.md)** | 전체 1회 설정 + 매일 워크플로 |
 | [onboarding/DEV_SETUP.md](onboarding/DEV_SETUP.md) | 개발 PC 로컬 실행 |
 | [onboarding/DEPLOY.md](onboarding/DEPLOY.md) | GitHub Actions 자동 배포 |
-| [onboarding/CLOUDFLARE_TUNNEL.md](onboarding/CLOUDFLARE_TUNNEL.md) | 외부 데모 URL |
+| [onboarding/CLOUDFLARE_TUNNEL.md](onboarding/CLOUDFLARE_TUNNEL.md) | Quick / Named Tunnel · Ubuntu systemd |
 | [onboarding/SESSION_HANDOFF.md](onboarding/SESSION_HANDOFF.md) | 다른 PC에서 이어하기 |
 | **[AI_SESSION_HANDOFF.md](AI_SESSION_HANDOFF.md)** | **Cursor AI 대화 맥락·SpecStory 이어하기** |
 

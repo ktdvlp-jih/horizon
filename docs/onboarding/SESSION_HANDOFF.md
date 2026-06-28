@@ -4,14 +4,14 @@
 
 ---
 
-## 아키텍처 (확정)
+## 아키텍처 (확정 · 2026-06)
 
 | 역할 | 방식 |
 |------|------|
-| **DB** | 집 PC Docker Postgres (`55432`) — 클라oud DB 없음 |
-| **밖에서 개발** | Tailscale + `ssh-db-tunnel-tailscale.bat` |
-| **배포** | `master` push → GitHub Actions + Tailscale SSH |
-| **데모** | `start_trycloudflare.bat` → `:9080` |
+| **앱 · DB** | Ubuntu Docker `192.168.219.100:9080` |
+| **배포** | `master` push → Self-hosted Runner → `deploy-docker.sh` |
+| **외부 데모 (현행)** | `https://opt-birds-built-streets.trycloudflare.com` · `cloudflared-quick` |
+| **외부 데모 (예정)** | Named Tunnel → `horizon-app.com` |
 | **Git push** | SSH (`setup-github-ssh.ps1`) — PC마다 1회 |
 
 ---
@@ -24,7 +24,7 @@
 1. git clone / git pull
 2. SETUP.md §4 — JDK/Node/Python/Tailscale
 3. copy .env.dev.remote.example → .env.dev  (.env는 git 제외 → 수동 복사)
-4. scripts\ssh-db-tunnel-tailscale.bat — IP/USER 수정
+4. scripts\ssh-db-tunnel-tailscale.bat — Ubuntu Tailscale IP (§7-3 · DEV_SETUP.md)
 5. setup-github-ssh.ps1 — GitHub SSH key 등록
 6. 매일: 터널 → bootRun → npm run dev
 ```
@@ -48,10 +48,10 @@
 | 항목 | 값 |
 |------|-----|
 | GitHub repo | `ktdvlp-jih/horizon` |
-| 집 PC Tailscale IP | `100.x.x.x` (`tailscale ip -4`) |
-| 집 PC Windows 사용자 | `<HOME_USER>` |
-| 집 PC LAN IP (참고) | `192.168.x.x` |
-| SSH 터널 DB | `localhost:55432` → 집 Docker Postgres |
+| Ubuntu Tailscale IP | `100.x.x.x` (Ubuntu: `tailscale ip -4`) |
+| Ubuntu SSH 사용자 | `jeon` |
+| Ubuntu LAN IP (참고) | `192.168.219.100` |
+| SSH 터널 DB | `localhost:55432` → Ubuntu Docker Postgres |
 
 ### 포트
 

@@ -116,14 +116,21 @@ docker compose up -d --build
 
 자동 재빌드: **[docs/onboarding/DEPLOY.md](docs/onboarding/DEPLOY.md)** (`master` merge → GitHub Actions + Tailscale SSH)
 
-### 4) 외부 데모 (Cloudflare Tunnel)
+### 4) 외부 데모 (Cloudflare Tunnel · Ubuntu)
 
-```powershell
-docker compose up -d
-cloudflared tunnel --url http://localhost:9080
+**현행:** Quick Tunnel + systemd `cloudflared-quick`
+
+```bash
+sudo journalctl -u cloudflared-quick -n 100 --no-pager \
+  | grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' | tail -1
+# → https://opt-birds-built-streets.trycloudflare.com (2026-06-28 · 재시작 시 변경)
 ```
 
-[docs/onboarding/CLOUDFLARE_TUNNEL.md](docs/onboarding/CLOUDFLARE_TUNNEL.md) 참고.
+- Live: https://opt-birds-built-streets.trycloudflare.com/designer
+
+**예정:** 도메인 구매 후 Named Tunnel → `https://horizon-app.com`
+
+[docs/onboarding/CLOUDFLARE_TUNNEL.md](docs/onboarding/CLOUDFLARE_TUNNEL.md) · [UBUNTU_SERVER_SETUP.md §7](docs/onboarding/UBUNTU_SERVER_SETUP.md#7-외부-접속)
 
 ---
 

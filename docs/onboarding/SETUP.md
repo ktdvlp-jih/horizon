@@ -39,7 +39,8 @@
 │ 집 PC                                                            │
 │  예약 작업 → git pull → docker compose build/up                  │
 │  http://localhost:9080  (DB 컨테이너 유지, app/ai 재빌드)        │
-│  trycloudflare → 외부 데모 URL                                   │
+│  Cloudflare Quick Tunnel (Ubuntu systemd) → *.trycloudflare.com   │
+│  (예정) Named Tunnel → horizon-app.com                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -338,11 +339,13 @@ git push origin master
 
 ---
 
-## 8. 외부 데모 URL (집 PC)
+## 8. 외부 데모 URL (Windows 집 PC · 레거시)
+
+> **현행:** Ubuntu Quick Tunnel + systemd — [UBUNTU_SERVER_SETUP.md §7](UBUNTU_SERVER_SETUP.md#7-외부-접속)
 
 ```powershell
 docker compose up -d
-.\scripts\start_trycloudflare.bat
+cloudflared tunnel --url http://localhost:9080 --no-autoupdate
 ```
 
 터미널의 `https://xxx.trycloudflare.com` 공유 (재실행 시 URL 변경).

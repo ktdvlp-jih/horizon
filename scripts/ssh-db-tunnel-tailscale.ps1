@@ -3,8 +3,8 @@
 #        .\scripts\ssh-db-tunnel-tailscale.ps1 -TailscaleIp 100.117.145.80
 
 param(
-    [string]$TailscaleIp = '100.117.145.80',
-    [string]$User = '전일훈'
+    [string]$TailscaleIp = '100.x.x.x',
+    [string]$User = 'jeon'
 )
 
 Write-Host "=== Horizon DB tunnel (Tailscale) ===" -ForegroundColor Cyan
