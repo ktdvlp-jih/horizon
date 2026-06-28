@@ -43318,3 +43318,1433 @@ wc : 'wc' �� cmdlet, �Լ�, ��ũ��Ʈ ���� �Ǵ� �
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+규칙 파일과 대화 기록을 커밋해야 한다. 중복된 마크다운 파일은 삭제해야 한다.
+
+구체적으로 DEPLOY.md, SETUP.md, CLOUDFLARE_TUNNEL.md가 중복된 것으로 보인다. 이 파일들은 기존 설정 문서와 내용이 겹친다.
+
+AI_SESSION_HANDOFF.md는 SESSION_HANDOFF.md와 에이전트 전달 내용이 중복된다. AI 내용을 통합하고 원본을 삭제할 수 있다. SpecStory의 cursor_project_tech_stack_integration.md도 중복이다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\.specstory\history\cursor_project_tech_stack_integration.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\.specstory\history\2026-06-23_07-16-07Z-project-tech-stack-integration.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "e:\\workspace\\horizon\\.gitignore",
+  "pattern": "specstory|\\.cursor"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "e:\\workspace\\horizon\\.gitignore",
+  "pattern": "specstory|\\.cursor",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": ".gitignore"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "e:/workspace/horizon"; git ls-files .specstory; Get-ChildItem .specstory/history/*.md | ForEach-Object { "$($_.Name) $($_.Length)" }</summary>
+
+```bash
+cd "e:/workspace/horizon"; git ls-files .specstory; Get-ChildItem .specstory/history/*.md | ForEach-Object { "$($_.Name) $($_.Length)" }
+```
+
+```
+.specstory/.project.json
+.specstory/cli/config.toml
+.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
+".specstory/history/2026-06-20_18-03-54Z-\355\224\204\353\241\234\354\240\235\355\212\270-\354\213\254\354\202\254-\352\270\260\354\244\200-\354\240\201\355\225\251\354\204\261.md"
+.specstory/history/2026-06-23_06-37-44Z-work-history-retrieval-from-another-pc.md
+.specstory/history/2026-06-23_07-16-07Z-project-tech-stack-integration.md
+.specstory/history/2026-06-24_11-36-41Z-chemical-management-system-development.md
+.specstory/history/cursor_project_tech_stack_integration.md
+2026-06-17_15-28-01Z-project-tech-stack-integration.md 1576722
+2026-06-20_18-03-54Z-������Ʈ-�ɻ�-����-���ռ�.md 109539
+2026-06-23_06-37-44Z-work-history-retrieval-from-another-pc.md 323073
+2026-06-23_07-16-07Z-project-tech-stack-integration.md 767466
+2026-06-24_11-36-41Z-chemical-management-system-development.md 41467
+cursor_project_tech_stack_integration.md 255474
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+규칙 파일과 대화 기록(.specstory)을 커밋해야 한다. 중복된 md 파일은 삭제해야 한다.
+
+SETUP.md는 레거시 Windows 환경이다. 현재 Ubuntu 기반 운영이므로 DEPLOY.md와 함께 삭제하거나 리다이렉트로 대체해야 한다.
+
+CLOUDFLARE_TUNNEL.md는 UBUNTU_SERVER_SETUP §7-8와 내용이 중복된다. 이 파일을 삭제하고 링크만 남기거나, 상세 문서를 유지하고 UBUNTU §7은 링크로 단순화하는 방안을 검토 중이다.
+
+DEPLOY.md는 삭제한다. CLOUDFLARE_TUNNEL.md도 삭제한다. UBUNTU_SERVER_SETUP §7-1, §7-2, §8에 해당 내용이 완전히 포함되어 있는지 확인해야 한다. SETUP.md는 삭제하지 않고 서버와 개발 PC, 세션 이관 문서로 연결하는 짧은 인덱스로 재작성한다.
+
+AI_SESSION_HANDOFF.md는 SESSION_HANDOFF.md와 내용이 중복된다. AI 콘텐츠를 SESSION_HANDOFF에 통합한 뒤 AI_SESSION_HANDOFF.md를 삭제한다.
+
+cursor_project_tech_stack_integration.md(255KB)는 SpecStory 자동 버전(2026-06-17, 2026-06-23)과 주제가 중복된다. 수동보내기 파일은 삭제한다. 2026-06-17 버전은 AI_SESSION_HANDOFF의 주요 긴 세션으로 보존한다.
+
+2026-06-23 버전이 수동보내기 파일을 이어받아 내용이 중복된다. 이 경우 두 날짜의 specstory를 모두 유지할지, 아니면 최신 종합 버전만 남기는지 결정해야 한다. 2026-06-24 chemical-management 파일은 사용자가 삭제 요청을 하지 않았으므로 그대로 둔다. 대화 기록(.specstory)은 커밋 대상에 포함한다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\onboarding\CLOUDFLARE_TUNNEL.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\.cursor\rules\secrets-handling.mdc</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+CLOUDFLARE_TUNNEL.md는 삭제합니다. 해당 파일의 고유 내용은 UBUNTU §7에 병합하고 참조를 정리합니다.
+
+DEPLOY.md는 삭제하고 링크를 UBUNTU §3로 변경합니다.
+SETUP.md는 진입점 인덱스로 재작성합니다.
+AI_SESSION_HANDOFF 내용을 SESSION_HANDOFF에 병합하고 해당 파일은 삭제합니다.
+cursor_project_tech_stack_integration.md 중복 파일도 삭제합니다.
+.cursor/rules/secrets-handling.mdc와 .specstory 변경 사항을 커밋합니다.
+README.md 및 하위 문서의 링크를 업데이트합니다.
+
+SETUP.md 진입점 인덱스를 작성합니다. Ubuntu 서버는 1회 설정 문서를, 개발 PC는 개발 환경 설정 문서를, PC 전환·대화 동기화는 세션 핸오프 문서를 각각 안내합니다. Windows 레거시는 UBUNTU §9에 기록합니다. DEPLOY.md는 삭제하고 배포 방식 변경 안내를 추가합니다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\AI_SESSION_HANDOFF.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\README.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+SETUP.md를 단순 인덱스(진입점)로 교체할 계획이다.
+
+DEPLOY.md, CLOUDFLARE_TUNNEL.md, AI_SESSION_HANDOFF.md를 삭제한다.
+SESSION_HANDOFF.md에 AI 핸드오프 내용을 병합하고, UBUNTU_SERVER_SETUP.md에서는 CLOUDFLARE_TUNNEL 링크를 제거하며 7절에 트러블슈팅 섹션을 추가한다.
+README.md와 관련 문서의 DEPLOY 참조를 모두 정리한다.
+.specstory/history/의 중복 파일도 삭제한다.
+모든 변경사항을 커밋하고 푸시할 예정이다.</details></think>
+
+_**Agent (default)**_
+
+중복 MD 정리·문서 병합·룰·SpecStory 커밋을 진행합니다.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\onboarding\SESSION_HANDOFF.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\README.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+SESSION_HANDOFF.md를 업데이트할 계획이다. AI 내용을 병합하고 오래된 체크리스트를 수정하며 불필요한 링크는 제거한다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{md,mdc}",
+  "path": "e:\\workspace\\horizon",
+  "pattern": "CLOUDFLARE_TUNNEL|DEPLOY\\.md|AI_SESSION_HANDOFF"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "e:\\workspace\\horizon",
+  "pattern": "CLOUDFLARE_TUNNEL|DEPLOY\\.md|AI_SESSION_HANDOFF",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": ".\\docs\\onboarding\\UBUNTU_SERVER_SETUP.md"
+    },
+    {
+      "matchCount": 127,
+      "uri": ".\\.specstory\\history\\2026-06-17_15-28-01Z-project-tech-stack-integration.md"
+    },
+    {
+      "matchCount": 4,
+      "uri": ".\\docs\\onboarding\\SESSION_HANDOFF.md"
+    },
+    {
+      "matchCount": 3,
+      "uri": ".\\docs\\onboarding\\README.md"
+    },
+    {
+      "matchCount": 4,
+      "uri": ".\\README.md"
+    },
+    {
+      "matchCount": 3,
+      "uri": ".\\docs\\README.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\docs\\onboarding\\DEPLOY.md"
+    },
+    {
+      "matchCount": 3,
+      "uri": ".\\docs\\template\\TECH_STACK.md"
+    },
+    {
+      "matchCount": 32,
+      "uri": ".\\.specstory\\history\\2026-06-23_07-16-07Z-project-tech-stack-integration.md"
+    },
+    {
+      "matchCount": 16,
+      "uri": ".\\.specstory\\history\\cursor_project_tech_stack_integration.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\docs\\AI_SESSION_HANDOFF.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\.specstory\\history\\2026-06-24_11-36-41Z-chemical-management-system-development.md"
+    }
+  ],
+  "totalFiles": 12,
+  "totalMatches": 198
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+세션 이어가기에 병합된 AI 내용을 업데이트하고 README 파일을 수정한다. UBUNTU 74번 줄을 고치고 불필요한 md 파일을 삭제한다. DEV_SETUP의 DEPLOY 섹션 참조 여부도 확인한다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\UBUNTU_SERVER_SETUP.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\SESSION_HANDOFF.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\README.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\README.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\README.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\README.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\README.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\RESILIENCE_TEST_GUIDE.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+DEPLOY.md와 CLOUDFLARE_TUNNEL.md를 삭제한다. DEV_SETUP는 이미 UBUNTU 기준으로 되어 있어 참조 수정이 필요 없다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="delete_file">
+<details><summary>Tool use: **delete_file**</summary>
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="delete_file"><details>
+<summary>Tool use: **delete_file**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="delete_file">
+<details><summary>Tool use: **delete_file**</summary>
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="delete_file"><details>
+<summary>Tool use: **delete_file**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="delete_file">
+<details><summary>Tool use: **delete_file**</summary>
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="delete_file"><details>
+<summary>Tool use: **delete_file**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="delete_file">
+<details><summary>Tool use: **delete_file**</summary>
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="delete_file"><details>
+<summary>Tool use: **delete_file**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.md",
+  "path": "e:\\workspace\\horizon\\docs\\template",
+  "pattern": "DEPLOY\\.md|CLOUDFLARE_TUNNEL|AI_SESSION_HANDOFF"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "e:\\workspace\\horizon\\docs\\template",
+  "pattern": "DEPLOY\\.md|CLOUDFLARE_TUNNEL|AI_SESSION_HANDOFF",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "docs\\template\\TECH_STACK.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\template\TECH_STACK.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\template\TECH_STACK.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\template\TECH_STACK.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{md,mdc,yml}",
+  "path": "e:\\workspace\\horizon",
+  "pattern": "DEPLOY\\.md|CLOUDFLARE_TUNNEL|AI_SESSION_HANDOFF"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "e:\\workspace\\horizon",
+  "pattern": "DEPLOY\\.md|CLOUDFLARE_TUNNEL|AI_SESSION_HANDOFF",
+  "topFiles": [
+    {
+      "matchCount": 127,
+      "uri": ".\\.specstory\\history\\2026-06-17_15-28-01Z-project-tech-stack-integration.md"
+    },
+    {
+      "matchCount": 32,
+      "uri": ".\\.specstory\\history\\2026-06-23_07-16-07Z-project-tech-stack-integration.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\.specstory\\history\\2026-06-24_11-36-41Z-chemical-management-system-development.md"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 161
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+specstory 이력 파일에만 참조가 남아있어 문제가 없다. 이제 모든 파일을 추가하고 커밋 및 푸시를 진행한다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "e:/workspace/horizon"; git add .cursor/rules/secrets-handling.mdc .specstory README.md docs docs/template/TECH_STACK.md; git status --short</summary>
+
+```bash
+cd "e:/workspace/horizon"; git add .cursor/rules/secrets-handling.mdc .specstory README.md docs docs/template/TECH_STACK.md; git status --short
+```
+
+```
+warning: LF will be replaced by CRLF in .specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/onboarding/README.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/onboarding/UBUNTU_SERVER_SETUP.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in .cursor/rules/secrets-handling.mdc.
+The file will have its original line endings in your working directory
+A  .cursor/rules/secrets-handling.mdc
+M  .specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
+D  .specstory/history/cursor_project_tech_stack_integration.md
+M  README.md
+D  docs/AI_SESSION_HANDOFF.md
+M  docs/README.md
+M  docs/RESILIENCE_TEST_GUIDE.md
+D  docs/onboarding/CLOUDFLARE_TUNNEL.md
+D  docs/onboarding/DEPLOY.md
+M  docs/onboarding/README.md
+M  docs/onboarding/SESSION_HANDOFF.md
+M  docs/onboarding/SETUP.md
+M  docs/onboarding/UBUNTU_SERVER_SETUP.md
+M  docs/template/TECH_STACK.md
+A  "docs/\352\260\234\353\260\234\352\263\204\355\232\215\354\204\234_\353\217\204\354\213\234\352\270\260\355\233\204\354\204\244\352\263\204\354\236\220.hwpx"
+A  "docs/\352\270\260\354\203\201\302\267\352\270\260\355\233\204+AI+\355\225\264\354\273\244\355\206\244+\352\262\275\354\247\204\353\214\200\355\232\214_\352\263\265\352\263\240\353\254\270.hwpx"
+?? tmp-smoke-eval.json
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "e:/workspace/horizon"; git reset HEAD "docs/개발계획서_도시기후설계자.hwpx" "docs/기상·기후+AI+해커톤+경진대회_공고문.hwpx"; git status --short</summary>
+
+```bash
+cd "e:/workspace/horizon"; git reset HEAD "docs/개발계획서_도시기후설계자.hwpx" "docs/기상·기후+AI+해커톤+경진대회_공고문.hwpx"; git status --short
+```
+
+```
+A  .cursor/rules/secrets-handling.mdc
+M  .specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
+D  .specstory/history/cursor_project_tech_stack_integration.md
+M  README.md
+D  docs/AI_SESSION_HANDOFF.md
+M  docs/README.md
+M  docs/RESILIENCE_TEST_GUIDE.md
+D  docs/onboarding/CLOUDFLARE_TUNNEL.md
+D  docs/onboarding/DEPLOY.md
+M  docs/onboarding/README.md
+M  docs/onboarding/SESSION_HANDOFF.md
+M  docs/onboarding/SETUP.md
+M  docs/onboarding/UBUNTU_SERVER_SETUP.md
+M  docs/template/TECH_STACK.md
+?? "docs/\352\260\234\353\260\234\352\263\204\355\232\215\354\204\234_\353\217\204\354\213\234\352\270\260\355\233\204\354\204\244\352\263\204\354\236\220.hwpx"
+?? "docs/\352\270\260\354\203\201\302\267\352\270\260\355\233\204+AI+\355\225\264\354\273\244\355\206\244+\352\262\275\354\247\204\353\214\200\355\232\214_\352\263\265\352\263\240\353\254\270.hwpx"
+?? tmp-smoke-eval.json
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "e:/workspace/horizon"; git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>" -m "$( @'
+chore: Cursor 룰·SpecStory 동기화 및 중복 온보딩 MD 정리
+
+secrets-handling 룰 추가, SpecStory 이력 커밋, DEPLOY/CLOUDFLARE_TUNNEL/AI_SESSION_HANDOFF 중복 문서 삭제 후 UBUNTU_SERVER_SETUP·SESSION_HANDOFF·SETUP 진입점으로 통합.
+'@ )"; git push origin master</summary>
+
+```bash
+cd "e:/workspace/horizon"; git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>" -m "$( @'
+chore: Cursor 룰·SpecStory 동기화 및 중복 온보딩 MD 정리
+
+secrets-handling 룰 추가, SpecStory 이력 커밋, DEPLOY/CLOUDFLARE_TUNNEL/AI_SESSION_HANDOFF 중복 문서 삭제 후 UBUNTU_SERVER_SETUP·SESSION_HANDOFF·SETUP 진입점으로 통합.
+'@ )"; git push origin master
+```
+
+```
+[master d2897d9] chore: Cursor 룰·SpecStory 동기화 및 중복 온보딩 MD 정리
+ 14 files changed, 30104 insertions(+), 44075 deletions(-)
+ create mode 100644 .cursor/rules/secrets-handling.mdc
+ delete mode 100644 .specstory/history/cursor_project_tech_stack_integration.md
+ delete mode 100644 docs/AI_SESSION_HANDOFF.md
+ delete mode 100644 docs/onboarding/CLOUDFLARE_TUNNEL.md
+ delete mode 100644 docs/onboarding/DEPLOY.md
+ rewrite docs/onboarding/SESSION_HANDOFF.md (67%)
+ rewrite docs/onboarding/SETUP.md (97%)
+To github.com:ktdvlp-jih/horizon.git
+   294afd0..d2897d9  master -&gt; master
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+작업 반영하고 **`master` push**까지 완료했습니다 (`d2897d9`).
+
+---
+
+## 커밋한 것
+
+| 항목 | 내용 |
+|------|------|
+| **Cursor 룰** | `.cursor/rules/secrets-handling.mdc` (신규) · `contest-constraints.mdc` (기존 유지) |
+| **SpecStory** | `2026-06-17_…` 갱신 · 중복 export `cursor_project_tech_stack_integration.md` 삭제 |
+
+---
+
+## 삭제한 중복 MD (내용은 다른 문서로 통합)
+
+| 삭제 | 통합 위치 |
+|------|-----------|
+| `docs/onboarding/DEPLOY.md` | `UBUNTU_SERVER_SETUP.md` §3 (Self-hosted Runner) |
+| `docs/onboarding/CLOUDFLARE_TUNNEL.md` | `UBUNTU_SERVER_SETUP.md` §7·§8 |
+| `docs/AI_SESSION_HANDOFF.md` | `SESSION_HANDOFF.md` (SpecStory·KMA·Agent 이어하기) |
+| `SETUP.md` (388줄 → 진입점) | 역할별 링크만 — 상세는 UBUNTU / DEV_SETUP |
+
+---
+
+## 문서 구조 (정리 후)
+
+```
+SETUP.md          → 진입점
+UBUNTU_SERVER_SETUP.md  → 서버 · 배포 · 외부 URL · Tailscale
+DEV_SETUP.md      → Windows/macOS 개발 PC
+SESSION_HANDOFF.md → PC 전환 · SpecStory · Cursor 룰 · Agent 맥락
+```
+
+---
+
+## 내일 Windows PC에서
+
+```powershell
+git pull
+# DEV_SETUP.md 따라 Tailscale + ssh-db-tunnel-tailscale.bat
+```
+
+대화 이어가기:
+
+```text
+@docs/onboarding/SESSION_HANDOFF.md
+```
+
+---
+
+**참고:** `docs/*.hwpx`, `tmp-smoke-eval.json`은 커밋에서 **제외**했습니다.
+
+---
+
+_**User**_
+
+E:\workspace\horizon\tmp-smoke-eval.json 이건 뭐야??
+
+---
+
+_**Agent (default)**_
+
+파일 내용과 레포에서의 출처를 확인합니다.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\tmp-smoke-eval.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "e:\\workspace\\horizon",
+  "pattern": "tmp-smoke-eval"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "e:\\workspace\\horizon",
+  "pattern": "tmp-smoke-eval",
+  "topFiles": [
+    {
+      "matchCount": 30,
+      "uri": ".specstory\\history\\2026-06-17_15-28-01Z-project-tech-stack-integration.md"
+    },
+    {
+      "matchCount": 30,
+      "uri": ".specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 60
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+**Cursor가 API 스모크 테스트할 때 만든 임시 파일**입니다. 앱 코드·설정과는 무관합니다.
+
+---
+
+## 내용
+
+서울 10×10 격자 + 태풍 시나리오(`typhoon-maemi-2003`) 샘플 JSON입니다.
+
+```json
+{
+  "regionCode": "seoul",
+  "grid": [ ["BUILDING", "PARK", "TREE", ...], ... ],
+  "scenarioId": "typhoon-maemi-2003"
+}
+```
+
+---
+
+## 용도 (과거 세션)
+
+KMA 연동·회복탄력성 API 확인할 때 `curl` / PowerShell에 넣어 쓴 **요청 body**입니다.
+
+```powershell
+curl -X POST http://localhost:9080/api/designs/evaluate `
+  -H "Content-Type: application/json" `
+  --data-binary "@tmp-smoke-eval.json"
+```
+
+`/api/designs/coach/resilience` 테스트에도 같은 파일을 썼습니다.
+
+---
+
+## 상태
+
+| | |
+|--|--|
+| Git | **미추적** (`??`) — 커밋 안 함 |
+| 앱 | **사용 안 함** — Spring/Vite가 읽지 않음 |
+| 삭제 | **해도 됨** |
+
+---
+
+## 정리
+
+- **로컬 테스트용 임시 파일** (`tmp-` = temporary)
+- SpecStory 6월 17일 세션에서 Agent가 만든 것
+- 지우려면: `del E:\workspace\horizon\tmp-smoke-eval.json`
+- 다시 쓰려면 같은 형식 JSON을 새로 만들면 됩니다
+
+`.gitignore`에 `tmp-smoke-eval.json` 또는 `tmp-*.json` 넣어 두면 `git status`에 안 뜹니다. 원하시면 추가해 드리겠습니다.
+
+---
+
+_**User**_
+
+git pull
+# DEV_SETUP.md 따라 Tailscale + ssh-db-tunnel-tailscale.bat
+대화 이어가기:
+
+@docs/onboarding/SESSION_HANDOFF.md
+
+이렇게 하라고했잖아? .spcstory에서 대화 이어나가기 할수있는거아냐??
+그리고 
+evlal 파일은 필요없으면 삭제해 필요하면 커밋하고
+
+---
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+사용자가 두 가지를 묻고 있다. 첫째, .spcstory에서 대화를 이어갈 수 있는지 확인한다. 둘째, 필요 없는 eval 파일은 삭제하고 필요한 것은 커밋한다.
+
+SpecStory와 SESSION_HANDOFF.md의 차이를 설명해야 한다. tmp-smoke-eval.json은 smoke test용 임시 파일이다. 불필요하므로 삭제하고 .gitignore에 추가할 수 있다.</details></think>
+
+_**Agent (default)**_
+
+SpecStory 이어하기 방식을 정리하고, 불필요한 `tmp-smoke-eval.json`은 삭제합니다.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\onboarding\SESSION_HANDOFF.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "e:\\workspace\\horizon\\.gitignore",
+  "pattern": "tmp-"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "e:\\workspace\\horizon\\.gitignore",
+  "pattern": "tmp-",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **e:\workspace\horizon** (1 file)
+
+| File |
+|------|
+| `../tmp-smoke-eval.json` |
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+tmp-smoke-eval.json을 삭제할 예정이다.</details></think>
+
+_**Agent (default)**_
+
+SpecStory가 대화 이어가기의 본체입니다. SESSION_HANDOFF 설명을 보강하고 `tmp-smoke-eval.json`은 삭제합니다.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\docs\onboarding\SESSION_HANDOFF.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: e:\workspace\horizon\.gitignore</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+SESSION_HANDOFF.md를 명확히 업데이트할 예정이다.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\SESSION_HANDOFF.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\docs\onboarding\SESSION_HANDOFF.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: e:\workspace\horizon\.gitignore</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="delete_file">
+<details><summary>Tool use: **delete_file**</summary>
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="delete_file"><details>
+<summary>Tool use: **delete_file**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd "e:/workspace/horizon"; git add .gitignore docs/onboarding/SESSION_HANDOFF.md; git status --short; git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>" -m "$( @'
+docs: SpecStory 대화 이어가기 안내 보강, tmp-smoke-eval 삭제
+
+SESSION_HANDOFF에 SpecStory가 본문·SESSION_HANDOFF는 요약 인덱스임을 명시하고, 로컬 스모크용 tmp JSON은 삭제·gitignore 처리.
+'@ )"; git push origin master</summary>
+
+```bash
+cd "e:/workspace/horizon"; git add .gitignore docs/onboarding/SESSION_HANDOFF.md; git status --short; git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>" -m "$( @'
+docs: SpecStory 대화 이어가기 안내 보강, tmp-smoke-eval 삭제
+
+SESSION_HANDOFF에 SpecStory가 본문·SESSION_HANDOFF는 요약 인덱스임을 명시하고, 로컬 스모크용 tmp JSON은 삭제·gitignore 처리.
+'@ )"; git push origin master
+```
+
+```
+M  .gitignore
+ M .specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
+M  docs/onboarding/SESSION_HANDOFF.md
+?? "docs/\352\260\234\353\260\234\352\263\204\355\232\215\354\204\234_\353\217\204\354\213\234\352\270\260\355\233\204\354\204\244\352\263\204\354\236\220.hwpx"
+?? "docs/\352\270\260\354\203\201\302\267\352\270\260\355\233\204+AI+\355\225\264\354\273\244\355\206\244+\352\262\275\354\247\204\353\214\200\355\232\214_\352\263\265\352\263\240\353\254\270.hwpx"
+[master 538e944] docs: SpecStory 대화 이어가기 안내 보강, tmp-smoke-eval 삭제
+ 2 files changed, 42 insertions(+), 2 deletions(-)
+To github.com:ktdvlp-jih/horizon.git
+   d2897d9..538e944  master -&gt; master
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+specstory 변경사항이 staged되지 않았다. 사용자가 specstory 관련 문의를 했으므로, 해당 변경사항도 함께 커밋해야 할 수 있다.</details></think>
+
+_**Agent (default)**_
+
+**맞습니다.** 대화 이어가기 **본체는 SpecStory** (`.specstory/history/*.md`)입니다.  
+`SESSION_HANDOFF.md`는 **요약·IP·체크리스트 인덱스**라서, 제가 짧게 적어 둔 `@SESSION_HANDOFF`만으로는 **전체 대화**가 안 넘어갑니다.
+
+---
+
+## 역할 정리
+
+| | SpecStory | SESSION_HANDOFF |
+|--|-----------|-----------------|
+| **내용** | 채팅 **전문** (User/Agent 전체) | 아키텍처·IP·할 일 **요약** |
+| **이어가기** | ✅ **여기가 메인** | 선택 (짧은 맥락용) |
+| **동기화** | `git add .specstory` → commit → push | 같이 commit 가능 |
+
+---
+
+## 다른 PC (회사 Windows)에서
+
+```powershell
+git pull
+```
+
+**방법 A — SpecStory 패널 (가장 편함)**  
+Cursor 사이드바 **SpecStory** → `.specstory/history/...` 세션 선택 → 이어서 대화
+
+**방법 B — 새 Agent 채팅에 @**
+
+```text
+@.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
+
+git pull 완료. Tailscale DB 터널 테스트 이어서 해줘.
+```
+
+최근 Tailscale·문서 작업은:
+
+```text
+@.specstory/history/2026-06-24_11-36-41Z-chemical-management-system-development.md
+```
+
+**방법 C — 요약만 빠르게**
+
+```text
+@docs/onboarding/SESSION_HANDOFF.md
+```
+
+---
+
+## PC 바꾸기 전 (지금 PC에서)
+
+SpecStory가 저장됐으면 **commit·push**해야 다른 PC에서 보입니다.
+
+```powershell
+git add .specstory
+git commit -m "SpecStory 채팅 이력 동기화"
+git push
+```
+
+지금 이 PC에는 `.specstory/history/2026-06-17_…` **미커밋 변경**이 있습니다. PC 옮기기 전에 위 명령 한 번 돌리세요.
+
+---
+
+## `tmp-smoke-eval.json`
+
+- **앱에서 안 씀** → **삭제**했습니다.
+- `.gitignore`에 `tmp-smoke-eval.json`, `tmp-*.json` 추가 (다시 생겨도 `git status`에 안 뜸)
+- 커밋·push 완료 (`538e944`)
+
+API 테스트 body가 필요하면 나중에 `scripts/fixtures/` 같은 곳에 넣는 게 맞고, 이번 파일은 **커밋할 필요 없었습니다**.
