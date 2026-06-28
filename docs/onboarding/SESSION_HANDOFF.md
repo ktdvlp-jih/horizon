@@ -77,9 +77,36 @@ git push
 ```
 
 4. 다른 PC: `git pull`
-5. SpecStory 패널 또는 `@.specstory/history/...` 로 이전 대화 참조
+5. **대화 이어가기** — 아래 §「SpecStory로 이어가기」 참고
 
 > `.specstory/statistics.json`만 `.gitignore`. **history·`.cursor/rules`는 commit 대상.**
+
+### SpecStory로 이어가기 (권장 · 대화 본문)
+
+**맞습니다.** `@SESSION_HANDOFF.md`만으로는 **요약**만 넘기는 것이고, **실제 대화 전체**는 `.specstory/history/*.md`에 있습니다.
+
+| 방법 | 설명 |
+|------|------|
+| **A. SpecStory 패널** | Cursor 사이드바 SpecStory → `git pull` 후 목록에서 세션 클릭 → 「Continue」/해당 채팅 열기 |
+| **B. @ 파일 첨부** | 새 Agent 채팅 첫 메시지에 `@.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md` |
+| **C. SESSION_HANDOFF** | 파일이 길 때 **요약·IP·체크리스트**만 빠르게 넘길 때 (선택) |
+
+**다른 PC 워크플로 (Windows 회사 PC 예):**
+
+```powershell
+git pull
+# SpecStory 확장 설치되어 있으면 history 자동 인식
+```
+
+새 채팅:
+
+```text
+@.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
+
+git pull 완료. Tailscale DB 터널 테스트 이어서 해줘.
+```
+
+`SESSION_HANDOFF.md`는 **SpecStory 대체가 아님** — IP·아키텍처·할 일 목록 **인덱스**. 긴 SpecStory 파일(수 MB)을 Agent에 통째로 @ 할 때 토큰이 크면 **SESSION_HANDOFF + 최근 SpecStory 파일** 조합을 쓰면 됩니다.
 
 ### SpecStory 파일 안내
 
@@ -104,11 +131,20 @@ git push
 
 ## Agent 이어하기 (새 채팅)
 
+**권장 (SpecStory):**
+
 ```text
-@docs/onboarding/SESSION_HANDOFF.md
 @.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
 
 git pull 완료. [이어서 할 작업] …
+```
+
+**짧은 맥락만 (선택):**
+
+```text
+@docs/onboarding/SESSION_HANDOFF.md
+
+git pull 완료. Windows Tailscale DB 터널 테스트해줘.
 ```
 
 ---
