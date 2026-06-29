@@ -4,6 +4,95 @@
 
 ---
 
+## 대화·코드 복원 (2026-06-17 SpecStory 세션)
+
+> **대화 본문:** `.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md` (약 44k줄 · Cursor Session `35737e04`)  
+> **요약 인덱스:** 이 파일. SpecStory @ 한 개가 **전체 채팅 복원**의 기준.
+
+| 항목 | 값 |
+|------|-----|
+| **코드 베이스 (재개)** | `rebuild/ddda1fc-baseline` · `ddda1fc` |
+| **현재 로컬 브랜치** | `master` (`3699536`) — 작업 전 `rebuild/ddda1fc-baseline` checkout 권장 |
+| **무시** | `experiment/threejs-city-model` (3D·미기후 실험 — 폐기) |
+
+### Agent 첫 메시지 (복원 후)
+
+```text
+@.specstory/history/2026-06-17_15-28-01Z-project-tech-stack-integration.md
+@docs/onboarding/SESSION_HANDOFF.md
+
+2026-06-17 SpecStory 세션 맥락으로 이어서. 코드는 ddda1fc 기준.
+```
+
+---
+
+### 세션에서 확정한 것 (기억할 결정)
+
+**제품·카피**
+
+| 항목 | 확정 |
+|------|------|
+| 프로젝트명 | **도시 기후 설계자** |
+| 한 줄 | 기상청 데이터로 도시를 설계하고, 열섬·대기·재난을 검증하는 AI 웹 체험 |
+| 대상 | 중·고등, 기후·재난·환경 교육 (교사 시연 가능) |
+| 학습 목표 | 여러 환경 문제를 동시에 견디는 **균형 잡힌 도시 설계** |
+| 대외 카피 | 열섬·**대기**·재난 중심 (앱 안에는 미세먼지·농어업 렌즈 유지) |
+| INDUSTRY 타일 | **경제 축 아님** — 대기·오염 트레이드오프 (공장=PM↑) |
+| 4축 | 코드·앱에 4축 유지, 시연·1페이지는 **열섬 입문 → 단계 확장** |
+
+**기술·인프라 (세션 후반)**
+
+| 항목 | 상태 |
+|------|------|
+| Ubuntu Docker `:9080` | 앱·DB |
+| Self-hosted Runner | `master` push → `deploy-docker.sh` |
+| Quick Tunnel | `cloudflared-quick` **systemd** 권장 (SSH 끊어도 유지) |
+| Named Tunnel | 예정 (`horizon-app.com`) — 포폴용 고정 URL |
+| 개발 DB | Tailscale + SSH `-L 55432` → Ubuntu Postgres |
+| 문서 | `SETUP` → `UBUNTU_SERVER_SETUP` / `DEV_SETUP` / `SESSION_HANDOFF` (중복 MD 정리됨) |
+
+**KMA (ddda1fc 시점)**
+
+| API | 상태 |
+|-----|------|
+| ASOS 기온·일사·강수 | ✅ API허브 |
+| 황사 PM10 | ✅ |
+| 태풍·지진 | ✅ |
+| 4축 회복탄력성 P1~P9 | ✅ 코드 반영 |
+
+---
+
+### 세션 마지막까지 한 일 (SpecStory tail)
+
+1. KMA API허브·4축·Designer UI/UX·캠페인 Lv1~10·튜토리얼·모바일 탭
+2. Cloudflare Quick vs Named Tunnel 문서화 · **systemd / nohup** 가이드 (커서 ~38996)
+3. Cursor 룰(`secrets-handling`, `contest-constraints`) · SpecStory git 동기화
+4. `tmp-smoke-eval.json` 삭제 · `.gitignore` 처리
+5. SpecStory = 대화 본문, SESSION_HANDOFF = 요약 인덱스 역할 확정
+
+---
+
+### 다음 우선순위 (세션에서 정리된 TODO)
+
+1. **`RESILIENCE_TEST_GUIDE.md` §1~5** 수동 체험 (`/designer` 게스트 → 렌즈 → AI 코치)
+2. **개발계획서 제출** — `docs/개발계획서_도시기후설계자.md` → 공고 양식2
+3. **시연 URL** — Quick Tunnel systemd URL journal 확인 · 심사용 Named Tunnel 검토
+4. **배포·잔여** — evaluate 401, 미커밋 정리, Docker 재빌드 후 `source: kma` 확인
+5. **air-2 공장 미션** · PM10·재난 라이브 안정화 (계획서·UI 문구 일치)
+
+---
+
+### 세션 주요 토픽 타임라인 (참고)
+
+| 구간 | 주제 |
+|------|------|
+| 초반 | INDUSTRY=경제? · 4축·프로젝트명·출품 카피 |
+| 중반 | KMA API 신청·연동 · PM10 · 다음 플랜 |
+| 중후반 | Designer UX · 튜토리얼 · 모바일 · 401 수정 |
+| 후반 | Ubuntu 배포 · Quick/Named Tunnel · Tailscale DB · SpecStory PC 동기화 |
+
+---
+
 ## 아키텍처 (확정 · 2026-06)
 
 | 역할 | 방식 |
@@ -151,7 +240,7 @@ git pull 완료. Windows Tailscale DB 터널 테스트해줘.
 
 ## 현재 작업 맥락
 
-> **마지막 동기화:** 2026-06-28 · Ubuntu Self-hosted Runner · Quick Tunnel · Tailscale DB 터널 문서화
+> **마지막 동기화:** 2026-06-29 · **대화** SpecStory `2026-06-17_15-28-01Z` · **코드** `ddda1fc` (`rebuild/ddda1fc-baseline`)
 
 ### KMA API 연동 (완료)
 
